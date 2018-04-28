@@ -21,6 +21,8 @@
   function handlePlay(event) {
     loadWorkspace(event.target);
     Blockly.JavaScript.addReservedWords('code');
+    musixiseParts.forEach(item=>{item.dispose()})
+    musixiseParts = []
     var code = Blockly.JavaScript.workspaceToCode(Blockly.getMainWorkspace());
     code += "MusicMaker.play();Tone.Transport.stop();Tone.Transport.start('+0.1');";
     // Eval can be dangerous. For more controlled execution, check
