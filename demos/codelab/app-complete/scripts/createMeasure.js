@@ -49,42 +49,7 @@ const timbre = 'square'
 const sequence = "C4,D4,E4,F4,G4,A4,B4,C5,E4,E4,E4,E4,E4,E4,E4,E4,G4,G4,G4,G4,G4,G4,G4,G4,B4,B4,B4,B4,B4,B4,B4,B4"
 const beat = '0-------0-------0-------0-------'
 
-// function getToneNotes(sequence,beat) {
-// 	if (!sequence||!beat) {
-// 		return
-// 	}
-// 	const sequenceArray = sequence.split(',')
-// 	const noteLen = (120/60)/beat.length //should replace 120 with BPM
-// 	const toneNotes = []
-// 	let toneNote = {}
-// 	beat.split('').forEach((digit,index)=>{
-// 		if (digit === '0') {
-// 			if (toneNote.duration) {
-// 				toneNotes.push(toneNote)
-// 				toneNote = {}
-// 			}
-// 			toneNote = { time : index*noteLen, note : sequenceArray[index],  duration:noteLen, velocity: 0.9 }
-// 			if(index === beat.length-1) {
-// 				toneNotes.push(toneNote)
-// 			}
-// 		} else if (digit === '-') {
-// 			if (toneNote.duration) {
-// 				toneNote.duration += noteLen
-// 			}
-// 			if(index === beat.length-1 && toneNote.duration) {
-// 				toneNotes.push(toneNote)
-// 			}
-// 		} else if (digit === '_') {
-// 			if (toneNote.duration) {
-// 				toneNotes.push(toneNote)
-// 				toneNote = {}
-// 			}
-// 		}
-// 	})
-// 	console.log(JSON.stringify(toneNotes))
-// 	return toneNotes
-// }
-function getToneNotes(sequence,beat) {
+function getToneNotes(sequence,beat,matchZero) { // by default, matchZero is undefined
 	//sequence is 'E4,E2,E3,E4' or '[E1,E2],E3,E4'
 	if (!sequence||!beat) {
 		return
@@ -94,19 +59,19 @@ function getToneNotes(sequence,beat) {
 	const noteLen = (120/60)/beat.length //should replace 120 with BPM
 	const toneNotes = []
 	let toneNote = {}
+	let zeroCounter = 0;
 	beat.split('').forEach((digit,index)=>{
 		if (digit === '0') {
 			if (toneNote.duration) {
-				// push current
-				// if (typeof toneNote.note==='object') {
-				// 	toneNotes.push(...toneNote.note.map(item=>{ return {time:toneNote.time,note:item,duration:toneNote.duration,velocity:toneNote.velocity}}))
-				// } else {
-				// 	toneNotes.push(toneNote)
-				// }
 				toneNotes.push(toneNote)
 				toneNote = {}
 			}
-			toneNote = { time : index*noteLen, note : sequenceArray[index],  duration:noteLen, velocity: 0.9 }
+			if (!matchZero){
+				toneNote = { time : index*noteLen, note : sequenceArray[index],  duration:noteLen, velocity: 0.9 }
+			} else {
+				toneNote = { time : index*noteLen, note : sequenceArray[zeroCounter],  duration:noteLen, velocity: 0.9 }
+				zeroCounter += 1;
+			}
 			if(index === beat.length-1) {
 				//push current
 				toneNotes.push(toneNote)
@@ -130,7 +95,7 @@ function getToneNotes(sequence,beat) {
 	console.log(JSON.stringify(toneNotes))
 	return toneNotes
 }
-function createMeasure(measure,timbre,sequence,beat) {
+function createMeasure(measure,timbre,sequence,beat,matchZero) {
 	// measure: int (1)
 	// timbre: string ('square')
 	// sequence: array
@@ -143,7 +108,7 @@ function createMeasure(measure,timbre,sequence,beat) {
 	console.log('sequence',sequence)
 	console.log('beat',beat)
 	
-	let notes = getToneNotes(sequence,beat)
+	let notes = getToneNotes(sequence,beat,matchZero)
 	// const flattenNotes = notes.reduce(
 	//   ( accumulator, currentValue ) => accumulator.concat(currentValue),
 	//   []
@@ -154,7 +119,7 @@ function createMeasure(measure,timbre,sequence,beat) {
 	}, notes).start((measure-1)*BPM/60))
 }
 
-function getToneNotesOnScale(sequence,beat,scale,basenote) {
+function getToneNotesOnScale(sequence,beat,scale,basenote,matchZero) {
 	//sequence is `1,2'','3,4` or `[1,2''],'3,4`
 	function getNoteAndOctave(noteStr) {
 		//receives a note string, like 1 or 1' or ''1
@@ -171,28 +136,34 @@ function getToneNotesOnScale(sequence,beat,scale,basenote) {
 	const noteLen = (120/60)/beat.length //should replace 120 with BPM
 	const toneNotes = []
 	let toneNote = {}
+	let zeroCounter = 0;
+	console.log(matchZero)
 	beat.split('').forEach((digit,index)=>{
 		if (digit === '0') {
 			if (toneNote.duration) {
 				toneNotes.push(toneNote)
 			}
-			if (typeof sequenceArray[index]==='object') { //["1''","1"]
+			if (typeof sequenceArray[matchZero?zeroCounter:index]==='object') { //["1''","1"]
+				console.log(11)
 				// harmonize receives an array to transpose, sequenceArray[index]记录是对应scale音的位置，TODO:目前用%，以后要加上减法八度，配合上模除
-				const note = sequenceArray[index].map(noteStr=>{ 
+				const note = sequenceArray[matchZero?zeroCounter:index].map(noteStr=>{ 
 					const { note,octave } = getNoteAndOctave(noteStr)
-					return Tone.Frequency(basenote).transpose(12*octave + scale[(note-1)%scale.length]).toNote()
+					return Tone.Frequency(basenote).transpose(12*octave + scale[(note-1)%scale.length]-1).toNote()
 				}) //Tone.Freq.harmonize不好用啊
 				// toneNote = { time : index*noteLen, note : Tone.Frequency(basenote).harmonize([sequenceArray[index]].map(index=>scale[index%scale.length])),  duration:noteLen, velocity: 0.9 }
 				toneNote = { time : index*noteLen, note,  duration:noteLen, velocity: 0.9 }
+				zeroCounter += 1
 			} else { // "1''"
+				console.log(22)
 				// Tone.transpose receives an integer to transpose
-				const { note,octave } = getNoteAndOctave(sequenceArray[index])
-				toneNote = { 
+				const { note,octave } = getNoteAndOctave(sequenceArray[matchZero?zeroCounter:index])
+				toneNote = {
 					time : index*noteLen, 
-					note : Tone.Frequency(basenote).transpose(12*octave + scale[(note-1)%scale.length]).toNote(),
+					note : Tone.Frequency(basenote).transpose(12*octave + scale[(note-1)%scale.length]-1).toNote(),
 					duration:noteLen,
 					velocity: 0.9,
-				}	
+				}
+				zeroCounter += 1
 			}
 			if(index === beat.length-1) {
 				//push current
@@ -217,25 +188,45 @@ function getToneNotesOnScale(sequence,beat,scale,basenote) {
 	console.log(JSON.stringify(toneNotes))
 	return toneNotes
 }
-function createMeasureOnScale(measure,timbre,sequence,beat,scale,basenote) {
+
+// Ionian 1 2 3 4 5 6 7 1 [1,3,5,6,8,10,12]
+// Dorian 1 2 b3 4 5 6 b7 1 [1,3,4,6,8,10,11]
+// Phrygian 1 b2 b3 4 5 b6 b7 1 [1,2,4,6,8,9,11]
+// Lydian 1 2 3 #4 5 6 7 1 [1,3,5,7,8,10,12]
+// Mixolydian 1 2 3 4 5 6 b7 1 [1,3,5,6,8,10,11]
+// Aeolian 1 2 b3 4 5 b6 b7 1 [1,3,4,6,8,9,11]
+// Locrian 1 b2 b3 4 b5 b6 b7 1 [1,2,4,6,7,9,11]
+
+function createMeasureOnScale(measure,timbre,sequence,beat,scale,basenote,matchZero) {
 // const measure = 1
 // const timbre = 'square'
 // const sequence = "1,2,3,4,5,6,7"
 // const beat = '0-------0-------0-------0-------'
 // scale = 'normal'
 // basenote = ‘C5’
-	if (!scale) {
-		scale = [1,3,5,6,8,10,12]
+	let scaleInterval = [1,3,5,6,8,10,12]
+	const scales = {
+		'Ionian': [1,3,5,6,8,10,12],
+		'Dorian': [1,3,4,6,8,10,11],
+		'Phrygian': [1,2,4,6,8,9,11],
+		'Lydian': [1,3,5,7,8,10,12],
+		'Mixolydian': [1,3,5,6,8,10,11],
+		'Aeolian':  [1,3,4,6,8,9,11],
+		'Locrian': [1,2,4,6,7,9,11],
 	}
+	if (scale) {
+		scaleInterval = scales[scale]
+	}
+
 	console.log('called create Measure')
 	console.log('measure',measure)
 	console.log('timbre',timbre)
 	console.log('sequence',sequence)
 	console.log('beat',beat)
-	console.log('scale',scale)
+	console.log('scale',scaleInterval)
 	console.log('basenote',basenote)
 
-	let notes = getToneNotesOnScale(sequence,beat,scale,basenote)
+	let notes = getToneNotesOnScale(sequence,beat,scaleInterval,basenote,matchZero)
 	// const flattenNotes = notes.reduce(
 	//   ( accumulator, currentValue ) => accumulator.concat(currentValue),
 	//   []
