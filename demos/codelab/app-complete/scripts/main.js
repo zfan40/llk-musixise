@@ -27,6 +27,7 @@
     code += "MusicMaker.play();Tone.Transport.stop();Tone.Transport.start('+0.1');";
     // Eval can be dangerous. For more controlled execution, check
     // https://github.com/NeilFraser/JS-Interpreter.
+    console.log(code)
     try {
       eval(code);
     } catch (error) {
