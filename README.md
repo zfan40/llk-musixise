@@ -1,17 +1,26 @@
-# Blockly [![Build Status]( https://travis-ci.org/google/blockly.svg?branch=master)](https://travis-ci.org/google/blockly)
+# Musixise thru Code
 
+**Explore/Compose/Know music thru code/Blockly. It will be fun!**
 
-Google's Blockly is a web-based, visual programming editor.  Users can drag
-blocks together to build programs.  All code is free and open source.
+The project is based on Google's Blockly, which enables users to drag and drop to generate codes, thus generating music here.
+The core idea is to make music by units of measures
 
-**The project page is https://developers.google.com/blockly/**
+**create_measure**
+(measure,timbre,sequence,beat)
 
-![](https://developers.google.com/blockly/images/sample.png)
+`1,'pulse','D4,E4,G4,A4','00-0'` ==> D4 E4- A4
 
-Blockly has an active [developer forum](https://groups.google.com/forum/#!forum/blockly). Please drop by and say hello. Show us your prototypes early; collectively we have a lot of experience and can offer hints which will save you time.
+**create_measure_on_scale**
+(measure,timbre,sequence,beat,scale,basenote)
 
-Help us focus our development efforts by telling us [what you are doing with
-Blockly](https://developers.google.com/blockly/registration). The questionnaire only takes
-a few minutes and will help us better support the Blockly community.
+`1,'pulse',"1,2,3,4'",'00-0','Ionian','C4'` ==> C4,D4-,F5
 
-Want to contribute? Great! First, read [our guidelines for contributors](https://developers.google.com/blockly/guides/modify/contributing).
+**create_measure_match_zero**
+(measure,timbre,sequence,beat)
+
+`1,'pulse','D4,E4,G4,A4','00-00-'` ==> D4 E4- G4 A4-
+
+**create_measure_on_scale_match_zero**
+(measure,timbre,sequence,beat,scale,basenote)
+
+`1,'pulse',"1,2,3,4'",'00-0','Ionian','C4'` ==> C4,D4-,E4
