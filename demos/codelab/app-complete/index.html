@@ -9,200 +9,168 @@
 
   <link rel="stylesheet" href="https://code.getmdl.io/1.2.1/material.indigo-pink.min.css">
   <link rel="stylesheet" href="styles/index.css">
+  <link rel="stylesheet" href="styles/iconfont.css">
+  <style type="text/css">
+    /*.blocklySvg {background-color:black;}*/
+  </style>
 </head>
 
-<body mode="maker">
-  <header class="mdl-color--cyan-500">
-    <h1 class="mode-maker">Music Maker</h1>
-    <h1 class="mode-edit mode-blockly">Music Maker Configuration</h1>
+<body style="display:flex;flex-direction:column;">
+  <header style="height:80px;">
+    <p style="background-color:white;height:40px;line-height: 40px;margin:0;padding-left:28px;background-color:#ffcc33;">LLK Musixise</p>
+    <div style="background-color:#00bdd4;height: 40px;line-height:40px;padding-left:20px;">
+      <i id="play" class="iconfont icon-icon--13" style="font-size:26px;cursor: pointer;"></i>
+      <i id="stop" class="iconfont icon-icon--17" style="font-size:26px;cursor: pointer;padding-left:10px;"></i>
+      <i id="save" class="iconfont icon-icon--1" style="font-size:26px;cursor: pointer;padding-left:10px;"></i>
+      <i id="load" class="iconfont icon-icon--" style="font-size:26px;cursor: pointer;padding-left:10px;"></i>
+    </div>
   </header>
+  <!-- <div class="blockly-editor" id="blockly-area" style="position:absolute;width:100%;height:100%;left:0;"> -->
+  <div class="blockly-editor" id="blockly-area" style="flex:1">
+    <div id="blockly-div" style="position:absolute;"></div>
+    <xml id="toolbox" style="display: none">
 
-  <main>
-    <button class="mode-maker mdl-button" id="edit">Edit</button>
-    <button class="mode-edit mdl-button mdl-js-button" id="done">Done</button>
-    <button class="mode-blockly mdl-button mdl-js-button" id="save">Save</button>
-    <p class="hint mode-edit">Tap any button to edit its code. <br/>When complete, press Done.</p>
+      <category name="Loops" colour="120">
+        <block type="controls_repeat_ext">
+          <value name="TIMES">
+            <shadow type="math_number">
+              <field name="NUM">5</field>
+            </shadow>
+          </value>
+        </block>
+        <block type="controls_if"></block>
+        <block type="controls_for">
+          <value name="FROM">
+            <block type="math_number">
+              <field name="NUM">1</field>
+            </block>
+          </value>
+          <value name="TO">
+            <block type="math_number">
+              <field name="NUM">10</field>
+            </block>
+          </value>
+          <value name="BY">
+            <block type="math_number">
+              <field name="NUM">1</field>
+            </block>
+          </value>
+        </block>
+        <!-- <block type="controls_whileUntil"></block> -->
+        <block type="math_number"></block>
+        <block type="variables_get"></block>
+      </category>
 
-    <div class="maker">
-      <div>
-        <div class="button mdl-color--amber-500">1</div>
-        <div class="button mdl-color--yellow-500">2</div>
-        <div class="button mdl-color--lime-500">3</div>
-      </div>
-      <div>
-        <div class="button mdl-color--pink-500">4</div>
-        <div class="button mdl-color--red-500">5</div>
-        <div class="button mdl-color--light-green-500">6</div>
-      </div>
-      <div>
-        <div class="button mdl-color--cyan-500">7</div>
-        <div class="button mdl-color--teal-500">8</div>
-        <div class="button mdl-color--green-500">9</div>
-      </div>
-    </div>
+      <category name="Boolean">
+        <block type="logic_compare"></block>
+        <block type="logic_operation"></block>
+        <block type="logic_negate"></block>
+        <block type="logic_boolean"></block>
+        <block type="logic_null"></block>
+        <block type="logic_ternary"></block>
+      </category>
 
-    <div class="blockly-editor">
-      <div id="blockly-div" style="height: 480px; width: 1200px;"></div>
-      <xml id="toolbox" style="display: none">
+      <category name="Math">
+        <block type="math_number">
+          <field name="NUM">123</field>
+        </block>
+        <block type="math_arithmetic"></block>
+        <block type="math_single"></block>
+        <block type="math_trig"></block>
+        <block type="math_constant"></block>
+        <block type="math_number_property"></block>
+        <block type="math_round"></block>
+        <block type="math_on_list"></block>
+        <block type="math_modulo"></block>
+        <block type="math_constrain">
+          <value name="LOW">
+            <block type="math_number">
+              <field name="NUM">1</field>
+            </block>
+          </value>
+          <value name="HIGH">
+            <block type="math_number">
+              <field name="NUM">100</field>
+            </block>
+          </value>
+        </block>
+        <block type="math_random_int">
+          <value name="FROM">
+            <block type="math_number">
+              <field name="NUM">1</field>
+            </block>
+          </value>
+          <value name="TO">
+            <block type="math_number">
+              <field name="NUM">100</field>
+            </block>
+          </value>
+        </block>
+        <block type="math_random_float"></block>
+      </category>
 
-        <category name="Loops" colour="120">
-          <block type="controls_repeat_ext">
-            <value name="TIMES">
-              <shadow type="math_number">
-                <field name="NUM">5</field>
-              </shadow>
-            </value>
-          </block>
-          <block type="controls_if"></block>
-          <block type="controls_for">
-            <value name="FROM">
-              <block type="math_number">
-                <field name="NUM">1</field>
-              </block>
-            </value>
-            <value name="TO">
-              <block type="math_number">
-                <field name="NUM">10</field>
-              </block>
-            </value>
-            <value name="BY">
-              <block type="math_number">
-                <field name="NUM">1</field>
-              </block>
-            </value>
-          </block>
-          <!-- <block type="controls_whileUntil"></block> -->
-          <block type="math_number"></block>
-          <block type="variables_get"></block>
-        </category>
+      <category name="Sounds" colour="355">
+        <block type="play_sound"></block>
+        <block type="create_measure"></block>
+        <block type="create_measure_on_scale"></block>
+        <block type="create_measure_match_zero"></block>
+        <block type="create_measure_on_scale_match_zero"></block>
+      </category>
 
-        <category name="Boolean">
-          <block type="logic_compare"></block>
-          <block type="logic_operation"></block>
-          <block type="logic_negate"></block>
-          <block type="logic_boolean"></block>
-          <block type="logic_null"></block>
-          <block type="logic_ternary"></block>
-        </category>
-
-        <category name="Math">
-          <block type="math_number">
-            <field name="NUM">123</field>
-          </block>
-          <block type="math_arithmetic"></block>
-          <block type="math_single"></block>
-          <block type="math_trig"></block>
-          <block type="math_constant"></block>
-          <block type="math_number_property"></block>
-          <block type="math_round"></block>
-          <block type="math_on_list"></block>
-          <block type="math_modulo"></block>
-          <block type="math_constrain">
-            <value name="LOW">
-              <block type="math_number">
-                <field name="NUM">1</field>
-              </block>
-            </value>
-            <value name="HIGH">
-              <block type="math_number">
-                <field name="NUM">100</field>
-              </block>
-            </value>
-          </block>
-          <block type="math_random_int">
-            <value name="FROM">
-              <block type="math_number">
-                <field name="NUM">1</field>
-              </block>
-            </value>
-            <value name="TO">
-              <block type="math_number">
-                <field name="NUM">100</field>
-              </block>
-            </value>
-          </block>
-          <block type="math_random_float"></block>
-        </category>
-
-        <category name="Sounds" colour="355">
-          <block type="play_sound"></block>
-          <block type="create_measure"></block>
-          <block type="create_measure_on_scale"></block>
-          <block type="create_measure_match_zero"></block>
-          <block type="create_measure_on_scale_match_zero"></block>
-        </category>
-
-        <category name="Timbre" colour="210">
-          <block type="text">
-            <field name="TEXT">pulse</field>
-          </block>
-          <block type="text">
-            <field name="TEXT">triangle</field>
-          </block>
-          <block type="text">
-            <field name="TEXT">square</field>
-          </block>
-          <block type="text">
-            <field name="TEXT">noise</field>
-          </block>
-        </category>
-        <category name="Sequence" colour="310">
-          <block type="text">
-            <field name="TEXT">C4,D4,E4,F4</field>
-          </block>
-          <block type="text">
-            <field name="TEXT">C4,D4,E4,F4,G4,A4,B4,C5,E4,E4,E4,E4,E4,E4,E4,E4,G4,G4,G4,G4,G4,G4,G4,G4,B4,B4,B4,B4,B4,B4,B4,B4</field>
-          </block>
-          <!-- SUPER MARIO - CASTLE THEME -->
-          <block type="text">
-            <field name="TEXT">[Bb4,D5],G4,[A4,C#5],G4,[Ab4,C5],G4,[A4,C#5],G4,[Bb4,D5],G4,[Cb5,Eb5],G4,[Bb4,D5],G4,[A4,C#5],G4</field>
-          </block>
-          <block type="text">
-            <field name="TEXT">[A4,C#5],Gb4,[Ab4,C5],Gb4,[A4,C#5],Gb4,[Bb4,D5],Gb4,[A4,C#5],Gb4,[Bb4,D5],Gb4,[A4,C#5],Gb4,[Ab4,C5],Gb4</field>
-          </block>
-          <block type="text">
-            <field name="TEXT">[Db5,F5],Bb4,[D5,F#5],Bb4,[Db5,F5],Bb4,[C5,E5],Bb4,[Db5,F5],Bb4,[C5,E5],Bb4,[Cb5,Eb5],Bb4,[C5,E5],Bb4</field>
-          </block>
-           <block type="text">
-            <field name="TEXT">Eb3</field>
-          </block>   
-          <block type="text">
-            <field name="TEXT">D3,Gb3</field>
-          </block>
-          <block type="text">
-            <field name="TEXT">F3</field>
-          </block>     
-          <block type="text">
-            <field name="TEXT">E3,Bb3</field>
-          </block>
-          <block type="text">
-            <field name="TEXT">A3,E3</field>
-          </block>
-          <block type="text">
-            <field name="TEXT">Eb3,E3</field>
-          </block>
-        </category>
-        <category name="Beats" colour="255">
-          <block type="text">
-            <field name="TEXT">0---0---0---0---</field>
-          </block>
-          <block type="text">
-            <field name="TEXT">0--0--0--</field>
-          </block>
-          <block type="text"></block>
-        </category>
-      </xml>
-    </div>
-  </main>
-
+      <category name="Timbre" colour="210">
+        <block type="text">
+          <field name="TEXT">pulse</field>
+        </block>
+        <block type="text">
+          <field name="TEXT">triangle</field>
+        </block>
+        <block type="text">
+          <field name="TEXT">square</field>
+        </block>
+        <block type="text">
+          <field name="TEXT">noise</field>
+        </block>
+      </category>
+      <category name="Sequence" colour="310">
+        <block type="text">
+          <field name="TEXT">C4,D4,E4,F4</field>
+        </block>
+        <block type="text">
+          <field name="TEXT">C4,D4,E4,F4,G4,A4,B4,C5,E4,E4,E4,E4,E4,E4,E4,E4,G4,G4,G4,G4,G4,G4,G4,G4,B4,B4,B4,B4,B4,B4,B4,B4</field>
+        </block>
+        <!-- SUPER MARIO - CASTLE THEME -->
+        <block type="text">
+          <field name="TEXT">[Bb4,D5],G4,[A4,C#5],G4,[Ab4,C5],G4,[A4,C#5],G4,[Bb4,D5],G4,[Cb5,Eb5],G4,[Bb4,D5],G4,[A4,C#5],G4</field>
+        </block>
+        <block type="text">
+          <field name="TEXT">[A4,C#5],Gb4,[Ab4,C5],Gb4,[A4,C#5],Gb4,[Bb4,D5],Gb4,[A4,C#5],Gb4,[Bb4,D5],Gb4,[A4,C#5],Gb4,[Ab4,C5],Gb4</field>
+        </block>
+        <block type="text">
+          <field name="TEXT">[Db5,F5],Bb4,[D5,F#5],Bb4,[Db5,F5],Bb4,[C5,E5],Bb4,[Db5,F5],Bb4,[C5,E5],Bb4,[Cb5,Eb5],Bb4,[C5,E5],Bb4</field>
+        </block>
+      </category>
+      <category name="Beats" colour="255">
+        <block type="text">
+          <field name="TEXT">0---0---0---0---</field>
+        </block>
+        <block type="text">
+          <field name="TEXT">0000000000000000</field>
+        </block>
+        <block type="text">
+          <field name="TEXT">0--0--0--</field>
+        </block>
+        <block type="text"></block>
+      </category>
+    </xml>
+  </div>
   <script src="../../../blockly_compressed.js"></script>
   <script src="../../../blocks_compressed.js"></script>
   <script src="../../../javascript_compressed.js"></script>
   <script src="../../../msg/js/en.js"></script>
 
   <script src="scripts/Tone.js"></script>
-  <script src="scripts/music_maker.js"></script>
-  <script src="scripts/sound_blocks.js"></script>
+  <!-- <script src="scripts/music_maker.js"></script> -->
+  <!-- <script src="scripts/sound_blocks.js"></script> -->
   <script src="scripts/music_blocks.js"></script>
   <script src="scripts/main.js"></script>
   <script src="scripts/createMeasure.js"></script>

@@ -37,17 +37,51 @@ const squareSynth = new Tone.PolySynth(6, Tone.Synth, squareOptions).toMaster();
 // const squareSynth = new Tone.Synth(squareOptions).toMaster();
 const noiseSynth = new Tone.NoiseSynth().toMaster();
 
-const synthMap = {
+// sampler instruments
+
+const musicbox = new Tone.Sampler({
+  B3: 'B3.[mp3|ogg]',
+  E4: 'E4.[mp3|ogg]',
+  G4: 'G4.[mp3|ogg]',
+  B4: 'B4.[mp3|ogg]',
+  'C#5': 'Cs5.[mp3|ogg]',
+  E5: 'E5.[mp3|ogg]',
+  G5: 'G5.[mp3|ogg]',
+  B5: 'B5.[mp3|ogg]',
+  'C#6': 'Cs6.[mp3|ogg]',
+}, {
+  release: 1,
+  baseUrl: '/static/audio/mbox/',
+}).toMaster();
+var piano = new Tone.Sampler({
+  'C4': 'C4.[mp3|ogg]',
+  'D#4': 'Ds4.[mp3|ogg]',
+  'F#4': 'Fs4.[mp3|ogg]',
+  'A4': 'A4.[mp3|ogg]',
+  'C5': 'C5.[mp3|ogg]',
+  'D#5': 'Ds5.[mp3|ogg]',
+  'F#5': 'Fs5.[mp3|ogg]',
+  'A5': 'A5.[mp3|ogg]',
+  'C6': 'C6.[mp3|ogg]',
+}, {
+  'release': 1,
+  'baseUrl': '/static/audio/piano/'
+}).toMaster()
+
+// synth
+const instrumentMap = {
 	pulse:pulseSynth,
 	triangle:triangleSynth,
 	square:squareSynth,
 	noise:noiseSynth,
+	musicbox,
+	piano
 }
 
-const measure = 1
-const timbre = 'square'
-const sequence = "C4,D4,E4,F4,G4,A4,B4,C5,E4,E4,E4,E4,E4,E4,E4,E4,G4,G4,G4,G4,G4,G4,G4,G4,B4,B4,B4,B4,B4,B4,B4,B4"
-const beat = '0-------0-------0-------0-------'
+// const measure = 1
+// const timbre = 'square'
+// const sequence = "C4,D4,E4,F4,G4,A4,B4,C5,E4,E4,E4,E4,E4,E4,E4,E4,G4,G4,G4,G4,G4,G4,G4,G4,B4,B4,B4,B4,B4,B4,B4,B4"
+// const beat = '0-------0-------0-------0-------'
 
 function getToneNotes(sequence,beat,matchZero) { // by default, matchZero is undefined
 	//sequence is 'E4,E2,E3,E4' or '[E1,E2],E3,E4'
@@ -115,7 +149,7 @@ function createMeasure(measure,timbre,sequence,beat,matchZero) {
 	// );
 	musixiseParts.push(new Tone.Part(function(time, value){
 		// arrange trigger notes
-		synthMap[timbre].triggerAttackRelease(value.note, value.duration, time, value.velocity);
+		instrumentMap[timbre].triggerAttackRelease(value.note, value.duration, time, value.velocity);
 	}, notes).start((measure-1)*BPM/60))
 }
 
@@ -233,6 +267,6 @@ function createMeasureOnScale(measure,timbre,sequence,beat,scale,basenote,matchZ
 	// );
 	musixiseParts.push(new Tone.Part(function(time, value){
 		// arrange trigger notes
-		synthMap[timbre].triggerAttackRelease(value.note, value.duration, time, value.velocity);
+		instrumentMap[timbre].triggerAttackRelease(value.note, value.duration, time, value.velocity);
 	}, notes).start((measure-1)*BPM/60))
 }
