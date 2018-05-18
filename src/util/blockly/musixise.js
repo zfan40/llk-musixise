@@ -19,7 +19,7 @@ Blockly.defineBlocksWithJsonArray([
   // Block for colour picker.
   {
     type: "create_measure",
-    message0: "matchpos 小节 %1 音色 %2 音序 %3 节拍%4",
+    message0: "音符对位 小节 %1 音色 %2 音序 %3 节拍%4",
     args0: [
       {
         type: "input_value",
@@ -86,7 +86,7 @@ Blockly.defineBlocksWithJsonArray([
   // Block for colour picker.
   {
     type: "create_measure_on_scale",
-    message0: "matchpos 小节 %1 音色 %2 音序 %3 节拍%4 调式%5 根音%6",
+    message0: "简谱对位 %1 音色 %2 音序 %3 节拍%4 调式%5 根音%6",
     args0: [
       {
         type: "input_value",
@@ -173,7 +173,7 @@ Blockly.defineBlocksWithJsonArray([
   // Block for colour picker.
   {
     type: "create_measure_match_zero",
-    message0: "match0 小节 %1 音色 %2 音序 %3 节拍%4",
+    message0: "音符不对位 小节 %1 音色 %2 音序 %3 节拍%4",
     args0: [
       {
         type: "input_value",
@@ -240,7 +240,7 @@ Blockly.defineBlocksWithJsonArray([
   // Block for colour picker.
   {
     type: "create_measure_on_scale_match_zero",
-    message0: "match0 小节 %1 音色 %2 音序 %3 节拍%4 调式%5 根音%6",
+    message0: "简谱不对位 小节 %1 音色 %2 音序 %3 节拍%4 调式%5 根音%6",
     args0: [
       {
         type: "input_value",

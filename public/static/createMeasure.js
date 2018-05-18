@@ -78,7 +78,23 @@ var piano = new Tone.Sampler(
     baseUrl: "/static/audio/piano/"
   }
 ).toMaster();
-
+var harp = new Tone.Sampler(
+  {
+    A2: "A2.[mp3|ogg]",
+    A4: "A4.[mp3|ogg]",
+    A6: "A6.[mp3|ogg]",
+    C3: "C3.[mp3|ogg]",
+    C5: "C5.[mp3|ogg]",
+    E3: "E3.[mp3|ogg]",
+    E5: "E5.[mp3|ogg]",
+    G3: "G3.[mp3|ogg]",
+    G5: "G5.[mp3|ogg]"
+  },
+  {
+    release: 1,
+    baseUrl: "/static/audio/harp/"
+  }
+).toMaster();
 // synth
 const instrumentMap = {
   pulse: pulseSynth,
@@ -86,7 +102,8 @@ const instrumentMap = {
   square: squareSynth,
   noise: noiseSynth,
   musicbox,
-  piano
+  piano,
+  harp
 };
 
 // const measure = 1
@@ -335,7 +352,8 @@ function createMeasureOnScale(
     Lydian: [1, 3, 5, 7, 8, 10, 12],
     Mixolydian: [1, 3, 5, 6, 8, 10, 11],
     Aeolian: [1, 3, 4, 6, 8, 9, 11],
-    Locrian: [1, 2, 4, 6, 7, 9, 11]
+    Locrian: [1, 2, 4, 6, 7, 9, 11],
+    Chinese: [1, 3, 5, 8, 10]
   };
   if (scale) {
     scaleInterval = scales[scale];
