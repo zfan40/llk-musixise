@@ -111,7 +111,7 @@ const instrumentMap = {
 // const sequence = "C4,D4,E4,F4,G4,A4,B4,C5,E4,E4,E4,E4,E4,E4,E4,E4,G4,G4,G4,G4,G4,G4,G4,G4,B4,B4,B4,B4,B4,B4,B4,B4"
 // const beat = '0-------0-------0-------0-------'
 
-function getToneNotes(sequence, beat, matchZero) {
+function getToneNotes(sequence, beat, velocity, matchZero) {
   // by default, matchZero is undefined
   //sequence is 'E4,E2,E3,E4' or '[E1,E2],E3,E4'
   if (!sequence || !beat) {
@@ -121,8 +121,10 @@ function getToneNotes(sequence, beat, matchZero) {
   const sequenceArray = JSON.parse(
     `[${sequence}]`.replace(/([ABCDEFG]#*b*[1-9])/g, '"$1"')
   ); //不对就报错
+  const velocityArray = JSON.parse(`[${velocity}]`);
   const noteLen = 120 / 60 / beat.length; //should replace 120 with BPM
   const toneNotes = [];
+
   let toneNote = {};
   let zeroCounter = 0;
   beat.split("").forEach((digit, index) => {
@@ -136,14 +138,14 @@ function getToneNotes(sequence, beat, matchZero) {
           time: index * noteLen,
           note: sequenceArray[index],
           duration: noteLen,
-          velocity: 0.9
+          velocity: velocityArray[index]
         };
       } else {
         toneNote = {
           time: index * noteLen,
           note: sequenceArray[zeroCounter],
           duration: noteLen,
-          velocity: 0.9
+          velocity: velocityArray[zeroCounter]
         };
         zeroCounter += 1;
       }
@@ -170,7 +172,7 @@ function getToneNotes(sequence, beat, matchZero) {
   console.log(JSON.stringify(toneNotes));
   return toneNotes;
 }
-function createMeasure(measure, timbre, sequence, beat, matchZero) {
+function createMeasure(measure, timbre, sequence, beat, velocity, matchZero) {
   // measure: int (1)
   // timbre: string ('square')
   // sequence: array
@@ -183,7 +185,7 @@ function createMeasure(measure, timbre, sequence, beat, matchZero) {
   console.log("sequence", sequence);
   console.log("beat", beat);
 
-  let notes = getToneNotes(sequence, beat, matchZero);
+  let notes = getToneNotes(sequence, beat, velocity, matchZero);
   // const flattenNotes = notes.reduce(
   //   ( accumulator, currentValue ) => accumulator.concat(currentValue),
   //   []
@@ -230,7 +232,14 @@ function createMeasure(measure, timbre, sequence, beat, matchZero) {
   );
 }
 
-function getToneNotesOnScale(sequence, beat, scale, basenote, matchZero) {
+function getToneNotesOnScale(
+  sequence,
+  beat,
+  scale,
+  basenote,
+  velocity,
+  matchZero
+) {
   //sequence is `1,2'','3,4` or `[1,2''],'3,4`
   function getNoteAndOctave(noteStr) {
     //receives a note string, like 1 or 1' or ''1
@@ -250,11 +259,14 @@ function getToneNotesOnScale(sequence, beat, scale, basenote, matchZero) {
   const sequenceArray = JSON.parse(
     `[${sequence}]`.replace(/('*[0-9]+'*)/g, '"$1"')
   ); // only integer
+  console.log(velocity);
+  const velocityArray = JSON.parse(`[${velocity}]`);
   const noteLen = 120 / 60 / beat.length; //should replace 120 with BPM
   const toneNotes = [];
   let toneNote = {};
   let zeroCounter = 0;
   console.log(matchZero);
+  console.log("力度！！！", velocityArray);
   beat.split("").forEach((digit, index) => {
     if (digit === "0") {
       if (toneNote.duration) {
@@ -262,8 +274,6 @@ function getToneNotesOnScale(sequence, beat, scale, basenote, matchZero) {
       }
       if (typeof sequenceArray[matchZero ? zeroCounter : index] === "object") {
         //["1''","1"]
-        console.log(11);
-        // harmonize receives an array to transpose, sequenceArray[index]记录是对应scale音的位置，TODO:目前用%，以后要加上减法八度，配合上模除
         const note = sequenceArray[matchZero ? zeroCounter : index].map(
           noteStr => {
             const { note, octave } = getNoteAndOctave(noteStr);
@@ -277,7 +287,7 @@ function getToneNotesOnScale(sequence, beat, scale, basenote, matchZero) {
           time: index * noteLen,
           note,
           duration: noteLen,
-          velocity: 0.9
+          velocity: velocityArray[matchZero ? zeroCounter : index]
         };
         zeroCounter += 1;
       } else {
@@ -293,7 +303,7 @@ function getToneNotesOnScale(sequence, beat, scale, basenote, matchZero) {
             .transpose(12 * octave + scale[(note - 1) % scale.length] - 1)
             .toNote(),
           duration: noteLen,
-          velocity: 0.9
+          velocity: velocityArray[matchZero ? zeroCounter : index]
         };
         zeroCounter += 1;
       }
@@ -336,6 +346,7 @@ function createMeasureOnScale(
   beat,
   scale,
   basenote,
+  velocity,
   matchZero
 ) {
   // const measure = 1
@@ -353,7 +364,8 @@ function createMeasureOnScale(
     Mixolydian: [1, 3, 5, 6, 8, 10, 11],
     Aeolian: [1, 3, 4, 6, 8, 9, 11],
     Locrian: [1, 2, 4, 6, 7, 9, 11],
-    Chinese: [1, 3, 5, 8, 10]
+    Chinese: [1, 3, 5, 8, 10],
+    Japanese: [1, 5, 6, 10, 12]
   };
   if (scale) {
     scaleInterval = scales[scale];
@@ -372,6 +384,7 @@ function createMeasureOnScale(
     beat,
     scaleInterval,
     basenote,
+    velocity,
     matchZero
   );
 
