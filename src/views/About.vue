@@ -163,7 +163,7 @@
 
 <script>
 import Blockly from "node-blockly/browser"; // import Blockly
-import Tutorial from "@/components/Tutorial.vue";
+import Tutorial from "@/components/tutorial/Tutorial.vue";
 require("../util/blockly/musixise"); // import Structure of Musixise Blocks
 var FileSaver = require("file-saver"); // For Midi file export
 
