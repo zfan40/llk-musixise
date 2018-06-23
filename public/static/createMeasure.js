@@ -339,6 +339,11 @@ function getToneNotesOnScale(
 // Aeolian 1 2 b3 4 5 b6 b7 1 [1,3,4,6,8,9,11]
 // Locrian 1 b2 b3 4 b5 b6 b7 1 [1,2,4,6,7,9,11]
 
+// harmonic major
+// melodic major
+// harmonic minor
+// melodic minor
+
 function createMeasureOnScale(
   measure,
   timbre,
