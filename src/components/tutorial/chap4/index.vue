@@ -22,7 +22,7 @@ import SixEight from "./SixEight.vue";
 import SixNine from "./SixNine.vue";
 
 export default {
-  name: "chap3",
+  name: "chap4",
   components: {
     FiveOne,
     FiveSixteen,
