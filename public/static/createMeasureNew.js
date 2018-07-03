@@ -109,11 +109,14 @@ const instrumentMap = {
 // const tracks = [];
 let currentTrack = {};
 let currentTrackId = 0;
-function createTrack(timbre, tempo, volumn) {
+function createTrack(timbre, tempo, volumn, metre) {
+  metre = metre ? eval(metre) : 1;
+  // alert(metre);
   currentTrack = {
     timbre,
     tempo,
-    volumn
+    volumn,
+    metre
   };
   currentTrackId += 1;
   // tracks.push(currentTrack);
@@ -122,7 +125,7 @@ function cleanTrack() {
   currentTrackId = 0;
   currentTrack = {};
 }
-function getToneNotes(sequence, beat, matchZero, tempo, volumn) {
+function getToneNotes(sequence, beat, matchZero, tempo, volumn, metre) {
   // by default, matchZero is undefined
   //sequence is 'E4,E2,E3,E4' or '[E1,E2],E3,E4'
   if (!sequence || !beat) {
@@ -132,7 +135,7 @@ function getToneNotes(sequence, beat, matchZero, tempo, volumn) {
   const sequenceArray = JSON.parse(
     `[${sequence}]`.replace(/([ABCDEFG]#*b*[1-9])/g, '"$1"')
   ); //不对就报错
-  const noteLen = 240 / tempo / beat.length; //should replace 120 with BPM
+  const noteLen = metre * 240 / tempo / beat.length; //should replace 120 with BPM
   const toneNotes = [];
 
   let toneNote = {};
@@ -190,7 +193,7 @@ function createMeasureNew(measure, sequence, beat, matchZero) {
   // beat: string
   // IMPORTANT...use an array of objects as long as the object has a "time" attribute
   // build notes
-  const { timbre, tempo, volumn } = currentTrack; // instead of being param, read from create track
+  const { timbre, tempo, volumn, metre } = currentTrack; // instead of being param, read from create track
   console.log("called create Measure");
   console.log("measure", measure);
   console.log("timbre", timbre);
@@ -202,7 +205,8 @@ function createMeasureNew(measure, sequence, beat, matchZero) {
     beat,
     matchZero,
     tempo ? tempo : 120,
-    volumn
+    volumn,
+    metre
   );
   // const flattenNotes = notes.reduce(
   //   ( accumulator, currentValue ) => accumulator.concat(currentValue),
@@ -216,7 +220,8 @@ function createMeasureNew(measure, sequence, beat, matchZero) {
         // ...item,
         midiNo: Tone.Frequency(item.note).toMidi(),
         velocity: item.velocity,
-        startTime: item.time + (measure - 1) * 240 / (tempo ? tempo : BPM),
+        startTime:
+          item.time + (measure - 1) * metre * 240 / (tempo ? tempo : BPM),
         duration: item.duration
       };
     } else if (typeof item.note === "object") {
@@ -225,7 +230,8 @@ function createMeasureNew(measure, sequence, beat, matchZero) {
           // ...item,
           midiNo: Tone.Frequency(note).toMidi(),
           velocity: item.velocity,
-          startTime: item.time + (measure - 1) * 240 / (tempo ? tempo : BPM),
+          startTime:
+            item.time + (measure - 1) * metre * 240 / (tempo ? tempo : BPM),
           duration: item.duration
         };
       });
@@ -240,7 +246,7 @@ function createMeasureNew(measure, sequence, beat, matchZero) {
   musixiseParts.push(
     new Tone.Part(function(time, value) {
       // arrange trigger notes
-      if (timbre !== 'noise') {
+      if (timbre !== "noise") {
         instrumentMap[timbre].triggerAttackRelease(
           value.note,
           value.duration,
@@ -254,8 +260,7 @@ function createMeasureNew(measure, sequence, beat, matchZero) {
           value.velocity
         );
       }
-
-    }, notes).start((measure - 1) * 240 / (tempo ? tempo : BPM))
+    }, notes).start((measure - 1) * metre * 240 / (tempo ? tempo : BPM))
   );
 }
 
@@ -266,7 +271,8 @@ function getToneNotesOnScale(
   basenote,
   matchZero,
   tempo,
-  volumn
+  volumn,
+  metre
 ) {
   //sequence is `1,2'','3,4` or `[1,2''],'3,4`
   function getNoteAndOctave(noteStr) {
@@ -287,7 +293,7 @@ function getToneNotesOnScale(
   const sequenceArray = JSON.parse(
     `[${sequence}]`.replace(/('*[0-9]+'*)/g, '"$1"')
   ); // only integer
-  const noteLen = 240 / tempo / beat.length; //should replace 120 with BPM
+  const noteLen = metre * 240 / tempo / beat.length; //should replace 120 with BPM
   const toneNotes = [];
   let toneNote = {};
   let zeroCounter = 0;
@@ -383,7 +389,7 @@ function createMeasureOnScaleNew(
   // const beat = '0-------0-------0-------0-------'
   // scale = 'normal'
   // basenote = ‘C5’
-  const { timbre, tempo, volumn } = currentTrack; // instead of being param, read from create track
+  const { timbre, tempo, volumn, metre } = currentTrack; // instead of being param, read from create track
   let scaleInterval = [1, 3, 5, 6, 8, 10, 12];
   const scales = {
     Ionian: [1, 3, 5, 6, 8, 10, 12],
@@ -415,7 +421,8 @@ function createMeasureOnScaleNew(
     basenote,
     matchZero,
     tempo ? tempo : 120,
-    volumn
+    volumn,
+    metre
   );
 
   // for midi export
@@ -425,7 +432,8 @@ function createMeasureOnScaleNew(
         // ...item,
         midiNo: Tone.Frequency(item.note).toMidi(),
         velocity: item.velocity,
-        startTime: item.time + (measure - 1) * 240 / (tempo ? tempo : BPM),
+        startTime:
+          item.time + (measure - 1) * metre * 240 / (tempo ? tempo : BPM),
         duration: item.duration
       };
     } else if (typeof item.note === "object") {
@@ -434,7 +442,8 @@ function createMeasureOnScaleNew(
           // ...item,
           midiNo: Tone.Frequency(note).toMidi(),
           velocity: item.velocity,
-          startTime: item.time + (measure - 1) * 240 / (tempo ? tempo : BPM),
+          startTime:
+            item.time + (measure - 1) * metre * 240 / (tempo ? tempo : BPM),
           duration: item.duration
         };
       });
@@ -449,7 +458,7 @@ function createMeasureOnScaleNew(
   musixiseParts.push(
     new Tone.Part(function(time, value) {
       // arrange trigger notes
-      if (timbre !== 'noise') {
+      if (timbre !== "noise") {
         instrumentMap[timbre].triggerAttackRelease(
           value.note,
           value.duration,
@@ -463,6 +472,6 @@ function createMeasureOnScaleNew(
           value.velocity
         );
       }
-    }, notes).start((measure - 1) * 240 / (tempo ? tempo : BPM))
+    }, notes).start((measure - 1) * metre * 240 / (tempo ? tempo : BPM))
   );
 }

@@ -21,7 +21,7 @@ Blockly.defineBlocksWithJsonArray([
   // Block for colour picker.
   {
     type: "create_track",
-    message0: "乐轨 音色 %1 速度 %2 音量 %3",
+    message0: "乐轨 音色 %1 速度 %2 音量 %3 节拍 %4",
     args0: [
       {
         type: "input_value",
@@ -36,7 +36,12 @@ Blockly.defineBlocksWithJsonArray([
       {
         type: "input_value",
         name: "VOLUMN",
-        check: "Number" //should be array
+        check: "Number"
+      },
+      {
+        type: "input_value",
+        name: "METRE",
+        check: "String"
       }
     ],
     message1: "小节 %1",
@@ -67,14 +72,20 @@ Blockly.JavaScript["create_track"] = function(block) {
     "VOLUMN",
     Blockly.JavaScript.ORDER_NONE
   );
+  const metre = Blockly.JavaScript.valueToCode(
+    block,
+    "METRE",
+    Blockly.JavaScript.ORDER_NONE
+  ); // measure length = metre * 240/tempo
   var branch = Blockly.JavaScript.statementToCode(block, "measures");
   // branch = Blockly.JavaScript.addLoopTrap(branch, block.id);
   console.log("=====", timbre);
   console.log("=====", measure);
   console.log("=====", volumn);
+  console.log("=====", metre);
   console.log("=====", branch);
   return `
-  createTrack(${timbre},${measure},${volumn});
+  createTrack(${timbre},${measure},${volumn},${metre});
   ${branch}
   `;
 };
