@@ -7,7 +7,7 @@
 
 <script>
 import Blockly from "node-blockly/browser"; // import Blockly
-import {test1,mario,ff} from "@/util/demos"
+import {test1,mario,ff,pianophase} from "@/util/demos"
 export default {
   data() {
     return {
@@ -20,6 +20,9 @@ export default {
       }, {
         value: 'ff',
         label: 'ff'
+      }, {
+        value: 'pianophase',
+        label: 'pianophase'
       }],
       value8:''
     }
@@ -27,7 +30,7 @@ export default {
   methods: {
     change(e) {
       console.log(e)
-      const a = {test1,mario,ff}
+      const a = {test1,mario,ff,pianophase}
       this.loadWork(a[e])
     },
     loadWork(blocklyXmlText) {

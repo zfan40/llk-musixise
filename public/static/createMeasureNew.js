@@ -240,12 +240,21 @@ function createMeasureNew(measure, sequence, beat, matchZero) {
   musixiseParts.push(
     new Tone.Part(function(time, value) {
       // arrange trigger notes
-      instrumentMap[timbre].triggerAttackRelease(
-        value.note,
-        value.duration,
-        time,
-        value.velocity
-      );
+      if (timbre !== 'noise') {
+        instrumentMap[timbre].triggerAttackRelease(
+          value.note,
+          value.duration,
+          time,
+          value.velocity
+        );
+      } else {
+        instrumentMap[timbre].triggerAttackRelease(
+          value.duration,
+          time,
+          value.velocity
+        );
+      }
+
     }, notes).start((measure - 1) * 240 / (tempo ? tempo : BPM))
   );
 }
@@ -440,12 +449,20 @@ function createMeasureOnScaleNew(
   musixiseParts.push(
     new Tone.Part(function(time, value) {
       // arrange trigger notes
-      instrumentMap[timbre].triggerAttackRelease(
-        value.note,
-        value.duration,
-        time,
-        value.velocity
-      );
+      if (timbre !== 'noise') {
+        instrumentMap[timbre].triggerAttackRelease(
+          value.note,
+          value.duration,
+          time,
+          value.velocity
+        );
+      } else {
+        instrumentMap[timbre].triggerAttackRelease(
+          value.duration,
+          time,
+          value.velocity
+        );
+      }
     }, notes).start((measure - 1) * 240 / (tempo ? tempo : BPM))
   );
 }

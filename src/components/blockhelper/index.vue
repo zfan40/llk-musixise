@@ -166,11 +166,6 @@
         </block>
         <block type="text"></block>
       </category>
-      <category name="力度" colour="475">
-        <block type="text">
-          <field name="TEXT">0.1,0.3,0.5,0.7,0.9,1,1,1,1,1,1,0.9,0.7,0.5,0.3,0.1</field>
-        </block>
-      </category>
     </xml>
   </div>
 </template>
