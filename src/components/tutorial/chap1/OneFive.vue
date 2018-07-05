@@ -52,8 +52,8 @@ export default {
       var system = vf2.System({width:200,spaceBetweenStaves: 10});
       system.addStave({
         voices: [
-          score.voice(score.notes('C#5/2, B4', {
-            stem: 'down'
+          score.voice(score.notes('C4/2, D4', {
+            stem: 'up'
           }))
         ]
       }).addClef('treble').addTimeSignature('4/4');
@@ -70,8 +70,8 @@ export default {
       var system = vf3.System({width:200,spaceBetweenStaves: 10});
       system.addStave({
         voices: [
-          score.voice(score.notes('C#5/4,B4,B4,B4', {
-            stem: 'down'
+          score.voice(score.notes('C4/4,D4,E4,F4', {
+            stem: 'up'
           }))
         ]
       }).addClef('treble').addTimeSignature('4/4');
@@ -86,16 +86,12 @@ export default {
       });
       var score = vf4.EasyScore();
       var system = vf4.System({width:200,spaceBetweenStaves: 10});
+      score.set({ time: '3/4' }); //important
       system.addStave({
         voices: [
-          score.voice([
-            score.beam(score.notes('C5/8,B4')),
-            score.beam(score.notes('C5/8,B4')),
-            score.beam(score.notes('C5/8,B4')),
-            score.beam(score.notes('C5/8,B4')),
-          ].reduce((a,b)=>{return a.concat(b)}))
+          score.voice(score.notes('C4/8,B4/r,D4/8,B4/r,E4/8,B4/r'))
         ]
-      }).addClef('treble').addTimeSignature('4/4');
+      }).addClef('treble').addTimeSignature('3/4');
       vf4.draw();
 
       var vf5 = new VF.Factory({

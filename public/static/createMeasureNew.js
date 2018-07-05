@@ -12,7 +12,6 @@ var pulseOptions = {
     release: 0.07
   }
 };
-
 var triangleOptions = {
   oscillator: {
     type: "triangle"
@@ -21,7 +20,6 @@ var triangleOptions = {
     release: 0.07
   }
 };
-
 var squareOptions = {
   oscillator: {
     type: "square"
@@ -43,7 +41,6 @@ const squareSynth = new Tone.PolySynth(6, Tone.Synth, squareOptions).toMaster();
 const noiseSynth = new Tone.NoiseSynth().toMaster();
 
 // sampler instruments
-
 const musicbox = new Tone.Sampler(
   {
     B3: "B3.[mp3|ogg]",
@@ -106,7 +103,7 @@ const instrumentMap = {
   harp
 };
 
-// const tracks = [];
+const tracks = [];
 let currentTrack = {};
 let currentTrackId = 0;
 function createTrack(timbre, tempo, volumn, metre) {
@@ -116,17 +113,95 @@ function createTrack(timbre, tempo, volumn, metre) {
     timbre,
     tempo,
     volumn,
-    metre
+    metre,
+    measures: []
   };
   currentTrackId += 1;
   // tracks.push(currentTrack);
 }
 function cleanTrack() {
+  tracks = [];
   currentTrackId = 0;
   currentTrack = {};
 }
-function getToneNotes(sequence, beat, matchZero, tempo, volumn, metre) {
-  // by default, matchZero is undefined
+const Util = {
+  lcm: function() {
+    //求最大公约数
+    //辗转相除法
+    function gcd(a, b) {
+      if (a == 0) return b;
+      return gcd(b % a, a);
+    }
+    //Reduce的思路
+    //依次求最小公倍数
+    return Array.prototype.slice.apply(arguments).reduce(function(a, b) {
+      return a * b / gcd(a, b);
+    }, 1);
+  },
+  createUnderScores: function(n) {
+    const a = "";
+    for (let i = 0; i <= n - 1; i++) {
+      a += "_";
+    }
+    return a;
+  },
+  getNoteAndOctave: function(noteStr) {
+    //receives a note string, like 1 or 1' or ''1
+    const note = noteStr.match(/[0-9]+/g)[0]; // string
+    const octaveUp = noteStr.match(/[0-9]+'+/g)
+      ? noteStr.match(/[0-9]+'+/g)[0].length - note.length
+      : 0;
+    const octaveDown = noteStr.match(/'+[0-9]+/g)
+      ? noteStr.match(/'+[0-9]+/g)[0].length - note.length
+      : 0;
+    return { note, octave: octaveUp - octaveDown };
+  }
+};
+//when creating new measures, accumulate measure one by one
+function accumulateMeasure(measure, sequence, beat, matchZero) {
+  currentTrack.measures[measure] = { measure, sequence, beat, matchZero };
+}
+// by far, we have got a track's all measures, need to process,normalize
+function normalizeMeasures() {
+  const measuresLengths = currentTrack.measures.map(a => a.beat.length);
+  const lcmOfBeatLength = Util.lcm(...measuresLengths);
+  //process each, to make each measure consistent: 1.全部对0 2.beat长度相同
+  currentTrack.measures.forEach((measure, measureIndex) => {
+    if (!measure) {
+      measure.measure = measureIndex;
+      measure.sequence = Util.createUnderScores(lcmOfBeatLength);
+      measure.beat = Util.createUnderScores(lcmOfBeatLength);
+      measure.matchZero = true;
+    } else {
+      if (!measure.matchZero) {
+        //对位转成对0，抽出对应的音
+        const notesStr = measure.beat.split("").map((beatDigit, index) => {
+          if (beatDigit.match(/\d/g)) {
+            return measure.sequence[index];
+          } else {
+            return "";
+          }
+        });
+        measure.sequence = notesStr.filter(note => note != "").join(",");
+        measure.matchZero = true;
+      }
+      //对0的，beat延展就行了，原来000的可能变成0__0__0__ (根据最小公倍数)
+      if (measure.beat.length < lcmOfBeatLength) {
+        const ratio = lcmOfBeatLength / measure.beat.length;
+        const append = Util.createUnderScores(ratio);
+        measure.beat.split("").join(append);
+        measure.beat += append;
+      }
+    }
+    console.log("=== measure after normalization===");
+    console.log(currentTrack);
+  });
+
+  //merge all,
+}
+function getToneNotes(sequence, beat, tempo, volumn, metre) {
+  //都是针对‘对0’
+  // 那就没有对0的了，就是都是matchZero
   //sequence is 'E4,E2,E3,E4' or '[E1,E2],E3,E4'
   if (!sequence || !beat) {
     return;
@@ -147,22 +222,15 @@ function getToneNotes(sequence, beat, matchZero, tempo, volumn, metre) {
         toneNotes.push(toneNote);
         toneNote = {};
       }
-      if (!matchZero) {
-        toneNote = {
-          time: index * noteLen,
-          note: sequenceArray[index],
-          duration: noteLen,
-          velocity: digit === "0" ? volumn / 100 : volumn * digit / 1000
-        };
-      } else {
-        toneNote = {
-          time: index * noteLen,
-          note: sequenceArray[zeroCounter],
-          duration: noteLen,
-          velocity: digit === "0" ? volumn / 100 : volumn * digit / 1000
-        };
-        zeroCounter += 1;
-      }
+
+      toneNote = {
+        time: index * noteLen,
+        note: sequenceArray[zeroCounter],
+        duration: noteLen,
+        velocity: digit === "0" ? volumn / 100 : volumn * digit / 1000
+      };
+      zeroCounter += 1;
+
       if (index === beat.length - 1) {
         //push current
         toneNotes.push(toneNote);
@@ -200,14 +268,7 @@ function createMeasureNew(measure, sequence, beat, matchZero) {
   console.log("sequence", sequence);
   console.log("beat", beat);
 
-  let notes = getToneNotes(
-    sequence,
-    beat,
-    matchZero,
-    tempo ? tempo : 120,
-    volumn,
-    metre
-  );
+  let notes = getToneNotes(sequence, beat, tempo ? tempo : 120, volumn, metre);
   // const flattenNotes = notes.reduce(
   //   ( accumulator, currentValue ) => accumulator.concat(currentValue),
   //   []
@@ -263,118 +324,12 @@ function createMeasureNew(measure, sequence, beat, matchZero) {
     }, notes).start((measure - 1) * metre * 240 / (tempo ? tempo : BPM))
   );
 }
-
-function getToneNotesOnScale(
-  sequence,
-  beat,
-  scale,
-  basenote,
-  matchZero,
-  tempo,
-  volumn,
-  metre
-) {
-  //sequence is `1,2'','3,4` or `[1,2''],'3,4`
-  function getNoteAndOctave(noteStr) {
-    //receives a note string, like 1 or 1' or ''1
-    const note = noteStr.match(/[0-9]+/g)[0]; // string
-    const octaveUp = noteStr.match(/[0-9]+'+/g)
-      ? noteStr.match(/[0-9]+'+/g)[0].length - note.length
-      : 0;
-    const octaveDown = noteStr.match(/'+[0-9]+/g)
-      ? noteStr.match(/'+[0-9]+/g)[0].length - note.length
-      : 0;
-    return { note, octave: octaveUp - octaveDown };
-  }
-  if (!sequence || !beat || !scale || !basenote) {
-    return;
-  }
-  console.log(".....", sequence);
-  const sequenceArray = JSON.parse(
-    `[${sequence}]`.replace(/('*[0-9]+'*)/g, '"$1"')
-  ); // only integer
-  const noteLen = metre * 240 / tempo / beat.length; //should replace 120 with BPM
-  const toneNotes = [];
-  let toneNote = {};
-  let zeroCounter = 0;
-  console.log(matchZero);
-  beat.split("").forEach((digit, index) => {
-    if (digit.match(/\d/g)) {
-      if (toneNote.duration) {
-        toneNotes.push(toneNote);
-      }
-      if (typeof sequenceArray[matchZero ? zeroCounter : index] === "object") {
-        //["1''","1"]
-        const note = sequenceArray[matchZero ? zeroCounter : index].map(
-          noteStr => {
-            const { note, octave } = getNoteAndOctave(noteStr);
-            return Tone.Frequency(basenote)
-              .transpose(12 * octave + scale[(note - 1) % scale.length] - 1)
-              .toNote();
-          }
-        ); //Tone.Freq.harmonize不好用啊
-        // toneNote = { time : index*noteLen, note : Tone.Frequency(basenote).harmonize([sequenceArray[index]].map(index=>scale[index%scale.length])),  duration:noteLen, velocity: 0.9 }
-        toneNote = {
-          time: index * noteLen,
-          note,
-          duration: noteLen,
-          velocity: digit === "0" ? volumn / 100 : volumn * digit / 1000
-        };
-        zeroCounter += 1;
-      } else {
-        // "1''"
-        console.log(22);
-        // Tone.transpose receives an integer to transpose
-        const { note, octave } = getNoteAndOctave(
-          sequenceArray[matchZero ? zeroCounter : index]
-        );
-        toneNote = {
-          time: index * noteLen,
-          note: Tone.Frequency(basenote)
-            .transpose(12 * octave + scale[(note - 1) % scale.length] - 1)
-            .toNote(),
-          duration: noteLen,
-          velocity: digit === "0" ? volumn / 100 : volumn * digit / 1000
-        };
-        zeroCounter += 1;
-      }
-      if (index === beat.length - 1) {
-        //push current
-        toneNotes.push(toneNote);
-      }
-    } else if (digit === "-") {
-      if (toneNote.duration) {
-        toneNote.duration += noteLen;
-      }
-      if (index === beat.length - 1 && toneNote.duration) {
-        //push current
-        toneNotes.push(toneNote);
-      }
-    } else if (digit === "_") {
-      if (toneNote.duration) {
-        // push current
-        toneNotes.push(toneNote);
-        toneNote = {};
-      }
-    }
-  });
-  console.log(JSON.stringify(toneNotes));
-  return toneNotes;
-}
-
-// Ionian 1 2 3 4 5 6 7 1 [1,3,5,6,8,10,12]
-// Dorian 1 2 b3 4 5 6 b7 1 [1,3,4,6,8,10,11]
-// Phrygian 1 b2 b3 4 5 b6 b7 1 [1,2,4,6,8,9,11]
-// Lydian 1 2 3 #4 5 6 7 1 [1,3,5,7,8,10,12]
-// Mixolydian 1 2 3 4 5 6 b7 1 [1,3,5,6,8,10,11]
-// Aeolian 1 2 b3 4 5 b6 b7 1 [1,3,4,6,8,9,11]
-// Locrian 1 b2 b3 4 b5 b6 b7 1 [1,2,4,6,7,9,11]
-
-// harmonic major
-// melodic major
-// harmonic minor
-// melodic minor
-
+// const measure = 1
+// const timbre = 'square'
+// const sequence = "1,2,3,4,5,6,7"
+// const beat = '0-------0-------0-------0-------'
+// scale = 'normal'
+// basenote = ‘C5’
 function createMeasureOnScaleNew(
   measure,
   sequence,
@@ -383,13 +338,18 @@ function createMeasureOnScaleNew(
   basenote,
   matchZero
 ) {
-  // const measure = 1
-  // const timbre = 'square'
-  // const sequence = "1,2,3,4,5,6,7"
-  // const beat = '0-------0-------0-------0-------'
-  // scale = 'normal'
-  // basenote = ‘C5’
-  const { timbre, tempo, volumn, metre } = currentTrack; // instead of being param, read from create track
+  // TODO: 转换成createMeasureNew即可!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // Ionian 1 2 3 4 5 6 7 1 [1,3,5,6,8,10,12]
+  // Dorian 1 2 b3 4 5 6 b7 1 [1,3,4,6,8,10,11]
+  // Phrygian 1 b2 b3 4 5 b6 b7 1 [1,2,4,6,8,9,11]
+  // Lydian 1 2 3 #4 5 6 7 1 [1,3,5,7,8,10,12]
+  // Mixolydian 1 2 3 4 5 6 b7 1 [1,3,5,6,8,10,11]
+  // Aeolian 1 2 b3 4 5 b6 b7 1 [1,3,4,6,8,9,11]
+  // Locrian 1 b2 b3 4 b5 b6 b7 1 [1,2,4,6,7,9,11]
+  // harmonic major
+  // melodic major
+  // harmonic minor
+  // melodic minor
   let scaleInterval = [1, 3, 5, 6, 8, 10, 12];
   const scales = {
     Ionian: [1, 3, 5, 6, 8, 10, 12],
@@ -405,73 +365,43 @@ function createMeasureOnScaleNew(
   if (scale) {
     scaleInterval = scales[scale];
   }
-
-  console.log("called create Measure");
-  console.log("measure", measure);
-  console.log("timbre", timbre);
-  console.log("sequence", sequence);
-  console.log("beat", beat);
-  console.log("scale", scaleInterval);
-  console.log("basenote", basenote);
-
-  let notes = getToneNotesOnScale(
-    sequence,
-    beat,
-    scaleInterval,
-    basenote,
-    matchZero,
-    tempo ? tempo : 120,
-    volumn,
-    metre
-  );
-
-  // for midi export
-  let midinotes = notes.map(item => {
-    if (typeof item.note === "string") {
-      return {
-        // ...item,
-        midiNo: Tone.Frequency(item.note).toMidi(),
-        velocity: item.velocity,
-        startTime:
-          item.time + (measure - 1) * metre * 240 / (tempo ? tempo : BPM),
-        duration: item.duration
-      };
-    } else if (typeof item.note === "object") {
-      return item.note.map(note => {
-        return {
-          // ...item,
-          midiNo: Tone.Frequency(note).toMidi(),
-          velocity: item.velocity,
-          startTime:
-            item.time + (measure - 1) * metre * 240 / (tempo ? tempo : BPM),
-          duration: item.duration
-        };
+  const sequenceArray = JSON.parse(
+    `[${sequence}]`.replace(/('*[0-9]+'*)/g, '"$1"')
+  ); // only integer
+  const notesFromNumbers = sequenceArray.map(sequenceNumber => {
+    if (typeof sequenceNumber === "object") {
+      //["1''","1"]
+      return sequenceNumber.map(noteStr => {
+        const { note, octave } = Util.getNoteAndOctave(noteStr);
+        return Tone.Frequency(basenote)
+          .transpose(
+            12 * octave + scaleInterval[(note - 1) % scaleInterval.length] - 1
+          )
+          .toNote();
       });
+    } else {
+      // "1''"
+      // Tone.transpose receives an integer to transpose
+      const { note, octave } = Util.getNoteAndOctave(sequenceNumber);
+      return Tone.Frequency(basenote)
+        .transpose(
+          12 * octave + scaleInterval[(note - 1) % scaleInterval.length] - 1
+        )
+        .toNote();
     }
   });
-  if (!MidiTracks[`${timbre}${currentTrackId}`]) {
-    MidiTracks[`${timbre}${currentTrackId}`] = [midinotes]; //还有小节呢
-  } else {
-    MidiTracks[`${timbre}${currentTrackId}`].push(midinotes);
-  }
-  // for playback
-  musixiseParts.push(
-    new Tone.Part(function(time, value) {
-      // arrange trigger notes
-      if (timbre !== "noise") {
-        instrumentMap[timbre].triggerAttackRelease(
-          value.note,
-          value.duration,
-          time,
-          value.velocity
-        );
-      } else {
-        instrumentMap[timbre].triggerAttackRelease(
-          value.duration,
-          time,
-          value.velocity
-        );
-      }
-    }, notes).start((measure - 1) * metre * 240 / (tempo ? tempo : BPM))
-  );
+  console.log(notesFromNumbers); //["C3","D3",["C3","D4"]]
+  const fedNotes = notesFromNumbers.reduce((a, b) => {
+    let pre = a;
+    let post = b;
+    if (typeof a == "object") {
+      pre = `[${a}]`;
+    }
+    if (typeof b == "object") {
+      post = `[${b}]`;
+    }
+    return `${pre},${post}`;
+  });
+  console.log(fedNotes);
+  createMeasureNew(measure, fedNotes, beat, matchZero);
 }

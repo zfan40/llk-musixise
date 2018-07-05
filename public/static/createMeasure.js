@@ -106,12 +106,26 @@ const instrumentMap = {
   harp
 };
 
-// const measure = 1
-// const timbre = 'square'
-// const sequence = "C4,D4,E4,F4,G4,A4,B4,C5,E4,E4,E4,E4,E4,E4,E4,E4,G4,G4,G4,G4,G4,G4,G4,G4,B4,B4,B4,B4,B4,B4,B4,B4"
-// const beat = '0-------0-------0-------0-------'
-
-function getToneNotes(sequence, beat, velocity, matchZero) {
+// const tracks = [];
+let currentTrack = {};
+let currentTrackId = 0;
+function createTrack(timbre, tempo, volumn, metre) {
+  metre = metre ? eval(metre) : 1;
+  // alert(metre);
+  currentTrack = {
+    timbre,
+    tempo,
+    volumn,
+    metre
+  };
+  currentTrackId += 1;
+  // tracks.push(currentTrack);
+}
+function cleanTrack() {
+  currentTrackId = 0;
+  currentTrack = {};
+}
+function getToneNotes(sequence, beat, matchZero, tempo, volumn, metre) {
   // by default, matchZero is undefined
   //sequence is 'E4,E2,E3,E4' or '[E1,E2],E3,E4'
   if (!sequence || !beat) {
@@ -121,14 +135,14 @@ function getToneNotes(sequence, beat, velocity, matchZero) {
   const sequenceArray = JSON.parse(
     `[${sequence}]`.replace(/([ABCDEFG]#*b*[1-9])/g, '"$1"')
   ); //不对就报错
-  const velocityArray = JSON.parse(`[${velocity}]`);
-  const noteLen = 120 / 60 / beat.length; //should replace 120 with BPM
+  const noteLen = metre * 240 / tempo / beat.length; //should replace 120 with BPM
   const toneNotes = [];
 
   let toneNote = {};
   let zeroCounter = 0;
   beat.split("").forEach((digit, index) => {
-    if (digit === "0") {
+    if (digit.match(/\d/g)) {
+      //digit shows velocity
       if (toneNote.duration) {
         toneNotes.push(toneNote);
         toneNote = {};
@@ -138,14 +152,14 @@ function getToneNotes(sequence, beat, velocity, matchZero) {
           time: index * noteLen,
           note: sequenceArray[index],
           duration: noteLen,
-          velocity: velocityArray[index]
+          velocity: digit === "0" ? volumn / 100 : volumn * digit / 1000
         };
       } else {
         toneNote = {
           time: index * noteLen,
           note: sequenceArray[zeroCounter],
           duration: noteLen,
-          velocity: velocityArray[zeroCounter]
+          velocity: digit === "0" ? volumn / 100 : volumn * digit / 1000
         };
         zeroCounter += 1;
       }
@@ -172,20 +186,28 @@ function getToneNotes(sequence, beat, velocity, matchZero) {
   console.log(JSON.stringify(toneNotes));
   return toneNotes;
 }
-function createMeasure(measure, timbre, sequence, beat, velocity, matchZero) {
+function createMeasureNew(measure, sequence, beat, matchZero) {
   // measure: int (1)
   // timbre: string ('square')
   // sequence: array
   // beat: string
   // IMPORTANT...use an array of objects as long as the object has a "time" attribute
   // build notes
+  const { timbre, tempo, volumn, metre } = currentTrack; // instead of being param, read from create track
   console.log("called create Measure");
   console.log("measure", measure);
   console.log("timbre", timbre);
   console.log("sequence", sequence);
   console.log("beat", beat);
 
-  let notes = getToneNotes(sequence, beat, velocity, matchZero);
+  let notes = getToneNotes(
+    sequence,
+    beat,
+    matchZero,
+    tempo ? tempo : 120,
+    volumn,
+    metre
+  );
   // const flattenNotes = notes.reduce(
   //   ( accumulator, currentValue ) => accumulator.concat(currentValue),
   //   []
@@ -198,7 +220,8 @@ function createMeasure(measure, timbre, sequence, beat, velocity, matchZero) {
         // ...item,
         midiNo: Tone.Frequency(item.note).toMidi(),
         velocity: item.velocity,
-        startTime: item.time + (measure - 1) * BPM / 60,
+        startTime:
+          item.time + (measure - 1) * metre * 240 / (tempo ? tempo : BPM),
         duration: item.duration
       };
     } else if (typeof item.note === "object") {
@@ -207,28 +230,37 @@ function createMeasure(measure, timbre, sequence, beat, velocity, matchZero) {
           // ...item,
           midiNo: Tone.Frequency(note).toMidi(),
           velocity: item.velocity,
-          startTime: item.time + (measure - 1) * BPM / 60,
+          startTime:
+            item.time + (measure - 1) * metre * 240 / (tempo ? tempo : BPM),
           duration: item.duration
         };
       });
     }
   });
-  if (!MidiTracks[timbre]) {
-    MidiTracks[timbre] = [midinotes]; //还有小节呢
+  if (!MidiTracks[`${timbre}${currentTrackId}`]) {
+    MidiTracks[`${timbre}${currentTrackId}`] = [midinotes]; //还有小节呢
   } else {
-    MidiTracks[timbre].push(midinotes);
+    MidiTracks[`${timbre}${currentTrackId}`].push(midinotes);
   }
   // for playback
   musixiseParts.push(
     new Tone.Part(function(time, value) {
       // arrange trigger notes
-      instrumentMap[timbre].triggerAttackRelease(
-        value.note,
-        value.duration,
-        time,
-        value.velocity
-      );
-    }, notes).start((measure - 1) * BPM / 60)
+      if (timbre !== "noise") {
+        instrumentMap[timbre].triggerAttackRelease(
+          value.note,
+          value.duration,
+          time,
+          value.velocity
+        );
+      } else {
+        instrumentMap[timbre].triggerAttackRelease(
+          value.duration,
+          time,
+          value.velocity
+        );
+      }
+    }, notes).start((measure - 1) * metre * 240 / (tempo ? tempo : BPM))
   );
 }
 
@@ -237,8 +269,10 @@ function getToneNotesOnScale(
   beat,
   scale,
   basenote,
-  velocity,
-  matchZero
+  matchZero,
+  tempo,
+  volumn,
+  metre
 ) {
   //sequence is `1,2'','3,4` or `[1,2''],'3,4`
   function getNoteAndOctave(noteStr) {
@@ -259,16 +293,13 @@ function getToneNotesOnScale(
   const sequenceArray = JSON.parse(
     `[${sequence}]`.replace(/('*[0-9]+'*)/g, '"$1"')
   ); // only integer
-  console.log(velocity);
-  const velocityArray = JSON.parse(`[${velocity}]`);
-  const noteLen = 120 / 60 / beat.length; //should replace 120 with BPM
+  const noteLen = metre * 240 / tempo / beat.length; //should replace 120 with BPM
   const toneNotes = [];
   let toneNote = {};
   let zeroCounter = 0;
   console.log(matchZero);
-  console.log("力度！！！", velocityArray);
   beat.split("").forEach((digit, index) => {
-    if (digit === "0") {
+    if (digit.match(/\d/g)) {
       if (toneNote.duration) {
         toneNotes.push(toneNote);
       }
@@ -287,7 +318,7 @@ function getToneNotesOnScale(
           time: index * noteLen,
           note,
           duration: noteLen,
-          velocity: velocityArray[matchZero ? zeroCounter : index]
+          velocity: digit === "0" ? volumn / 100 : volumn * digit / 1000
         };
         zeroCounter += 1;
       } else {
@@ -303,7 +334,7 @@ function getToneNotesOnScale(
             .transpose(12 * octave + scale[(note - 1) % scale.length] - 1)
             .toNote(),
           duration: noteLen,
-          velocity: velocityArray[matchZero ? zeroCounter : index]
+          velocity: digit === "0" ? volumn / 100 : volumn * digit / 1000
         };
         zeroCounter += 1;
       }
@@ -344,14 +375,12 @@ function getToneNotesOnScale(
 // harmonic minor
 // melodic minor
 
-function createMeasureOnScale(
+function createMeasureOnScaleNew(
   measure,
-  timbre,
   sequence,
   beat,
   scale,
   basenote,
-  velocity,
   matchZero
 ) {
   // const measure = 1
@@ -360,6 +389,7 @@ function createMeasureOnScale(
   // const beat = '0-------0-------0-------0-------'
   // scale = 'normal'
   // basenote = ‘C5’
+  const { timbre, tempo, volumn, metre } = currentTrack; // instead of being param, read from create track
   let scaleInterval = [1, 3, 5, 6, 8, 10, 12];
   const scales = {
     Ionian: [1, 3, 5, 6, 8, 10, 12],
@@ -389,8 +419,10 @@ function createMeasureOnScale(
     beat,
     scaleInterval,
     basenote,
-    velocity,
-    matchZero
+    matchZero,
+    tempo ? tempo : 120,
+    volumn,
+    metre
   );
 
   // for midi export
@@ -400,7 +432,8 @@ function createMeasureOnScale(
         // ...item,
         midiNo: Tone.Frequency(item.note).toMidi(),
         velocity: item.velocity,
-        startTime: item.time + (measure - 1) * BPM / 60,
+        startTime:
+          item.time + (measure - 1) * metre * 240 / (tempo ? tempo : BPM),
         duration: item.duration
       };
     } else if (typeof item.note === "object") {
@@ -409,27 +442,36 @@ function createMeasureOnScale(
           // ...item,
           midiNo: Tone.Frequency(note).toMidi(),
           velocity: item.velocity,
-          startTime: item.time + (measure - 1) * BPM / 60,
+          startTime:
+            item.time + (measure - 1) * metre * 240 / (tempo ? tempo : BPM),
           duration: item.duration
         };
       });
     }
   });
-  if (!MidiTracks[timbre]) {
-    MidiTracks[timbre] = [midinotes]; //还有小节呢
+  if (!MidiTracks[`${timbre}${currentTrackId}`]) {
+    MidiTracks[`${timbre}${currentTrackId}`] = [midinotes]; //还有小节呢
   } else {
-    MidiTracks[timbre].push(midinotes);
+    MidiTracks[`${timbre}${currentTrackId}`].push(midinotes);
   }
   // for playback
   musixiseParts.push(
     new Tone.Part(function(time, value) {
       // arrange trigger notes
-      instrumentMap[timbre].triggerAttackRelease(
-        value.note,
-        value.duration,
-        time,
-        value.velocity
-      );
-    }, notes).start((measure - 1) * BPM / 60)
+      if (timbre !== "noise") {
+        instrumentMap[timbre].triggerAttackRelease(
+          value.note,
+          value.duration,
+          time,
+          value.velocity
+        );
+      } else {
+        instrumentMap[timbre].triggerAttackRelease(
+          value.duration,
+          time,
+          value.velocity
+        );
+      }
+    }, notes).start((measure - 1) * metre * 240 / (tempo ? tempo : BPM))
   );
 }

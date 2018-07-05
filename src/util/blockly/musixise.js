@@ -79,11 +79,11 @@ Blockly.JavaScript["create_track"] = function(block) {
   ); // measure length = metre * 240/tempo
   var branch = Blockly.JavaScript.statementToCode(block, "measures");
   // branch = Blockly.JavaScript.addLoopTrap(branch, block.id);
-  console.log("=====", timbre);
-  console.log("=====", measure);
-  console.log("=====", volumn);
-  console.log("=====", metre);
-  console.log("=====", branch);
+  // console.log("=====", timbre);
+  // console.log("=====", measure);
+  // console.log("=====", volumn);
+  // console.log("=====", metre);
+  // console.log("=====", branch);
   return `
   createTrack(${timbre},${measure},${volumn},${metre});
   ${branch}
