@@ -103,26 +103,22 @@ const instrumentMap = {
   harp
 };
 
-const tracks = [];
-let currentTrack = {};
+let tracks = [];
 let currentTrackId = 0;
 function createTrack(timbre, tempo, volumn, metre) {
   metre = metre ? eval(metre) : 1;
-  // alert(metre);
-  currentTrack = {
+  tracks.push({
     timbre,
     tempo,
     volumn,
     metre,
     measures: []
-  };
+  });
   currentTrackId += 1;
-  // tracks.push(currentTrack);
 }
 function cleanTrack() {
   tracks = [];
   currentTrackId = 0;
-  currentTrack = {};
 }
 const Util = {
   lcm: function() {
@@ -135,13 +131,22 @@ const Util = {
     //Reduce的思路
     //依次求最小公倍数
     return Array.prototype.slice.apply(arguments).reduce(function(a, b) {
+      if (!a) a = 1;
+      if (!b) b = 1;
       return a * b / gcd(a, b);
     }, 1);
   },
   createUnderScores: function(n) {
-    const a = "";
+    let a = "";
     for (let i = 0; i <= n - 1; i++) {
       a += "_";
+    }
+    return a;
+  },
+  createScores: function(n) {
+    let a = "";
+    for (let i = 0; i <= n - 1; i++) {
+      a += "-";
     }
     return a;
   },
@@ -155,182 +160,76 @@ const Util = {
       ? noteStr.match(/'+[0-9]+/g)[0].length - note.length
       : 0;
     return { note, octave: octaveUp - octaveDown };
+  },
+  getToneNotes: function(sequence, beat, tempo, volumn, metre, measureCount) {
+    //都是针对‘对0’
+    //sequence is 'E4,E2,E3,E4' or '[E1,E2],E3,E4'
+    if (!sequence || !beat) {
+      return;
+    }
+    console.log(".....", sequence);
+    console.log(".....", beat);
+    const sequenceArray = JSON.parse(
+      `[${sequence}]`.replace(/([ABCDEFG]#*b*[1-9])/g, '"$1"')
+    ); //不对就报错
+    const noteLen = measureCount * (metre * 240 / tempo / beat.length); //should replace 120 with BPM
+    const toneNotes = [];
+
+    let toneNote = {};
+    let zeroCounter = 0;
+    beat.split("").forEach((digit, index) => {
+      if (digit.match(/\d/g)) {
+        //digit shows velocity
+        if (toneNote.duration) {
+          toneNotes.push(toneNote);
+          toneNote = {};
+        }
+
+        toneNote = {
+          time: index * noteLen,
+          note: sequenceArray[zeroCounter],
+          duration: noteLen,
+          velocity: digit === "0" ? volumn / 100 : volumn * digit / 1000
+        };
+        zeroCounter += 1;
+
+        if (index === beat.length - 1) {
+          //push current
+          toneNotes.push(toneNote);
+        }
+      } else if (digit === "-") {
+        if (toneNote.duration) {
+          // alert("1");
+          toneNote.duration += noteLen;
+        }
+        if (index === beat.length - 1 && toneNote.duration) {
+          //push current
+          toneNotes.push(toneNote);
+        }
+      } else if (digit === "_") {
+        if (toneNote.duration) {
+          // push current
+          toneNotes.push(toneNote);
+          toneNote = {};
+        }
+      }
+    });
+    console.log(JSON.stringify(toneNotes));
+    return toneNotes;
   }
 };
+
 //when creating new measures, accumulate measure one by one
-function accumulateMeasure(measure, sequence, beat, matchZero) {
-  currentTrack.measures[measure] = { measure, sequence, beat, matchZero };
-}
-// by far, we have got a track's all measures, need to process,normalize
-function normalizeMeasures() {
-  const measuresLengths = currentTrack.measures.map(a => a.beat.length);
-  const lcmOfBeatLength = Util.lcm(...measuresLengths);
-  //process each, to make each measure consistent: 1.全部对0 2.beat长度相同
-  currentTrack.measures.forEach((measure, measureIndex) => {
-    if (!measure) {
-      measure.measure = measureIndex;
-      measure.sequence = Util.createUnderScores(lcmOfBeatLength);
-      measure.beat = Util.createUnderScores(lcmOfBeatLength);
-      measure.matchZero = true;
-    } else {
-      if (!measure.matchZero) {
-        //对位转成对0，抽出对应的音
-        const notesStr = measure.beat.split("").map((beatDigit, index) => {
-          if (beatDigit.match(/\d/g)) {
-            return measure.sequence[index];
-          } else {
-            return "";
-          }
-        });
-        measure.sequence = notesStr.filter(note => note != "").join(",");
-        measure.matchZero = true;
-      }
-      //对0的，beat延展就行了，原来000的可能变成0__0__0__ (根据最小公倍数)
-      if (measure.beat.length < lcmOfBeatLength) {
-        const ratio = lcmOfBeatLength / measure.beat.length;
-        const append = Util.createUnderScores(ratio);
-        measure.beat.split("").join(append);
-        measure.beat += append;
-      }
-    }
-    console.log("=== measure after normalization===");
-    console.log(currentTrack);
-  });
-
-  //merge all,
-}
-function getToneNotes(sequence, beat, tempo, volumn, metre) {
-  //都是针对‘对0’
-  // 那就没有对0的了，就是都是matchZero
-  //sequence is 'E4,E2,E3,E4' or '[E1,E2],E3,E4'
-  if (!sequence || !beat) {
-    return;
-  }
-  console.log(".....", sequence);
-  const sequenceArray = JSON.parse(
-    `[${sequence}]`.replace(/([ABCDEFG]#*b*[1-9])/g, '"$1"')
-  ); //不对就报错
-  const noteLen = metre * 240 / tempo / beat.length; //should replace 120 with BPM
-  const toneNotes = [];
-
-  let toneNote = {};
-  let zeroCounter = 0;
-  beat.split("").forEach((digit, index) => {
-    if (digit.match(/\d/g)) {
-      //digit shows velocity
-      if (toneNote.duration) {
-        toneNotes.push(toneNote);
-        toneNote = {};
-      }
-
-      toneNote = {
-        time: index * noteLen,
-        note: sequenceArray[zeroCounter],
-        duration: noteLen,
-        velocity: digit === "0" ? volumn / 100 : volumn * digit / 1000
-      };
-      zeroCounter += 1;
-
-      if (index === beat.length - 1) {
-        //push current
-        toneNotes.push(toneNote);
-      }
-    } else if (digit === "-") {
-      if (toneNote.duration) {
-        toneNote.duration += noteLen;
-      }
-      if (index === beat.length - 1 && toneNote.duration) {
-        //push current
-        toneNotes.push(toneNote);
-      }
-    } else if (digit === "_") {
-      if (toneNote.duration) {
-        // push current
-        toneNotes.push(toneNote);
-        toneNote = {};
-      }
-    }
-  });
-  console.log(JSON.stringify(toneNotes));
-  return toneNotes;
-}
 function createMeasureNew(measure, sequence, beat, matchZero) {
-  // measure: int (1)
-  // timbre: string ('square')
-  // sequence: array
-  // beat: string
-  // IMPORTANT...use an array of objects as long as the object has a "time" attribute
-  // build notes
-  const { timbre, tempo, volumn, metre } = currentTrack; // instead of being param, read from create track
-  console.log("called create Measure");
-  console.log("measure", measure);
-  console.log("timbre", timbre);
-  console.log("sequence", sequence);
-  console.log("beat", beat);
-
-  let notes = getToneNotes(sequence, beat, tempo ? tempo : 120, volumn, metre);
-  // const flattenNotes = notes.reduce(
-  //   ( accumulator, currentValue ) => accumulator.concat(currentValue),
-  //   []
-  // );
-
-  // for midi export
-  let midinotes = notes.map(item => {
-    if (typeof item.note === "string") {
-      return {
-        // ...item,
-        midiNo: Tone.Frequency(item.note).toMidi(),
-        velocity: item.velocity,
-        startTime:
-          item.time + (measure - 1) * metre * 240 / (tempo ? tempo : BPM),
-        duration: item.duration
-      };
-    } else if (typeof item.note === "object") {
-      return item.note.map(note => {
-        return {
-          // ...item,
-          midiNo: Tone.Frequency(note).toMidi(),
-          velocity: item.velocity,
-          startTime:
-            item.time + (measure - 1) * metre * 240 / (tempo ? tempo : BPM),
-          duration: item.duration
-        };
-      });
-    }
-  });
-  if (!MidiTracks[`${timbre}${currentTrackId}`]) {
-    MidiTracks[`${timbre}${currentTrackId}`] = [midinotes]; //还有小节呢
-  } else {
-    MidiTracks[`${timbre}${currentTrackId}`].push(midinotes);
-  }
-  // for playback
-  musixiseParts.push(
-    new Tone.Part(function(time, value) {
-      // arrange trigger notes
-      if (timbre !== "noise") {
-        instrumentMap[timbre].triggerAttackRelease(
-          value.note,
-          value.duration,
-          time,
-          value.velocity
-        );
-      } else {
-        instrumentMap[timbre].triggerAttackRelease(
-          value.duration,
-          time,
-          value.velocity
-        );
-      }
-    }, notes).start((measure - 1) * metre * 240 / (tempo ? tempo : BPM))
-  );
+  tracks[currentTrackId - 1].measures[measure - 1] = {
+    measure,
+    sequence,
+    beat,
+    matchZero
+  };
 }
-// const measure = 1
-// const timbre = 'square'
-// const sequence = "1,2,3,4,5,6,7"
-// const beat = '0-------0-------0-------0-------'
-// scale = 'normal'
-// basenote = ‘C5’
-function createMeasureOnScaleNew(
+
+function createMeasureOnScaleNew( // this would finally call createMeasureNew
   measure,
   sequence,
   beat,
@@ -338,7 +237,6 @@ function createMeasureOnScaleNew(
   basenote,
   matchZero
 ) {
-  // TODO: 转换成createMeasureNew即可!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   // Ionian 1 2 3 4 5 6 7 1 [1,3,5,6,8,10,12]
   // Dorian 1 2 b3 4 5 6 b7 1 [1,3,4,6,8,10,11]
   // Phrygian 1 b2 b3 4 5 b6 b7 1 [1,2,4,6,8,9,11]
@@ -404,4 +302,177 @@ function createMeasureOnScaleNew(
   });
   console.log(fedNotes);
   createMeasureNew(measure, fedNotes, beat, matchZero);
+}
+
+// by far, we have got a track's all measures, need to process,normalize
+function normalizeMeasures(track) {
+  const measuresLengths = track.measures.map(a => a.beat.length);
+  console.log("12121212121212122", measuresLengths);
+  const lcmOfBeatLength = Util.lcm(...measuresLengths);
+  // 1.转换成对0 2.把track内所有小节beat统一长度
+
+  // 不能用foreach，foreach会直接bypass掉empty的（稀疏数组遍历）
+  // track.measures.forEach((measure, measureIndex) => {});
+  for (
+    let measureIndex = 0;
+    measureIndex <= track.measures.length - 1;
+    measureIndex += 1
+  ) {
+    console.log("measure::::::::::", track.measures[measureIndex]);
+    if (!track.measures[measureIndex]) {
+      //建一个空小节
+      //TODO: bug gere
+      track.measures[measureIndex] = {
+        measure: measureIndex + 1,
+        sequence: "",
+        beat: Util.createUnderScores(lcmOfBeatLength),
+        matchZero: true
+      };
+    } else {
+      if (!track.measures[measureIndex].matchZero) {
+        // 对位转成对0，抽出对应的音//TODO: bug here, super mario....seemingly solved
+        const sequenceArray = JSON.parse(
+          `[${track.measures[measureIndex].sequence}]`.replace(
+            /([ABCDEFG]#*b*[1-9])/g,
+            '"$1"'
+          )
+        );
+        const newSeqArray = track.measures[measureIndex].beat
+          .split("")
+          .map((beatDigit, index) => {
+            if (beatDigit.match(/\d/g)) {
+              return sequenceArray[index];
+            } else {
+              return "";
+            }
+          });
+        console.log("bbbbbbbbbbb", newSeqArray);
+
+        // track.measures[measureIndex].sequence = newSeqArray.filter(note => note != "").join(","); //不行，因为内层数组会被打开
+        let s = JSON.stringify(newSeqArray.filter(note => note != "")).replace(
+          /"/g,
+          ""
+        );
+        s = s.substring(1, s.length - 1); // 去掉数组的前后方括号
+        track.measures[measureIndex].sequence = s;
+        track.measures[measureIndex].matchZero = true;
+      }
+      console.log("jjjjjjjjjjjjjj", track.measures[measureIndex].sequence);
+      //对0的，beat延展就行了，原来000的可能变成0--0--0-- (根据最小公倍数)
+      if (track.measures[measureIndex].beat.length < lcmOfBeatLength) {
+        const ratio =
+          lcmOfBeatLength / track.measures[measureIndex].beat.length;
+        const append = Util.createScores(ratio - 1);
+        track.measures[measureIndex].beat = track.measures[measureIndex].beat
+          .split("")
+          .join(append);
+        track.measures[measureIndex].beat += append;
+      }
+    }
+  }
+
+  console.log("=== measure after normalization===");
+  console.log(track.measures);
+
+  //把所有measure合成一大段 应了老话「不要看小节线」
+  track.part = track.measures.reduce((a, b) => {
+    return {
+      // TODO: if a/b is empty string, no comma here, seemingly solved
+      sequence: `${a.sequence}${a.sequence && b.sequence ? "," : ""}${
+        b.sequence
+      }`,
+      beat: `${a.beat}${b.beat}`
+    };
+  });
+  console.log("=== final part in this part ===");
+  console.log(track.part);
+}
+
+function prepareTrackNotes(track) {
+  // measure: int (1)
+  // timbre: string ('square')
+  // sequence: array
+  // beat: string
+  // IMPORTANT...use an array of objects as long as the object has a "time" attribute
+  // build notes
+  const {
+    timbre,
+    tempo,
+    volumn,
+    metre,
+    measures,
+    part: { sequence, beat }
+  } = track; // instead of being param, read from create track
+
+  let notes = Util.getToneNotes(
+    sequence,
+    beat,
+    tempo ? tempo : 120,
+    volumn,
+    metre,
+    measures.length
+  );
+
+  // for midi export
+  let midinotes = notes.map(item => {
+    if (typeof item.note === "string") {
+      return {
+        // ...item,
+        midiNo: Tone.Frequency(item.note).toMidi(),
+        velocity: item.velocity,
+        startTime: item.time,
+        duration: item.duration
+      };
+    } else if (typeof item.note === "object") {
+      return item.note.map(note => {
+        return {
+          // ...item,
+          midiNo: Tone.Frequency(note).toMidi(),
+          velocity: item.velocity,
+          startTime: item.time,
+          duration: item.duration
+        };
+      });
+    }
+  });
+  if (!MidiTracks[`${timbre}${currentTrackId}`]) {
+    MidiTracks[`${timbre}${currentTrackId}`] = [midinotes]; //还有小节呢
+  } else {
+    MidiTracks[`${timbre}${currentTrackId}`].push(midinotes);
+  }
+  // for playback //musixiseParts is currently reset in about.vue
+  musixiseParts.push(
+    new Tone.Part(function(time, value) {
+      // arrange trigger notes
+      if (timbre !== "noise") {
+        instrumentMap[timbre].triggerAttackRelease(
+          value.note,
+          value.duration,
+          time,
+          value.velocity
+        );
+      } else {
+        instrumentMap[timbre].triggerAttackRelease(
+          value.duration,
+          time,
+          value.velocity
+        );
+      }
+    }, notes).start("0.01")
+  );
+}
+
+function prepareProject() {
+  tracks.forEach(track => {
+    normalizeMeasures(track);
+    prepareTrackNotes(track);
+  });
+}
+
+function makeSound(startMeasure) {
+  if (!startMeasure) startMeasure = 1;
+  Tone.Transport.start(
+    "+0.1",
+    (startMeasure - 1) * tracks[0].metre * 240 / tracks[0].tempo
+  );
 }

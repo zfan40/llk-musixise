@@ -15,7 +15,12 @@
  * limitations under the License.
  */
 import Blockly from "node-blockly/browser";
-
+// Blockly.JavaScript.STATEMENT_PREFIX = "highlightBlock(%1);\n";
+// Blockly.JavaScript.addReservedWords("highlightBlock");
+// let workspace = Blockly.getMainWorkspace();
+// function highlightBlock(id) {
+//   workspace.highlightBlock(id);
+// }
 /***************** new methods (simpler)*********************/
 Blockly.defineBlocksWithJsonArray([
   // Block for colour picker.
