@@ -26,7 +26,7 @@ Blockly.defineBlocksWithJsonArray([
   // Block for colour picker.
   {
     type: "create_track",
-    message0: "乐轨 音色 %1 速度 %2 音量 %3 节拍 %4",
+    message0: "乐轨 音色 %1 速度 %2 音量 %3 节拍 %4 静音 %5",
     args0: [
       {
         type: "input_value",
@@ -47,6 +47,11 @@ Blockly.defineBlocksWithJsonArray([
         type: "input_value",
         name: "METRE",
         check: "String"
+      },
+      {
+        type: "field_dropdown",
+        name: "MUTE",
+        options: [["N", 0], ["Y", 1]]
       }
     ],
     message1: "小节 %1",
@@ -82,6 +87,8 @@ Blockly.JavaScript["create_track"] = function(block) {
     "METRE",
     Blockly.JavaScript.ORDER_NONE
   ); // measure length = metre * 240/tempo
+  const mute = this.getFieldValue("MUTE");
+  // alert(typeof mute);
   var branch = Blockly.JavaScript.statementToCode(block, "measures");
   // branch = Blockly.JavaScript.addLoopTrap(branch, block.id);
   // console.log("=====", timbre);
@@ -90,7 +97,7 @@ Blockly.JavaScript["create_track"] = function(block) {
   // console.log("=====", metre);
   // console.log("=====", branch);
   return `
-  createTrack(${timbre},${measure},${volumn},${metre});
+  createTrack(${timbre},${measure},${volumn},${metre},${mute});
   ${branch}
   `;
 };
@@ -142,7 +149,9 @@ Blockly.JavaScript["create_measure_new"] = function(block) {
     "BEAT",
     Blockly.JavaScript.ORDER_NONE
   );
-  return `createMeasureNew(${measure},${sequence},${beat});\n`;
+  return `createMeasureNew(${measure},${sequence},${beat},false,'${
+    block.id
+  }');\n`;
 };
 
 Blockly.defineBlocksWithJsonArray([
@@ -212,7 +221,9 @@ Blockly.JavaScript["create_measure_on_scale_new"] = function(block) {
     "BASENOTE",
     Blockly.JavaScript.ORDER_NONE
   );
-  return `createMeasureOnScaleNew(${measure},${sequence},${beat},${scale},${basenote});\n`;
+  return `createMeasureOnScaleNew(${measure},${sequence},${beat},${scale},${basenote},false,'${
+    block.id
+  }');\n`;
 };
 
 Blockly.defineBlocksWithJsonArray([
@@ -262,7 +273,9 @@ Blockly.JavaScript["create_measure_match_zero_new"] = function(block) {
     "BEAT",
     Blockly.JavaScript.ORDER_NONE
   );
-  return `createMeasureNew(${measure},${sequence},${beat},true);\n`;
+  return `createMeasureNew(${measure},${sequence},${beat},true,'${
+    block.id
+  }');\n`;
 };
 
 Blockly.defineBlocksWithJsonArray([
@@ -332,354 +345,7 @@ Blockly.JavaScript["create_measure_on_scale_match_zero_new"] = function(block) {
     "BASENOTE",
     Blockly.JavaScript.ORDER_NONE
   );
-  return `createMeasureOnScaleNew(${measure},${sequence},${beat},${scale},${basenote},true);\n`;
-};
-
-/*********** old methods (redundant)**************/
-Blockly.defineBlocksWithJsonArray([
-  // Block for colour picker.
-  {
-    type: "create_measure",
-    message0: "音符对位 小节 %1 音色 %2 音序 %3 节拍%4 力度%5",
-    args0: [
-      {
-        type: "input_value",
-        name: "MEASURE",
-        check: "Number"
-      },
-      {
-        // "type": "field_dropdown",
-        // "name": "TIMBRE",
-        // "options": [
-        //   ["SINE", "sine_synth"],
-        //   ["TRIANGLE", "triangle_synth"],
-        //   ["SQUARE", "square_synth"]
-        // ]
-        type: "input_value",
-        name: "TIMBRE",
-        check: "String"
-      },
-      {
-        type: "input_value",
-        name: "SEQUENCE",
-        check: "String" //should be array
-      },
-      {
-        type: "input_value",
-        name: "BEAT",
-        check: "String"
-      },
-      {
-        type: "input_value",
-        name: "VELOCITY",
-        check: "String"
-      }
-    ],
-    inputsInline: true,
-    previousStatement: null,
-    nextStatement: null,
-    colour: 355,
-    tooltip: "",
-    helpUrl: ""
-  }
-]);
-
-Blockly.JavaScript["create_measure"] = function(block) {
-  const measure = Blockly.JavaScript.valueToCode(
-    block,
-    "MEASURE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const timbre = Blockly.JavaScript.valueToCode(
-    block,
-    "TIMBRE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const sequence = Blockly.JavaScript.valueToCode(
-    block,
-    "SEQUENCE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const beat = Blockly.JavaScript.valueToCode(
-    block,
-    "BEAT",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const velocity = Blockly.JavaScript.valueToCode(
-    block,
-    "VELOCITY",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  return `createMeasure(${measure},${timbre},${sequence},${beat},${velocity});\n`;
-};
-
-Blockly.defineBlocksWithJsonArray([
-  // Block for colour picker.
-  {
-    type: "create_measure_on_scale",
-    message0: "简谱对位 %1 音色 %2 音序 %3 节拍%4 调式%5 根音%6 力度%7",
-    args0: [
-      {
-        type: "input_value",
-        name: "MEASURE",
-        check: "Number"
-      },
-      {
-        // "type": "field_dropdown",
-        // "name": "TIMBRE",
-        // "options": [
-        //   ["SINE", "sine_synth"],
-        //   ["TRIANGLE", "triangle_synth"],
-        //   ["SQUARE", "square_synth"]
-        // ]
-        type: "input_value",
-        name: "TIMBRE",
-        check: "String"
-      },
-      {
-        type: "input_value",
-        name: "SEQUENCE",
-        check: "String" //should be array
-      },
-      {
-        type: "input_value",
-        name: "BEAT",
-        check: "String"
-      },
-      {
-        type: "input_value",
-        name: "SCALE",
-        check: "String"
-      },
-      {
-        type: "input_value",
-        name: "BASENOTE",
-        check: "String"
-      },
-      {
-        type: "input_value",
-        name: "VELOCITY",
-        check: "String"
-      }
-    ],
-    inputsInline: true,
-    previousStatement: null,
-    nextStatement: null,
-    colour: 355,
-    tooltip: "",
-    helpUrl: ""
-  }
-]);
-
-Blockly.JavaScript["create_measure_on_scale"] = function(block) {
-  const measure = Blockly.JavaScript.valueToCode(
-    block,
-    "MEASURE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const timbre = Blockly.JavaScript.valueToCode(
-    block,
-    "TIMBRE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const sequence = Blockly.JavaScript.valueToCode(
-    block,
-    "SEQUENCE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const beat = Blockly.JavaScript.valueToCode(
-    block,
-    "BEAT",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const scale = Blockly.JavaScript.valueToCode(
-    block,
-    "SCALE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const basenote = Blockly.JavaScript.valueToCode(
-    block,
-    "BASENOTE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const velocity = Blockly.JavaScript.valueToCode(
-    block,
-    "VELOCITY",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  return `createMeasureOnScale(${measure},${timbre},${sequence},${beat},${scale},${basenote},${velocity});\n`;
-};
-
-Blockly.defineBlocksWithJsonArray([
-  // Block for colour picker.
-  {
-    type: "create_measure_match_zero",
-    message0: "音符不对位 小节 %1 音色 %2 音序 %3 节拍%4 力度%5",
-    args0: [
-      {
-        type: "input_value",
-        name: "MEASURE",
-        check: "Number"
-      },
-      {
-        // "type": "field_dropdown",
-        // "name": "TIMBRE",
-        // "options": [
-        //   ["SINE", "sine_synth"],
-        //   ["TRIANGLE", "triangle_synth"],
-        //   ["SQUARE", "square_synth"]
-        // ]
-        type: "input_value",
-        name: "TIMBRE",
-        check: "String"
-      },
-      {
-        type: "input_value",
-        name: "SEQUENCE",
-        check: "String" //should be array
-      },
-      {
-        type: "input_value",
-        name: "BEAT",
-        check: "String"
-      },
-      {
-        type: "input_value",
-        name: "VELOCITY",
-        check: "String"
-      }
-    ],
-    inputsInline: true,
-    previousStatement: null,
-    nextStatement: null,
-    colour: 355,
-    tooltip: "",
-    helpUrl: ""
-  }
-]);
-
-Blockly.JavaScript["create_measure_match_zero"] = function(block) {
-  const measure = Blockly.JavaScript.valueToCode(
-    block,
-    "MEASURE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const timbre = Blockly.JavaScript.valueToCode(
-    block,
-    "TIMBRE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const sequence = Blockly.JavaScript.valueToCode(
-    block,
-    "SEQUENCE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const beat = Blockly.JavaScript.valueToCode(
-    block,
-    "BEAT",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const velocity = Blockly.JavaScript.valueToCode(
-    block,
-    "VELOCITY",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  return `createMeasure(${measure},${timbre},${sequence},${beat},${velocity},true);\n`;
-};
-
-Blockly.defineBlocksWithJsonArray([
-  // Block for colour picker.
-  {
-    type: "create_measure_on_scale_match_zero",
-    message0: "简谱不对位 小节 %1 音色 %2 音序 %3 节拍%4 调式%5 根音%6 力度%7",
-    args0: [
-      {
-        type: "input_value",
-        name: "MEASURE",
-        check: "Number"
-      },
-      {
-        // "type": "field_dropdown",
-        // "name": "TIMBRE",
-        // "options": [
-        //   ["SINE", "sine_synth"],
-        //   ["TRIANGLE", "triangle_synth"],
-        //   ["SQUARE", "square_synth"]
-        // ]
-        type: "input_value",
-        name: "TIMBRE",
-        check: "String"
-      },
-      {
-        type: "input_value",
-        name: "SEQUENCE",
-        check: "String" //should be array
-      },
-      {
-        type: "input_value",
-        name: "BEAT",
-        check: "String"
-      },
-      {
-        type: "input_value",
-        name: "SCALE",
-        check: "String"
-      },
-      {
-        type: "input_value",
-        name: "BASENOTE",
-        check: "String"
-      },
-      {
-        type: "input_value",
-        name: "VELOCITY",
-        check: "String"
-      }
-    ],
-    inputsInline: true,
-    previousStatement: null,
-    nextStatement: null,
-    colour: 355,
-    tooltip: "",
-    helpUrl: ""
-  }
-]);
-
-Blockly.JavaScript["create_measure_on_scale_match_zero"] = function(block) {
-  const measure = Blockly.JavaScript.valueToCode(
-    block,
-    "MEASURE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const timbre = Blockly.JavaScript.valueToCode(
-    block,
-    "TIMBRE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const sequence = Blockly.JavaScript.valueToCode(
-    block,
-    "SEQUENCE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const beat = Blockly.JavaScript.valueToCode(
-    block,
-    "BEAT",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const scale = Blockly.JavaScript.valueToCode(
-    block,
-    "SCALE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const basenote = Blockly.JavaScript.valueToCode(
-    block,
-    "BASENOTE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const velocity = Blockly.JavaScript.valueToCode(
-    block,
-    "VELOCITY",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  return `createMeasureOnScale(${measure},${timbre},${sequence},${beat},${scale},${basenote},${velocity},true);\n`;
+  return `createMeasureOnScaleNew(${measure},${sequence},${beat},${scale},${basenote},true,'${
+    block.id
+  }');\n`;
 };

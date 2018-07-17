@@ -1,6 +1,8 @@
 const BPM = 120;
 // const note32 = BPM / 60 / 32;
 let MidiTracks = {}; // will eventually be something like: {sin:[toneNote,toneNote,toneNote,...],piano:[toneNote,toneNote]}
+let lastActiveBlockIds = [];
+let currentActiveBlockIds = [];
 AudioParam.prototype.cancelAndHoldAtTime = false;
 
 let musixiseParts = [];
@@ -105,14 +107,16 @@ const instrumentMap = {
 
 let tracks = [];
 let currentTrackId = 0;
-function createTrack(timbre, tempo, volumn, metre) {
+function createTrack(timbre, tempo, volumn, metre, mute) {
   metre = metre ? eval(metre) : 1;
+  if (mute) volumn = 0;
   tracks.push({
     timbre,
     tempo,
     volumn,
     metre,
-    measures: []
+    measures: [],
+    mute
   });
   currentTrackId += 1;
 }
@@ -220,12 +224,13 @@ const Util = {
 };
 
 //when creating new measures, accumulate measure one by one
-function createMeasureNew(measure, sequence, beat, matchZero) {
+function createMeasureNew(measure, sequence, beat, matchZero, blockId) {
   tracks[currentTrackId - 1].measures[measure - 1] = {
     measure,
     sequence,
     beat,
-    matchZero
+    matchZero,
+    blockId
   };
 }
 
@@ -235,7 +240,8 @@ function createMeasureOnScaleNew( // this would finally call createMeasureNew
   beat,
   scale,
   basenote,
-  matchZero
+  matchZero,
+  blockId
 ) {
   // Ionian 1 2 3 4 5 6 7 1 [1,3,5,6,8,10,12]
   // Dorian 1 2 b3 4 5 6 b7 1 [1,3,4,6,8,10,11]
@@ -301,7 +307,7 @@ function createMeasureOnScaleNew( // this would finally call createMeasureNew
     return `${pre},${post}`;
   });
   console.log(fedNotes);
-  createMeasureNew(measure, fedNotes, beat, matchZero);
+  createMeasureNew(measure, fedNotes, beat, matchZero, blockId);
 }
 
 // by far, we have got a track's all measures, need to process,normalize
@@ -321,7 +327,7 @@ function normalizeMeasures(track) {
     console.log("measure::::::::::", track.measures[measureIndex]);
     if (!track.measures[measureIndex]) {
       //建一个空小节
-      //TODO: bug gere
+      //TODO: bug here
       track.measures[measureIndex] = {
         measure: measureIndex + 1,
         sequence: "",
@@ -475,4 +481,25 @@ function makeSound(startMeasure) {
     "+0.1",
     (startMeasure - 1) * tracks[0].metre * 240 / tracks[0].tempo
   );
+}
+
+function highlightBlock(time) {
+  // console.log(tracks);
+  currentActiveBlockIds = [];
+  tracks.forEach(track => {
+    const activeMeasure = parseInt(time / (track.metre * 240 / track.tempo));
+    if (
+      track.measures[activeMeasure] &&
+      track.measures[activeMeasure].blockId
+    ) {
+      currentActiveBlockIds.push(track.measures[activeMeasure].blockId);
+    }
+  });
+  lastActiveBlockIds.forEach(activeBlockId => {
+    Blockly.getMainWorkspace().highlightBlock(activeBlockId, false);
+  });
+  currentActiveBlockIds.forEach(activeBlockId => {
+    Blockly.getMainWorkspace().highlightBlock(activeBlockId, true);
+  });
+  lastActiveBlockIds = currentActiveBlockIds;
 }

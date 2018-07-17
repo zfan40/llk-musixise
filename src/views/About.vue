@@ -4,7 +4,7 @@
     <p style="background-color:white;height:40px;line-height: 40px;margin:0;padding-left:28px;background-color:#ffcc33;">LLK Musixise</p>
     <div style="background-color:#00bdd4;height: 40px;line-height:40px;padding-left:20px;padding-right:20px;display: flex;justify-content: space-between;">
       <div class="">
-        <el-input-number v-model="startMeasure" size="mini" @change="handleChange" :min="1"></el-input-number>
+        <el-input-number v-model="startMeasure" size="mini" :min="1"></el-input-number>
         <i id="play" class="iconfont icon-icon--13" style="font-size:26px;cursor: pointer;" @click="handlePlay"></i>
         <i id="stop" class="iconfont icon-icon--17" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleStop"></i>
         <i id="save" class="iconfont icon-icon--1" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleSave"></i>
@@ -34,7 +34,7 @@ import BlockHelper from "@/components/blockhelper/index.vue";
 import WorkLoader from "@/components/workloader/index.vue";
 require("../util/blockly/musixise"); // import Structure of Musixise Blocks
 var FileSaver = require("file-saver"); // For Midi file export
-
+let clock;
 export default {
   name: "workspace",
   components: {
@@ -57,14 +57,23 @@ export default {
       musixiseParts.forEach(item => {
         item.dispose();
       });
+      cleanTrack()
       musixiseParts = [];
       var code = Blockly.JavaScript.workspaceToCode(Blockly.getMainWorkspace()); //把workspace转换为代码
-      code += `prepareProject();makeSound(${this.startMeasure});cleanTrack()`;
+      code += `prepareProject();makeSound(${this.startMeasure});`;
       // Eval can be dangerous. For more controlled execution, check
       // https://github.com/NeilFraser/JS-Interpreter.
       console.log(code);
       try {
         eval(code);
+        if (clock) {clock.stop(); clock.dispose()}
+        clock = new Tone.Clock(()=>{console.log(Tone.Transport.seconds);highlightBlock(Tone.Transport.seconds)},4)
+        clock.start()
+        //TODO: auto stop...
+        // Tone.Transport.on('stop',()=>{
+        //   // if (clock) {clock.stop(); clock.dispose()}
+        //   console.log('jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj')
+        // })
       } catch (error) {
         console.log(error);
       }
@@ -74,6 +83,7 @@ export default {
       musixiseParts.forEach(item => {
         item.dispose();
       });
+      if (clock) {clock.stop(); clock.dispose();clock=undefined}
       musixiseParts = [];
     },
     handleSave() {
