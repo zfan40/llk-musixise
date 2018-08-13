@@ -14,6 +14,7 @@
         <i id="clear" class="iconfont icon-icon--34" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleToggleTutorial"></i>
       </div>
       <div class="">
+        <span>切视图</span>
         <work-loader />
       </div>
     </div>

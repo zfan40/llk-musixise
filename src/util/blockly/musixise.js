@@ -26,7 +26,7 @@ Blockly.defineBlocksWithJsonArray([
   // Block for colour picker.
   {
     type: "create_track",
-    message0: "乐轨 音色 %1 速度 %2 音量 %3 节拍 %4 静音 %5",
+    message0: "乐轨 音色 %1 速度 %2 音量 %3 节拍 %4 效果 %5",
     args0: [
       {
         type: "input_value",
@@ -49,14 +49,18 @@ Blockly.defineBlocksWithJsonArray([
         check: "String"
       },
       {
-        type: "field_dropdown",
-        name: "MUTE",
-        options: [["N", 0], ["Y", 1]]
+        type: "input_value",
+        name: "FX"
       }
+      // {
+      //   type: "field_dropdown",
+      //   name: "MUTE",
+      //   options: [["N", 0], ["Y", 1]]
+      // }
     ],
     message1: "小节 %1",
     args1: [{ type: "input_statement", name: "measures" }],
-    inputsInline: true,
+    inputsInline: false,
     previousStatement: null,
     nextStatement: null,
     colour: 155,
@@ -87,7 +91,7 @@ Blockly.JavaScript["create_track"] = function(block) {
     "METRE",
     Blockly.JavaScript.ORDER_NONE
   ); // measure length = metre * 240/tempo
-  const mute = this.getFieldValue("MUTE");
+  // const mute = this.getFieldValue("MUTE");
   // alert(typeof mute);
   var branch = Blockly.JavaScript.statementToCode(block, "measures");
   // branch = Blockly.JavaScript.addLoopTrap(branch, block.id);
@@ -97,7 +101,7 @@ Blockly.JavaScript["create_track"] = function(block) {
   // console.log("=====", metre);
   // console.log("=====", branch);
   return `
-  createTrack(${timbre},${measure},${volumn},${metre},${mute});
+  createTrack(${timbre},${measure},${volumn},${metre});
   ${branch}
   `;
 };
@@ -106,7 +110,7 @@ Blockly.defineBlocksWithJsonArray([
   // Block for colour picker.
   {
     type: "create_measure_new",
-    message0: "音符对位 小节 %1 音序 %2 节拍%3",
+    message0: "音符对位 小节 %1 音序 %2 拍子%3",
     args0: [
       {
         type: "input_value",
@@ -158,7 +162,7 @@ Blockly.defineBlocksWithJsonArray([
   // Block for colour picker.
   {
     type: "create_measure_on_scale_new",
-    message0: "简谱对位 小节%1 音序 %2 节拍%3 调式%4 根音%5",
+    message0: "音级对位 小节%1 音序 %2 拍子%3 调式%4 根音%5",
     args0: [
       {
         type: "input_value",
@@ -230,7 +234,7 @@ Blockly.defineBlocksWithJsonArray([
   // Block for colour picker.
   {
     type: "create_measure_match_zero_new",
-    message0: "音符对0 小节 %1 音序 %2 节拍%3",
+    message0: "音符对0 小节 %1 音序 %2 拍子%3",
     args0: [
       {
         type: "input_value",
@@ -282,7 +286,7 @@ Blockly.defineBlocksWithJsonArray([
   // Block for colour picker.
   {
     type: "create_measure_on_scale_match_zero_new",
-    message0: "简谱对0 小节 %1 音序 %2 节拍%3 调式%4 根音%5",
+    message0: "音级对0 小节 %1 音序 %2 拍子%3 调式%4 根音%5",
     args0: [
       {
         type: "input_value",

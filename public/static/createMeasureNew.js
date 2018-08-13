@@ -77,6 +77,22 @@ var piano = new Tone.Sampler(
     baseUrl: "/static/audio/piano/"
   }
 ).toMaster();
+var organ = new Tone.Sampler(
+  {
+    A2: "A2.[mp3|ogg]",
+    A4: "A4.[mp3|ogg]",
+    A5: "A5.[mp3|ogg]",
+    C3: "C3.[mp3|ogg]",
+    C5: "C5.[mp3|ogg]",
+    C6: "C6.[mp3|ogg]",
+    "D#5": "Ds5.[mp3|ogg]",
+    "F#5": "Fs5.[mp3|ogg]"
+  },
+  {
+    release: 1,
+    baseUrl: "/static/audio/organ/"
+  }
+).toMaster();
 var harp = new Tone.Sampler(
   {
     A2: "A2.[mp3|ogg]",
@@ -94,6 +110,22 @@ var harp = new Tone.Sampler(
     baseUrl: "/static/audio/harp/"
   }
 ).toMaster();
+var guitar = new Tone.Sampler(
+  {
+    A2: "A2.[mp3|ogg]",
+    A3: "A3.[mp3|ogg]",
+    C3: "C3.[mp3|ogg]",
+    C4: "C4.[mp3|ogg]",
+    D2: "E3.[mp3|ogg]",
+    D4: "E5.[mp3|ogg]",
+    E2: "E2.[mp3|ogg]",
+    E3: "E3.[mp3|ogg]"
+  },
+  {
+    release: 1,
+    baseUrl: "/static/audio/guitar-acoustic/"
+  }
+).toMaster();
 // synth
 const instrumentMap = {
   pulse: pulseSynth,
@@ -102,14 +134,16 @@ const instrumentMap = {
   noise: noiseSynth,
   musicbox,
   piano,
-  harp
+  harp,
+  guitar,
+  organ
 };
 
 let tracks = [];
 let currentTrackId = 0;
 function createTrack(timbre, tempo, volumn, metre, mute) {
   metre = metre ? eval(metre) : 1;
-  if (mute) volumn = 0;
+  // if (mute) volumn = 0;
   tracks.push({
     timbre,
     tempo,
