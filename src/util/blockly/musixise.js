@@ -110,7 +110,7 @@ Blockly.defineBlocksWithJsonArray([
   // Block for colour picker.
   {
     type: "create_measure_new",
-    message0: "音符对位 小节 %1 音序 %2 拍子%3",
+    message0: "音符对位 小节 %1 音序 %2 拍子%3 声部 %4",
     args0: [
       {
         type: "input_value",
@@ -126,6 +126,11 @@ Blockly.defineBlocksWithJsonArray([
         type: "input_value",
         name: "BEAT",
         check: "String"
+      },
+      {
+        type: "input_value",
+        name: "PART",
+        check: "Number"
       }
     ],
     inputsInline: true,
@@ -153,16 +158,21 @@ Blockly.JavaScript["create_measure_new"] = function(block) {
     "BEAT",
     Blockly.JavaScript.ORDER_NONE
   );
+  const part = Blockly.JavaScript.valueToCode(
+    block,
+    "PART",
+    Blockly.JavaScript.ORDER_NONE
+  );
   return `createMeasureNew(${measure},${sequence},${beat},false,'${
     block.id
-  }');\n`;
+  },${part}');\n`;
 };
 
 Blockly.defineBlocksWithJsonArray([
   // Block for colour picker.
   {
     type: "create_measure_on_scale_new",
-    message0: "音级对位 小节%1 音序 %2 拍子%3 调式%4 根音%5",
+    message0: "音级对位 小节%1 音序 %2 拍子%3 调式%4 根音%5 声部%6",
     args0: [
       {
         type: "input_value",
@@ -188,6 +198,11 @@ Blockly.defineBlocksWithJsonArray([
         type: "input_value",
         name: "BASENOTE",
         check: "String"
+      },
+      {
+        type: "input_value",
+        name: "PART",
+        check: "Number"
       }
     ],
     inputsInline: true,
@@ -225,16 +240,21 @@ Blockly.JavaScript["create_measure_on_scale_new"] = function(block) {
     "BASENOTE",
     Blockly.JavaScript.ORDER_NONE
   );
+  const part = Blockly.JavaScript.valueToCode(
+    block,
+    "PART",
+    Blockly.JavaScript.ORDER_NONE
+  );
   return `createMeasureOnScaleNew(${measure},${sequence},${beat},${scale},${basenote},false,'${
     block.id
-  }');\n`;
+  }',${part});\n`;
 };
 
 Blockly.defineBlocksWithJsonArray([
   // Block for colour picker.
   {
     type: "create_measure_match_zero_new",
-    message0: "音符对0 小节 %1 音序 %2 拍子%3",
+    message0: "音符对0 小节 %1 音序 %2 拍子%3 声部%4",
     args0: [
       {
         type: "input_value",
@@ -250,6 +270,11 @@ Blockly.defineBlocksWithJsonArray([
         type: "input_value",
         name: "BEAT",
         check: "String"
+      },
+      {
+        type: "input_value",
+        name: "PART",
+        check: "Number"
       }
     ],
     inputsInline: true,
@@ -277,16 +302,21 @@ Blockly.JavaScript["create_measure_match_zero_new"] = function(block) {
     "BEAT",
     Blockly.JavaScript.ORDER_NONE
   );
+  const part = Blockly.JavaScript.valueToCode(
+    block,
+    "PART",
+    Blockly.JavaScript.ORDER_NONE
+  );
   return `createMeasureNew(${measure},${sequence},${beat},true,'${
     block.id
-  }');\n`;
+  }',${part});\n`;
 };
 
 Blockly.defineBlocksWithJsonArray([
   // Block for colour picker.
   {
     type: "create_measure_on_scale_match_zero_new",
-    message0: "音级对0 小节 %1 音序 %2 拍子%3 调式%4 根音%5",
+    message0: "音级对0 小节 %1 音序 %2 拍子%3 调式%4 根音%5 声部%6",
     args0: [
       {
         type: "input_value",
@@ -312,6 +342,11 @@ Blockly.defineBlocksWithJsonArray([
         type: "input_value",
         name: "BASENOTE",
         check: "String"
+      },
+      {
+        type: "input_value",
+        name: "PART",
+        check: "Number"
       }
     ],
     inputsInline: true,
@@ -349,7 +384,12 @@ Blockly.JavaScript["create_measure_on_scale_match_zero_new"] = function(block) {
     "BASENOTE",
     Blockly.JavaScript.ORDER_NONE
   );
+  const part = Blockly.JavaScript.valueToCode(
+    block,
+    "PART",
+    Blockly.JavaScript.ORDER_NONE
+  );
   return `createMeasureOnScaleNew(${measure},${sequence},${beat},${scale},${basenote},true,'${
     block.id
-  }');\n`;
+  }',${part});\n`;
 };

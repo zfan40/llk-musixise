@@ -258,13 +258,14 @@ const Util = {
 };
 
 //when creating new measures, accumulate measure one by one
-function createMeasureNew(measure, sequence, beat, matchZero, blockId) {
+function createMeasureNew(measure, sequence, beat, matchZero, blockId, part) {
   tracks[currentTrackId - 1].measures[measure - 1] = {
     measure,
     sequence,
     beat,
     matchZero,
-    blockId
+    blockId,
+    part
   };
 }
 
@@ -275,7 +276,8 @@ function createMeasureOnScaleNew( // this would finally call createMeasureNew
   scale,
   basenote,
   matchZero,
-  blockId
+  blockId,
+  part
 ) {
   // Ionian 1 2 3 4 5 6 7 1 [1,3,5,6,8,10,12]
   // Dorian 1 2 b3 4 5 6 b7 1 [1,3,4,6,8,10,11]
@@ -341,7 +343,7 @@ function createMeasureOnScaleNew( // this would finally call createMeasureNew
     return `${pre},${post}`;
   });
   console.log(fedNotes);
-  createMeasureNew(measure, fedNotes, beat, matchZero, blockId);
+  createMeasureNew(measure, fedNotes, beat, matchZero, blockId, part);
 }
 
 // by far, we have got a track's all measures, need to process,normalize
@@ -415,7 +417,7 @@ function normalizeMeasures(track) {
   console.log(track.measures);
 
   //把所有measure合成一大段 应了老话「不要看小节线」
-  track.part = track.measures.reduce((a, b) => {
+  track.tonepart = track.measures.reduce((a, b) => {
     return {
       // TODO: if a/b is empty string, no comma here, seemingly solved
       sequence: `${a.sequence}${a.sequence && b.sequence ? "," : ""}${
@@ -425,7 +427,7 @@ function normalizeMeasures(track) {
     };
   });
   console.log("=== final part in this part ===");
-  console.log(track.part);
+  console.log(track.tonepart);
 }
 
 function prepareTrackNotes(track) {
@@ -441,7 +443,7 @@ function prepareTrackNotes(track) {
     volumn,
     metre,
     measures,
-    part: { sequence, beat }
+    tonepart: { sequence, beat }
   } = track; // instead of being param, read from create track
 
   let notes = Util.getToneNotes(
