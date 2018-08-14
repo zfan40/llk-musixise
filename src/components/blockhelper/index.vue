@@ -120,6 +120,7 @@
         <block type="create_measure_on_scale_new"></block>
         <block type="create_measure_match_zero_new"></block>
         <block type="create_measure_on_scale_match_zero_new"></block>
+        <block type="create_effect"></block>
       </category>
 
       <category name="Timbre" colour="210">

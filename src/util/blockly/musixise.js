@@ -26,7 +26,7 @@ Blockly.defineBlocksWithJsonArray([
   // Block for colour picker.
   {
     type: "create_track",
-    message0: "乐轨 音色 %1 速度 %2 音量 %3 节拍 %4 效果 %5",
+    message0: "乐轨 音色 %1 速度 %2 音量 %3 节拍 %4",
     args0: [
       {
         type: "input_value",
@@ -47,10 +47,6 @@ Blockly.defineBlocksWithJsonArray([
         type: "input_value",
         name: "METRE",
         check: "String"
-      },
-      {
-        type: "input_value",
-        name: "FX"
       }
       // {
       //   type: "field_dropdown",
@@ -58,8 +54,10 @@ Blockly.defineBlocksWithJsonArray([
       //   options: [["N", 0], ["Y", 1]]
       // }
     ],
-    message1: "小节 %1",
-    args1: [{ type: "input_statement", name: "measures" }],
+    message1: "效果 %1",
+    args1: [{ type: "input_statement", name: "effects" }],
+    message2: "小节 %1",
+    args2: [{ type: "input_statement", name: "measures" }],
     inputsInline: false,
     previousStatement: null,
     nextStatement: null,
@@ -71,38 +69,19 @@ Blockly.defineBlocksWithJsonArray([
 
 Blockly.JavaScript["create_track"] = function(block) {
   // Do while/until loop.
-  const timbre = Blockly.JavaScript.valueToCode(
-    block,
+  const [timbre, measure, volumn, metre] = [
     "TIMBRE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const measure = Blockly.JavaScript.valueToCode(
-    block,
     "TEMPO",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const volumn = Blockly.JavaScript.valueToCode(
-    block,
     "VOLUMN",
-    Blockly.JavaScript.ORDER_NONE
+    "METRE"
+  ].map(item =>
+    Blockly.JavaScript.valueToCode(block, item, Blockly.JavaScript.ORDER_NONE)
   );
-  const metre = Blockly.JavaScript.valueToCode(
-    block,
-    "METRE",
-    Blockly.JavaScript.ORDER_NONE
-  ); // measure length = metre * 240/tempo
-  // const mute = this.getFieldValue("MUTE");
-  // alert(typeof mute);
   var branch = Blockly.JavaScript.statementToCode(block, "measures");
-  // branch = Blockly.JavaScript.addLoopTrap(branch, block.id);
-  // console.log("=====", timbre);
-  // console.log("=====", measure);
-  // console.log("=====", volumn);
-  // console.log("=====", metre);
-  // console.log("=====", branch);
+  var effects = Blockly.JavaScript.statementToCode(block, "effects");
   return `
   createTrack(${timbre},${measure},${volumn},${metre});
-  ${branch}
+  ${branch};${effects};
   `;
 };
 
@@ -143,29 +122,84 @@ Blockly.defineBlocksWithJsonArray([
 ]);
 
 Blockly.JavaScript["create_measure_new"] = function(block) {
-  const measure = Blockly.JavaScript.valueToCode(
-    block,
+  const [measure, sequence, beat, part] = [
     "MEASURE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const sequence = Blockly.JavaScript.valueToCode(
-    block,
     "SEQUENCE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const beat = Blockly.JavaScript.valueToCode(
-    block,
     "BEAT",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const part = Blockly.JavaScript.valueToCode(
-    block,
-    "PART",
-    Blockly.JavaScript.ORDER_NONE
+    "PART"
+  ].map(item =>
+    Blockly.JavaScript.valueToCode(block, item, Blockly.JavaScript.ORDER_NONE)
   );
   return `createMeasureNew(${measure},${sequence},${beat},false,'${
     block.id
   },${part}');\n`;
+};
+
+Blockly.defineBlocksWithJsonArray([
+  // Block for colour picker.
+  {
+    type: "create_effect",
+    message0: "效果 效果 %1 参数 %2 初始值%3 初始小节 %4 结束值%5 结束小节 %6",
+    args0: [
+      {
+        type: "input_value",
+        name: "EFFECT",
+        check: "String"
+      },
+      {
+        type: "input_value",
+        name: "PARAMETER",
+        check: "String"
+      },
+      {
+        type: "input_value",
+        name: "EFFECTSTARTVALUE",
+        check: "Number"
+      },
+      {
+        type: "input_value",
+        name: "EFFECTSTARTMEASURE",
+        check: "Number"
+      },
+      {
+        type: "input_value",
+        name: "EFFECTENDVALUE",
+        check: "Number"
+      },
+      {
+        type: "input_value",
+        name: "EFFECTENDMEASURE",
+        check: "Number"
+      }
+    ],
+    inputsInline: true,
+    previousStatement: null,
+    nextStatement: null,
+    colour: 355,
+    tooltip: "",
+    helpUrl: ""
+  }
+]);
+
+Blockly.JavaScript["create_effect"] = function(block) {
+  const [
+    effect,
+    parameter,
+    effectStartValue,
+    effectStartMeasure,
+    effectEndValue,
+    effectEndMeasure
+  ] = [
+    "EFFECT",
+    "PARAMETER",
+    "EFFECTSTARTVALUE",
+    "EFFECTSTARTMEASURE",
+    "EFFECTENDVALUE",
+    "EFFECTENDMEASURE"
+  ].map(item =>
+    Blockly.JavaScript.valueToCode(block, item, Blockly.JavaScript.ORDER_NONE)
+  );
+  return `createEffect(${effect},${parameter},${effectStartValue},${effectStartMeasure},${effectEndValue},${effectEndMeasure});\n`;
 };
 
 Blockly.defineBlocksWithJsonArray([
@@ -215,35 +249,15 @@ Blockly.defineBlocksWithJsonArray([
 ]);
 
 Blockly.JavaScript["create_measure_on_scale_new"] = function(block) {
-  const measure = Blockly.JavaScript.valueToCode(
-    block,
+  const [measure, sequence, beat, scale, basenote, part] = [
     "MEASURE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const sequence = Blockly.JavaScript.valueToCode(
-    block,
     "SEQUENCE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const beat = Blockly.JavaScript.valueToCode(
-    block,
     "BEAT",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const scale = Blockly.JavaScript.valueToCode(
-    block,
     "SCALE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const basenote = Blockly.JavaScript.valueToCode(
-    block,
     "BASENOTE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const part = Blockly.JavaScript.valueToCode(
-    block,
-    "PART",
-    Blockly.JavaScript.ORDER_NONE
+    "PART"
+  ].map(item =>
+    Blockly.JavaScript.valueToCode(block, item, Blockly.JavaScript.ORDER_NONE)
   );
   return `createMeasureOnScaleNew(${measure},${sequence},${beat},${scale},${basenote},false,'${
     block.id
@@ -287,25 +301,13 @@ Blockly.defineBlocksWithJsonArray([
 ]);
 
 Blockly.JavaScript["create_measure_match_zero_new"] = function(block) {
-  const measure = Blockly.JavaScript.valueToCode(
-    block,
+  const [measure, sequence, beat, part] = [
     "MEASURE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const sequence = Blockly.JavaScript.valueToCode(
-    block,
     "SEQUENCE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const beat = Blockly.JavaScript.valueToCode(
-    block,
     "BEAT",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const part = Blockly.JavaScript.valueToCode(
-    block,
-    "PART",
-    Blockly.JavaScript.ORDER_NONE
+    "PART"
+  ].map(item =>
+    Blockly.JavaScript.valueToCode(block, item, Blockly.JavaScript.ORDER_NONE)
   );
   return `createMeasureNew(${measure},${sequence},${beat},true,'${
     block.id
@@ -359,35 +361,15 @@ Blockly.defineBlocksWithJsonArray([
 ]);
 
 Blockly.JavaScript["create_measure_on_scale_match_zero_new"] = function(block) {
-  const measure = Blockly.JavaScript.valueToCode(
-    block,
+  const [measure, sequence, beat, scale, basenote, part] = [
     "MEASURE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const sequence = Blockly.JavaScript.valueToCode(
-    block,
     "SEQUENCE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const beat = Blockly.JavaScript.valueToCode(
-    block,
     "BEAT",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const scale = Blockly.JavaScript.valueToCode(
-    block,
     "SCALE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const basenote = Blockly.JavaScript.valueToCode(
-    block,
     "BASENOTE",
-    Blockly.JavaScript.ORDER_NONE
-  );
-  const part = Blockly.JavaScript.valueToCode(
-    block,
-    "PART",
-    Blockly.JavaScript.ORDER_NONE
+    "PART"
+  ].map(item =>
+    Blockly.JavaScript.valueToCode(block, item, Blockly.JavaScript.ORDER_NONE)
   );
   return `createMeasureOnScaleNew(${measure},${sequence},${beat},${scale},${basenote},true,'${
     block.id

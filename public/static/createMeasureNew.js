@@ -150,7 +150,7 @@ function createTrack(timbre, tempo, volumn, metre, mute) {
     volumn,
     metre,
     parts: [],
-    mute
+    effects: {}
   });
   currentTrackId += 1;
 }
@@ -343,7 +343,7 @@ function createMeasureOnScaleNew( // this would finally call createMeasureNew
         .toNote();
     }
   });
-  console.log(notesFromNumbers); //["C3","D3",["C3","D4"]]
+  // console.log(notesFromNumbers); //["C3","D3",["C3","D4"]]
   const fedNotes = notesFromNumbers.reduce((a, b) => {
     let pre = a;
     let post = b;
@@ -355,44 +355,44 @@ function createMeasureOnScaleNew( // this would finally call createMeasureNew
     }
     return `${pre},${post}`;
   });
-  console.log(fedNotes);
+  // console.log(fedNotes);
   createMeasureNew(measure, fedNotes, beat, matchZero, blockId, part);
 }
 
 // by far, we have got a track's all measures, need to process,normalize
-function normalizeMeasures(track) {
-  const measuresLengths = track.measures.map(a => a.beat.length);
+function normalizeMeasures(part) {
+  const measuresLengths = part.measures.map(a => a.beat.length);
   console.log("12121212121212122", measuresLengths);
   const lcmOfBeatLength = Util.lcm(...measuresLengths);
   // 1.转换成对0 2.把track内所有小节beat统一长度
 
   // 不能用foreach，foreach会直接bypass掉empty的（稀疏数组遍历）
-  // track.measures.forEach((measure, measureIndex) => {});
+  // part.measures.forEach((measure, measureIndex) => {});
   for (
     let measureIndex = 0;
-    measureIndex <= track.measures.length - 1;
+    measureIndex <= part.measures.length - 1;
     measureIndex += 1
   ) {
-    console.log("measure::::::::::", track.measures[measureIndex]);
-    if (!track.measures[measureIndex]) {
+    // console.log("measure::::::::::", part.measures[measureIndex]);
+    if (!part.measures[measureIndex]) {
       //建一个空小节
       //TODO: bug here
-      track.measures[measureIndex] = {
+      part.measures[measureIndex] = {
         measure: measureIndex + 1,
         sequence: "",
         beat: Util.createUnderScores(lcmOfBeatLength),
         matchZero: true
       };
     } else {
-      if (!track.measures[measureIndex].matchZero) {
+      if (!part.measures[measureIndex].matchZero) {
         // 对位转成对0，抽出对应的音//TODO: bug here, super mario....seemingly solved
         const sequenceArray = JSON.parse(
-          `[${track.measures[measureIndex].sequence}]`.replace(
+          `[${part.measures[measureIndex].sequence}]`.replace(
             /([ABCDEFG]#*b*[1-9])/g,
             '"$1"'
           )
         );
-        const newSeqArray = track.measures[measureIndex].beat
+        const newSeqArray = part.measures[measureIndex].beat
           .split("")
           .map((beatDigit, index) => {
             if (beatDigit.match(/\d/g)) {
@@ -401,36 +401,35 @@ function normalizeMeasures(track) {
               return "";
             }
           });
-        console.log("bbbbbbbbbbb", newSeqArray);
+        // console.log("bbbbbbbbbbb", newSeqArray);
 
-        // track.measures[measureIndex].sequence = newSeqArray.filter(note => note != "").join(","); //不行，因为内层数组会被打开
+        // part.measures[measureIndex].sequence = newSeqArray.filter(note => note != "").join(","); //不行，因为内层数组会被打开
         let s = JSON.stringify(newSeqArray.filter(note => note != "")).replace(
           /"/g,
           ""
         );
         s = s.substring(1, s.length - 1); // 去掉数组的前后方括号
-        track.measures[measureIndex].sequence = s;
-        track.measures[measureIndex].matchZero = true;
+        part.measures[measureIndex].sequence = s;
+        part.measures[measureIndex].matchZero = true;
       }
-      console.log("jjjjjjjjjjjjjj", track.measures[measureIndex].sequence);
+      // console.log("jjjjjjjjjjjjjj", part.measures[measureIndex].sequence);
       //对0的，beat延展就行了，原来000的可能变成0--0--0-- (根据最小公倍数)
-      if (track.measures[measureIndex].beat.length < lcmOfBeatLength) {
-        const ratio =
-          lcmOfBeatLength / track.measures[measureIndex].beat.length;
+      if (part.measures[measureIndex].beat.length < lcmOfBeatLength) {
+        const ratio = lcmOfBeatLength / part.measures[measureIndex].beat.length;
         const append = Util.createScores(ratio - 1);
-        track.measures[measureIndex].beat = track.measures[measureIndex].beat
+        part.measures[measureIndex].beat = part.measures[measureIndex].beat
           .split("")
           .join(append);
-        track.measures[measureIndex].beat += append;
+        part.measures[measureIndex].beat += append;
       }
     }
   }
 
   console.log("=== measure after normalization===");
-  console.log(track.measures);
+  console.log(part.measures);
 
   //把所有measure合成一大段 应了老话「不要看小节线」
-  track.tonepart = track.measures.reduce((a, b) => {
+  part.tonepart = part.measures.reduce((a, b) => {
     return {
       // TODO: if a/b is empty string, no comma here, seemingly solved
       sequence: `${a.sequence}${a.sequence && b.sequence ? "," : ""}${
@@ -440,10 +439,10 @@ function normalizeMeasures(track) {
     };
   });
   console.log("=== final part in this part ===");
-  console.log(track.tonepart);
+  console.log(part.tonepart);
 }
 
-function prepareTrackNotes(track) {
+function prepareTrackNotes(part, track) {
   // measure: int (1)
   // timbre: string ('square')
   // sequence: array
@@ -451,14 +450,11 @@ function prepareTrackNotes(track) {
   // IMPORTANT...use an array of objects as long as the object has a "time" attribute
   // build notes
   const {
-    timbre,
-    tempo,
-    volumn,
-    metre,
     measures,
     tonepart: { sequence, beat }
-  } = track; // instead of being param, read from create track
-
+  } = part; // instead of being param, read from create part
+  const { timbre, tempo, volumn, metre, effects } = track;
+  console.log("!!!", part);
   let notes = Util.getToneNotes(
     sequence,
     beat,
@@ -517,11 +513,70 @@ function prepareTrackNotes(track) {
   );
 }
 
+// just store effect structure
+function createEffect(
+  effect,
+  parameter,
+  effectStartValue,
+  effectStartMeasure,
+  effectEndValue,
+  effectEndMeasure
+) {
+  //the structure of effect on a track is
+  // effects = {
+  //   reverb: {
+  //     roomSize: {
+  //       value: [3, 2, 1],
+  //       timePoint: [1, 2, 3]
+  //     }
+  //   },
+  //   delay: {
+  //     delayTime: {
+  //         value: [3, 2, 1],
+  //         timePoint: [1, 2, 3]
+  //     },
+  //     feedback: {
+  //         value: [3, 2, 1],
+  //         timePoint: [1, 2, 3]
+  //     }
+  //   }
+  // }
+  tracks[currentTrackId - 1].effects[effect] = {};
+  tracks[currentTrackId - 1].effects[effect][parameter] = {};
+  if (!tracks[currentTrackId - 1].effects[effect][parameter].value) {
+    tracks[currentTrackId - 1].effects[effect][parameter].value = [
+      effectStartValue,
+      effectEndValue
+    ];
+    tracks[currentTrackId - 1].effects[effect][parameter].timepoint = [
+      effectStartMeasure,
+      effectEndMeasure
+    ];
+  } else {
+    tracks[currentTrackId - 1].effects[effect][parameter].value.push(
+      effectStartValue,
+      effectEndValue
+    );
+    tracks[currentTrackId - 1].effects[effect][parameter].timepoint.push(
+      effectStartMeasure,
+      effectEndMeasure
+    );
+  }
+}
+
+function makeSound(startMeasure) {
+  if (!startMeasure) startMeasure = 1;
+  Tone.Transport.start(
+    "+0.1",
+    (startMeasure - 1) * tracks[0].metre * 240 / tracks[0].tempo
+  );
+}
+
 function prepareProject() {
   tracks.forEach(track => {
     track.parts.forEach(part => {
       normalizeMeasures(part);
-      prepareTrackNotes(part);
+      prepareTrackNotes(part, track);
     });
   });
   // tracks.forEach(track => {
@@ -530,31 +585,26 @@ function prepareProject() {
   // });
 }
 
-function makeSound(startMeasure) {
-  if (!startMeasure) startMeasure = 1;
-  Tone.Transport.start(
-    "+0.1"
-    // (startMeasure - 1) * tracks[0].metre * 240 / tracks[0].tempo
-  );
-}
-
 function highlightBlock(time) {
-  // // console.log(tracks);
-  // currentActiveBlockIds = [];
-  // tracks.forEach(track => {
-  //   const activeMeasure = parseInt(time / (track.metre * 240 / track.tempo));
-  //   if (
-  //     track.measures[activeMeasure] &&
-  //     track.measures[activeMeasure].blockId
-  //   ) {
-  //     currentActiveBlockIds.push(track.measures[activeMeasure].blockId);
-  //   }
-  // });
-  // lastActiveBlockIds.forEach(activeBlockId => {
-  //   Blockly.getMainWorkspace().highlightBlock(activeBlockId, false);
-  // });
-  // currentActiveBlockIds.forEach(activeBlockId => {
-  //   Blockly.getMainWorkspace().highlightBlock(activeBlockId, true);
-  // });
-  // lastActiveBlockIds = currentActiveBlockIds;
+  // console.log(tracks);
+  currentActiveBlockIds = [];
+  tracks.forEach(track => {
+    track.parts.forEach(part => {
+      const activeMeasure = parseInt(time / (track.metre * 240 / track.tempo));
+      if (
+        part.measures[activeMeasure] &&
+        part.measures[activeMeasure].blockId
+      ) {
+        currentActiveBlockIds.push(part.measures[activeMeasure].blockId);
+      }
+    });
+  });
+
+  lastActiveBlockIds.forEach(activeBlockId => {
+    Blockly.getMainWorkspace().highlightBlock(activeBlockId, false);
+  });
+  currentActiveBlockIds.forEach(activeBlockId => {
+    Blockly.getMainWorkspace().highlightBlock(activeBlockId, true);
+  });
+  lastActiveBlockIds = currentActiveBlockIds;
 }
