@@ -1,4 +1,4 @@
-const BPM = 120;
+// const BPM = 120;
 // const note32 = BPM / 60 / 32;
 let MidiTracks = {}; // will eventually be something like: {sin:[toneNote,toneNote,toneNote,...],piano:[toneNote,toneNote]}
 let lastActiveBlockIds = [];
@@ -149,7 +149,7 @@ function createTrack(timbre, tempo, volumn, metre, mute) {
     tempo,
     volumn,
     metre,
-    measures: [],
+    parts: [],
     mute
   });
   currentTrackId += 1;
@@ -258,15 +258,28 @@ const Util = {
 };
 
 //when creating new measures, accumulate measure one by one
+// a song has many tracks. one track can have many parts, one part can have many measures
 function createMeasureNew(measure, sequence, beat, matchZero, blockId, part) {
-  tracks[currentTrackId - 1].measures[measure - 1] = {
-    measure,
-    sequence,
-    beat,
-    matchZero,
-    blockId,
-    part
-  };
+  if (part == undefined) part = 1;
+  if (!tracks[currentTrackId - 1].parts[part - 1]) {
+    tracks[currentTrackId - 1].parts[part - 1] = {};
+    tracks[currentTrackId - 1].parts[part - 1].measures = [];
+    tracks[currentTrackId - 1].parts[part - 1].measures[measure - 1] = {
+      measure,
+      sequence,
+      beat,
+      matchZero,
+      blockId
+    };
+  } else {
+    tracks[currentTrackId - 1].parts[part - 1].measures[measure - 1] = {
+      measure,
+      sequence,
+      beat,
+      matchZero,
+      blockId
+    };
+  }
 }
 
 function createMeasureOnScaleNew( // this would finally call createMeasureNew
@@ -506,36 +519,42 @@ function prepareTrackNotes(track) {
 
 function prepareProject() {
   tracks.forEach(track => {
-    normalizeMeasures(track);
-    prepareTrackNotes(track);
+    track.parts.forEach(part => {
+      normalizeMeasures(part);
+      prepareTrackNotes(part);
+    });
   });
+  // tracks.forEach(track => {
+  //   normalizeMeasures(track);
+  //   prepareTrackNotes(track);
+  // });
 }
 
 function makeSound(startMeasure) {
   if (!startMeasure) startMeasure = 1;
   Tone.Transport.start(
-    "+0.1",
-    (startMeasure - 1) * tracks[0].metre * 240 / tracks[0].tempo
+    "+0.1"
+    // (startMeasure - 1) * tracks[0].metre * 240 / tracks[0].tempo
   );
 }
 
 function highlightBlock(time) {
-  // console.log(tracks);
-  currentActiveBlockIds = [];
-  tracks.forEach(track => {
-    const activeMeasure = parseInt(time / (track.metre * 240 / track.tempo));
-    if (
-      track.measures[activeMeasure] &&
-      track.measures[activeMeasure].blockId
-    ) {
-      currentActiveBlockIds.push(track.measures[activeMeasure].blockId);
-    }
-  });
-  lastActiveBlockIds.forEach(activeBlockId => {
-    Blockly.getMainWorkspace().highlightBlock(activeBlockId, false);
-  });
-  currentActiveBlockIds.forEach(activeBlockId => {
-    Blockly.getMainWorkspace().highlightBlock(activeBlockId, true);
-  });
-  lastActiveBlockIds = currentActiveBlockIds;
+  // // console.log(tracks);
+  // currentActiveBlockIds = [];
+  // tracks.forEach(track => {
+  //   const activeMeasure = parseInt(time / (track.metre * 240 / track.tempo));
+  //   if (
+  //     track.measures[activeMeasure] &&
+  //     track.measures[activeMeasure].blockId
+  //   ) {
+  //     currentActiveBlockIds.push(track.measures[activeMeasure].blockId);
+  //   }
+  // });
+  // lastActiveBlockIds.forEach(activeBlockId => {
+  //   Blockly.getMainWorkspace().highlightBlock(activeBlockId, false);
+  // });
+  // currentActiveBlockIds.forEach(activeBlockId => {
+  //   Blockly.getMainWorkspace().highlightBlock(activeBlockId, true);
+  // });
+  // lastActiveBlockIds = currentActiveBlockIds;
 }
