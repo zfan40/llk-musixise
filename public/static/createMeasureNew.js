@@ -31,15 +31,12 @@ var squareOptions = {
   }
 };
 
-const pulseSynth = () =>
-  new Tone.PolySynth(6, Tone.Synth, pulseOptions).toMaster(); //polysynth本来就支持[A3,B3,D3]直接传，白弄
-const triangleSynth = () =>
-  new Tone.PolySynth(6, Tone.Synth, triangleOptions).toMaster();
-const squareSynth = () =>
-  new Tone.PolySynth(6, Tone.Synth, squareOptions).toMaster();
-// const triangleSynth = new Tone.Synth(triangleOptions).toMaster();
-// const squareSynth = new Tone.Synth(squareOptions).toMaster();
-const noiseSynth = () => new Tone.NoiseSynth().toMaster();
+const pulseSynth = () => new Tone.PolySynth(6, Tone.Synth, pulseOptions); //polysynth本来就支持[A3,B3,D3]直接传，白弄
+const triangleSynth = () => new Tone.PolySynth(6, Tone.Synth, triangleOptions);
+const squareSynth = () => new Tone.PolySynth(6, Tone.Synth, squareOptions);
+// const triangleSynth = new Tone.Synth(triangleOptions);
+// const squareSynth = new Tone.Synth(squareOptions);
+const noiseSynth = () => new Tone.NoiseSynth();
 
 // sampler instruments
 const musicbox = () =>
@@ -59,7 +56,7 @@ const musicbox = () =>
       release: 1,
       baseUrl: "/static/audio/mbox/"
     }
-  ).toMaster();
+  );
 var piano = () =>
   new Tone.Sampler(
     {
@@ -77,7 +74,7 @@ var piano = () =>
       release: 1,
       baseUrl: "/static/audio/piano/"
     }
-  ).toMaster();
+  );
 var organ = () =>
   new Tone.Sampler(
     {
@@ -94,7 +91,7 @@ var organ = () =>
       release: 1,
       baseUrl: "/static/audio/organ/"
     }
-  ).toMaster();
+  );
 var harp = () =>
   new Tone.Sampler(
     {
@@ -112,7 +109,7 @@ var harp = () =>
       release: 1,
       baseUrl: "/static/audio/harp/"
     }
-  ).toMaster();
+  );
 var guitar = () =>
   new Tone.Sampler(
     {
@@ -129,7 +126,7 @@ var guitar = () =>
       release: 1,
       baseUrl: "/static/audio/guitar-acoustic/"
     }
-  ).toMaster();
+  );
 // synth
 const instrumentMap = {
   pulse: pulseSynth,
@@ -507,11 +504,16 @@ function prepareTrackNotes(part, track) {
   }
   // for playback //musixiseParts is currently reset in about.vue
   //playback connect effect chain
+  console.log("hehehehe FX:", effects);
   // let dist = Object.keys(effects).reduce((a, b) => {
   //   new FXMap(a)().connect(new FXMap(b)());
   // });
   // dist.toMaster();
+  const effectNodes = Object.keys(effects).map(effectName => {
+    return new FXMap[effectName]();
+  });
   const instrument = instrumentMap[timbre]();
+  instrument.chain(...effectNodes, Tone.Master);
   // playback notes
   musixiseParts.push(
     new Tone.Part(function(time, value) {
