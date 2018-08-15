@@ -526,7 +526,7 @@ function prepareTrackNotes(part, track) {
       } else {
         instrument.triggerAttackRelease(value.duration, time, value.velocity);
       }
-    }, notes).start("0.01")
+    }, notes).start("0.1")
   );
 }
 
