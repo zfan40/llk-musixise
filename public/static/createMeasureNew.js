@@ -31,101 +31,105 @@ var squareOptions = {
   }
 };
 
-const pulseSynth = new Tone.PolySynth(6, Tone.Synth, pulseOptions).toMaster(); //polysynth本来就支持[A3,B3,D3]直接传，白弄
-const triangleSynth = new Tone.PolySynth(
-  6,
-  Tone.Synth,
-  triangleOptions
-).toMaster();
-const squareSynth = new Tone.PolySynth(6, Tone.Synth, squareOptions).toMaster();
+const pulseSynth = () =>
+  new Tone.PolySynth(6, Tone.Synth, pulseOptions).toMaster(); //polysynth本来就支持[A3,B3,D3]直接传，白弄
+const triangleSynth = () =>
+  new Tone.PolySynth(6, Tone.Synth, triangleOptions).toMaster();
+const squareSynth = () =>
+  new Tone.PolySynth(6, Tone.Synth, squareOptions).toMaster();
 // const triangleSynth = new Tone.Synth(triangleOptions).toMaster();
 // const squareSynth = new Tone.Synth(squareOptions).toMaster();
-const noiseSynth = new Tone.NoiseSynth().toMaster();
+const noiseSynth = () => new Tone.NoiseSynth().toMaster();
 
 // sampler instruments
-const musicbox = new Tone.Sampler(
-  {
-    B3: "B3.[mp3|ogg]",
-    E4: "E4.[mp3|ogg]",
-    G4: "G4.[mp3|ogg]",
-    B4: "B4.[mp3|ogg]",
-    "C#5": "Cs5.[mp3|ogg]",
-    E5: "E5.[mp3|ogg]",
-    G5: "G5.[mp3|ogg]",
-    B5: "B5.[mp3|ogg]",
-    "C#6": "Cs6.[mp3|ogg]"
-  },
-  {
-    release: 1,
-    baseUrl: "/static/audio/mbox/"
-  }
-).toMaster();
-var piano = new Tone.Sampler(
-  {
-    C4: "C4.[mp3|ogg]",
-    "D#4": "Ds4.[mp3|ogg]",
-    "F#4": "Fs4.[mp3|ogg]",
-    A4: "A4.[mp3|ogg]",
-    C5: "C5.[mp3|ogg]",
-    "D#5": "Ds5.[mp3|ogg]",
-    "F#5": "Fs5.[mp3|ogg]",
-    A5: "A5.[mp3|ogg]",
-    C6: "C6.[mp3|ogg]"
-  },
-  {
-    release: 1,
-    baseUrl: "/static/audio/piano/"
-  }
-).toMaster();
-var organ = new Tone.Sampler(
-  {
-    A2: "A2.[mp3|ogg]",
-    A4: "A4.[mp3|ogg]",
-    A5: "A5.[mp3|ogg]",
-    C3: "C3.[mp3|ogg]",
-    C5: "C5.[mp3|ogg]",
-    C6: "C6.[mp3|ogg]",
-    "D#5": "Ds5.[mp3|ogg]",
-    "F#5": "Fs5.[mp3|ogg]"
-  },
-  {
-    release: 1,
-    baseUrl: "/static/audio/organ/"
-  }
-).toMaster();
-var harp = new Tone.Sampler(
-  {
-    A2: "A2.[mp3|ogg]",
-    A4: "A4.[mp3|ogg]",
-    A6: "A6.[mp3|ogg]",
-    C3: "C3.[mp3|ogg]",
-    C5: "C5.[mp3|ogg]",
-    E3: "E3.[mp3|ogg]",
-    E5: "E5.[mp3|ogg]",
-    G3: "G3.[mp3|ogg]",
-    G5: "G5.[mp3|ogg]"
-  },
-  {
-    release: 1,
-    baseUrl: "/static/audio/harp/"
-  }
-).toMaster();
-var guitar = new Tone.Sampler(
-  {
-    A2: "A2.[mp3|ogg]",
-    A3: "A3.[mp3|ogg]",
-    C3: "C3.[mp3|ogg]",
-    C4: "C4.[mp3|ogg]",
-    D2: "E3.[mp3|ogg]",
-    D4: "E5.[mp3|ogg]",
-    E2: "E2.[mp3|ogg]",
-    E3: "E3.[mp3|ogg]"
-  },
-  {
-    release: 1,
-    baseUrl: "/static/audio/guitar-acoustic/"
-  }
-).toMaster();
+const musicbox = () =>
+  new Tone.Sampler(
+    {
+      B3: "B3.[mp3|ogg]",
+      E4: "E4.[mp3|ogg]",
+      G4: "G4.[mp3|ogg]",
+      B4: "B4.[mp3|ogg]",
+      "C#5": "Cs5.[mp3|ogg]",
+      E5: "E5.[mp3|ogg]",
+      G5: "G5.[mp3|ogg]",
+      B5: "B5.[mp3|ogg]",
+      "C#6": "Cs6.[mp3|ogg]"
+    },
+    {
+      release: 1,
+      baseUrl: "/static/audio/mbox/"
+    }
+  ).toMaster();
+var piano = () =>
+  new Tone.Sampler(
+    {
+      C4: "C4.[mp3|ogg]",
+      "D#4": "Ds4.[mp3|ogg]",
+      "F#4": "Fs4.[mp3|ogg]",
+      A4: "A4.[mp3|ogg]",
+      C5: "C5.[mp3|ogg]",
+      "D#5": "Ds5.[mp3|ogg]",
+      "F#5": "Fs5.[mp3|ogg]",
+      A5: "A5.[mp3|ogg]",
+      C6: "C6.[mp3|ogg]"
+    },
+    {
+      release: 1,
+      baseUrl: "/static/audio/piano/"
+    }
+  ).toMaster();
+var organ = () =>
+  new Tone.Sampler(
+    {
+      A2: "A2.[mp3|ogg]",
+      A4: "A4.[mp3|ogg]",
+      A5: "A5.[mp3|ogg]",
+      C3: "C3.[mp3|ogg]",
+      C5: "C5.[mp3|ogg]",
+      C6: "C6.[mp3|ogg]",
+      "D#5": "Ds5.[mp3|ogg]",
+      "F#5": "Fs5.[mp3|ogg]"
+    },
+    {
+      release: 1,
+      baseUrl: "/static/audio/organ/"
+    }
+  ).toMaster();
+var harp = () =>
+  new Tone.Sampler(
+    {
+      A2: "A2.[mp3|ogg]",
+      A4: "A4.[mp3|ogg]",
+      A6: "A6.[mp3|ogg]",
+      C3: "C3.[mp3|ogg]",
+      C5: "C5.[mp3|ogg]",
+      E3: "E3.[mp3|ogg]",
+      E5: "E5.[mp3|ogg]",
+      G3: "G3.[mp3|ogg]",
+      G5: "G5.[mp3|ogg]"
+    },
+    {
+      release: 1,
+      baseUrl: "/static/audio/harp/"
+    }
+  ).toMaster();
+var guitar = () =>
+  new Tone.Sampler(
+    {
+      A2: "A2.[mp3|ogg]",
+      A3: "A3.[mp3|ogg]",
+      C3: "C3.[mp3|ogg]",
+      C4: "C4.[mp3|ogg]",
+      D2: "E3.[mp3|ogg]",
+      D4: "E5.[mp3|ogg]",
+      E2: "E2.[mp3|ogg]",
+      E3: "E3.[mp3|ogg]"
+    },
+    {
+      release: 1,
+      baseUrl: "/static/audio/guitar-acoustic/"
+    }
+  ).toMaster();
 // synth
 const instrumentMap = {
   pulse: pulseSynth,
@@ -138,7 +142,17 @@ const instrumentMap = {
   guitar,
   organ
 };
-
+const FXMap = {
+  reverb: Tone.Freeverb,
+  distortion: Tone.Distortion,
+  panner: Tone.AutoPanner,
+  wahwah: Tone.AutoWah,
+  delay: Tone.FeedbackDelay,
+  chorus: Tone.Chorus,
+  tremolo: Tone.Tremolo,
+  vibrato: Tone.Vibrato,
+  compressor: Tone.Compressor //??this is not list in Tone=>Effect
+};
 let tracks = [];
 let currentTrackId = 0;
 function createTrack(timbre, tempo, volumn, metre, mute) {
@@ -492,22 +506,25 @@ function prepareTrackNotes(part, track) {
     MidiTracks[`${timbre}${currentTrackId}`].push(midinotes);
   }
   // for playback //musixiseParts is currently reset in about.vue
+  //playback connect effect chain
+  // let dist = Object.keys(effects).reduce((a, b) => {
+  //   new FXMap(a)().connect(new FXMap(b)());
+  // });
+  // dist.toMaster();
+  const instrument = instrumentMap[timbre]();
+  // playback notes
   musixiseParts.push(
     new Tone.Part(function(time, value) {
       // arrange trigger notes
       if (timbre !== "noise") {
-        instrumentMap[timbre].triggerAttackRelease(
+        instrument.triggerAttackRelease(
           value.note,
           value.duration,
           time,
           value.velocity
         );
       } else {
-        instrumentMap[timbre].triggerAttackRelease(
-          value.duration,
-          time,
-          value.velocity
-        );
+        instrument.triggerAttackRelease(value.duration, time, value.velocity);
       }
     }, notes).start("0.01")
   );
