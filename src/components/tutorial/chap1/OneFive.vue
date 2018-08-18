@@ -15,7 +15,7 @@ import Vex from 'vexflow'
 import {tutorialMixin} from '../tutorialMixin'
 
 export default {
-  name: "1-5",
+  name: "one-5",
   mixins:[tutorialMixin],
   props: {
     xmlArrayObj:Object,

@@ -132,7 +132,7 @@ Blockly.JavaScript["create_measure_new"] = function(block) {
   );
   return `createMeasureNew(${measure},${sequence},${beat},false,'${
     block.id
-  },${part}');\n`;
+  }',${part});\n`;
 };
 
 Blockly.defineBlocksWithJsonArray([

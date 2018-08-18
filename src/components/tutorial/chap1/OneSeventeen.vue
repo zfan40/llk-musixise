@@ -9,7 +9,7 @@
 import Vex from 'vexflow'
 import {tutorialMixin} from '../tutorialMixin'
 export default {
-  name: "1-17",
+  name: "one-17",
   mixins:[tutorialMixin],
   props: {
 

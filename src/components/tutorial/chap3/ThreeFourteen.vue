@@ -8,7 +8,7 @@
 import Vex from 'vexflow'
 import {tutorialMixin} from '../tutorialMixin'
 export default {
-  name: "3.14",
+  name: "three-14",
   props: {
     xmlArrayObj:Object,
   },

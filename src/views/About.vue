@@ -33,8 +33,20 @@ import Blockly from "node-blockly/browser"; // import Blockly
 import Tutorial from "@/components/tutorial/Tutorial.vue";
 import BlockHelper from "@/components/blockhelper/index.vue";
 import WorkLoader from "@/components/workloader/index.vue";
+import scopeEval from "scope-eval"
+import {
+  createTrack,
+  cleanTrack,
+  createMeasureNew,
+  createMeasureOnScaleNew,
+  createEffect,
+  makeSound,
+  prepareProject,
+  highlightBlock
+} from "../util/core/audioAPI"
 require("../util/blockly/musixise"); // import Structure of Musixise Blocks
-var FileSaver = require("file-saver"); // For Midi file export
+const FileSaver = require("file-saver"); // For Midi file export
+
 let clock;
 export default {
   name: "workspace",
@@ -55,18 +67,23 @@ export default {
     handlePlay() {
       Blockly.JavaScript.addReservedWords("code");
       Tone.Transport.stop();
-      musixiseParts.forEach(item => {
-        item.dispose();
-      });
       cleanTrack()
-      musixiseParts = [];
       var code = Blockly.JavaScript.workspaceToCode(Blockly.getMainWorkspace()); //把workspace转换为代码
       code += `prepareProject();makeSound(${this.startMeasure});`;
       // Eval can be dangerous. For more controlled execution, check
       // https://github.com/NeilFraser/JS-Interpreter.
       console.log(code);
       try {
-        eval(code);
+        scopeEval(code,{
+          createTrack,
+          cleanTrack,
+          createMeasureNew,
+          createMeasureOnScaleNew,
+          createEffect,
+          makeSound,
+          prepareProject,
+          highlightBlock,
+        })
         if (clock) {
           clock.stop();
           clock.dispose()
@@ -86,16 +103,13 @@ export default {
       }
     },
     handleStop() {
-      Tone.Transport.stop();
-      musixiseParts.forEach(item => {
-        item.dispose();
-      });
       if (clock) {
         clock.stop();
         clock.dispose();
         clock = undefined
       }
-      musixiseParts = [];
+      Tone.Transport.stop();
+      cleanTrack()
     },
     handleSave() {
       let xml = Blockly.Xml.workspaceToDom(Blockly.getMainWorkspace()); // 当前workspace的block转成xml dom

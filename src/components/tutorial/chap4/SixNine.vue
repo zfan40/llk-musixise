@@ -7,7 +7,7 @@
 <script>
 import Vex from 'vexflow'
 export default {
-  name: "6.9",
+  name: "six-9",
   props: {
 
   },

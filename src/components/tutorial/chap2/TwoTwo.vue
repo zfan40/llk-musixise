@@ -13,7 +13,7 @@
 import Vex from 'vexflow'
 import {tutorialMixin} from '../tutorialMixin'
 export default {
-  name: "2.2",
+  name: "two-2",
   mixins:[tutorialMixin],
   props: {
     xmlArrayObj:Object,

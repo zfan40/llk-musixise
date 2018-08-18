@@ -6,154 +6,13 @@ let currentActiveBlockIds = [];
 AudioParam.prototype.cancelAndHoldAtTime = false;
 
 let musixiseParts = [];
-var pulseOptions = {
-  oscillator: {
-    type: "pulse"
-  },
-  envelope: {
-    release: 0.07
-  }
-};
-var triangleOptions = {
-  oscillator: {
-    type: "triangle"
-  },
-  envelope: {
-    release: 0.07
-  }
-};
-var squareOptions = {
-  oscillator: {
-    type: "square"
-  },
-  envelope: {
-    release: 0.07
-  }
-};
+import { instrumentMap } from "./instrumentConfig";
+import { FXMap } from "./FXConfig";
 
-const pulseSynth = () => new Tone.PolySynth(6, Tone.Synth, pulseOptions); //polysynth本来就支持[A3,B3,D3]直接传，白弄
-const triangleSynth = () => new Tone.PolySynth(6, Tone.Synth, triangleOptions);
-const squareSynth = () => new Tone.PolySynth(6, Tone.Synth, squareOptions);
-// const triangleSynth = new Tone.Synth(triangleOptions);
-// const squareSynth = new Tone.Synth(squareOptions);
-const noiseSynth = () => new Tone.NoiseSynth();
-
-// sampler instruments
-const musicbox = () =>
-  new Tone.Sampler(
-    {
-      B3: "B3.[mp3|ogg]",
-      E4: "E4.[mp3|ogg]",
-      G4: "G4.[mp3|ogg]",
-      B4: "B4.[mp3|ogg]",
-      "C#5": "Cs5.[mp3|ogg]",
-      E5: "E5.[mp3|ogg]",
-      G5: "G5.[mp3|ogg]",
-      B5: "B5.[mp3|ogg]",
-      "C#6": "Cs6.[mp3|ogg]"
-    },
-    {
-      release: 1,
-      baseUrl: "/static/audio/mbox/"
-    }
-  );
-var piano = () =>
-  new Tone.Sampler(
-    {
-      C4: "C4.[mp3|ogg]",
-      "D#4": "Ds4.[mp3|ogg]",
-      "F#4": "Fs4.[mp3|ogg]",
-      A4: "A4.[mp3|ogg]",
-      C5: "C5.[mp3|ogg]",
-      "D#5": "Ds5.[mp3|ogg]",
-      "F#5": "Fs5.[mp3|ogg]",
-      A5: "A5.[mp3|ogg]",
-      C6: "C6.[mp3|ogg]"
-    },
-    {
-      release: 1,
-      baseUrl: "/static/audio/piano/"
-    }
-  );
-var organ = () =>
-  new Tone.Sampler(
-    {
-      A2: "A2.[mp3|ogg]",
-      A4: "A4.[mp3|ogg]",
-      A5: "A5.[mp3|ogg]",
-      C3: "C3.[mp3|ogg]",
-      C5: "C5.[mp3|ogg]",
-      C6: "C6.[mp3|ogg]",
-      "D#5": "Ds5.[mp3|ogg]",
-      "F#5": "Fs5.[mp3|ogg]"
-    },
-    {
-      release: 1,
-      baseUrl: "/static/audio/organ/"
-    }
-  );
-var harp = () =>
-  new Tone.Sampler(
-    {
-      A2: "A2.[mp3|ogg]",
-      A4: "A4.[mp3|ogg]",
-      A6: "A6.[mp3|ogg]",
-      C3: "C3.[mp3|ogg]",
-      C5: "C5.[mp3|ogg]",
-      E3: "E3.[mp3|ogg]",
-      E5: "E5.[mp3|ogg]",
-      G3: "G3.[mp3|ogg]",
-      G5: "G5.[mp3|ogg]"
-    },
-    {
-      release: 1,
-      baseUrl: "/static/audio/harp/"
-    }
-  );
-var guitar = () =>
-  new Tone.Sampler(
-    {
-      A2: "A2.[mp3|ogg]",
-      A3: "A3.[mp3|ogg]",
-      C3: "C3.[mp3|ogg]",
-      C4: "C4.[mp3|ogg]",
-      D2: "E3.[mp3|ogg]",
-      D4: "E5.[mp3|ogg]",
-      E2: "E2.[mp3|ogg]",
-      E3: "E3.[mp3|ogg]"
-    },
-    {
-      release: 1,
-      baseUrl: "/static/audio/guitar-acoustic/"
-    }
-  );
-// synth
-const instrumentMap = {
-  pulse: pulseSynth,
-  triangle: triangleSynth,
-  square: squareSynth,
-  noise: noiseSynth,
-  musicbox,
-  piano,
-  harp,
-  guitar,
-  organ
-};
-const FXMap = {
-  reverb: Tone.Freeverb,
-  distortion: Tone.Distortion,
-  panner: Tone.AutoPanner,
-  wahwah: Tone.AutoWah,
-  delay: Tone.PingPongDelay,
-  chorus: Tone.Chorus,
-  tremolo: Tone.Tremolo,
-  vibrato: Tone.Vibrato,
-  compressor: Tone.Compressor //??this is not list in Tone=>Effect
-};
 let tracks = [];
 let currentTrackId = 0;
 
-function createTrack(timbre, tempo, volumn, metre, mute) {
+export function createTrack(timbre, tempo, volumn, metre, mute) {
   metre = metre ? eval(metre) : 1;
   // if (mute) volumn = 0;
   tracks.push({
@@ -167,9 +26,13 @@ function createTrack(timbre, tempo, volumn, metre, mute) {
   currentTrackId += 1;
 }
 
-function cleanTrack() {
+export function cleanTrack() {
   tracks = [];
   currentTrackId = 0;
+  musixiseParts.forEach(musixisePart => {
+    musixisePart.dispose();
+  });
+  musixiseParts = [];
 }
 const Util = {
   lcm: function() {
@@ -275,7 +138,14 @@ const Util = {
 
 //when creating new measures, accumulate measure one by one
 // a song has many tracks. one track can have many parts, one part can have many measures
-function createMeasureNew(measure, sequence, beat, matchZero, blockId, part) {
+export function createMeasureNew(
+  measure,
+  sequence,
+  beat,
+  matchZero,
+  blockId,
+  part
+) {
   if (part == undefined) part = 1;
   if (!tracks[currentTrackId - 1].parts[part - 1]) {
     tracks[currentTrackId - 1].parts[part - 1] = {};
@@ -298,7 +168,7 @@ function createMeasureNew(measure, sequence, beat, matchZero, blockId, part) {
   }
 }
 
-function createMeasureOnScaleNew( // this would finally call createMeasureNew
+export function createMeasureOnScaleNew( // this would finally call createMeasureNew
   measure,
   sequence,
   beat,
@@ -558,9 +428,13 @@ function prepareTrackNotes(part, track) {
   //   console.log(effectNodes[0]);
   //   console.log(effectNodes[0].wet);
   // }
-
+  console.log("==========================");
+  console.log(instrumentMap);
   const instrument = instrumentMap[timbre]();
+  console.log(instrument);
   instrument.chain(...effectNodes, Tone.Master);
+  // instrument.toMaster();
+  console.log(notes);
   // playback notes
   musixiseParts.push(
     new Tone.Part(function(time, value) {
@@ -580,7 +454,7 @@ function prepareTrackNotes(part, track) {
 }
 
 // just store effect structure
-function createEffect(
+export function createEffect(
   effect,
   parameter,
   effectStartValue,
@@ -632,7 +506,7 @@ function createEffect(
   }
 }
 
-function makeSound(startMeasure) {
+export function makeSound(startMeasure) {
   if (!startMeasure) startMeasure = 1;
   Tone.Transport.start(
     "+0.1",
@@ -640,7 +514,7 @@ function makeSound(startMeasure) {
   );
 }
 
-function prepareProject() {
+export function prepareProject() {
   tracks.forEach(track => {
     track.parts.forEach(part => {
       normalizeMeasures(part);
@@ -653,7 +527,7 @@ function prepareProject() {
   // });
 }
 
-function highlightBlock(time) {
+export function highlightBlock(time) {
   // console.log(tracks);
   currentActiveBlockIds = [];
   tracks.forEach(track => {
