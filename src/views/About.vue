@@ -24,7 +24,7 @@
     <div class="tutorial" :style="{height:`${tutorialHeight}px`}" v-show="showTutorial">
       <tutorial />
     </div>
-</transition>
+  </transition>
 </div>
 </template>
 
@@ -45,9 +45,9 @@ export default {
   },
   data() {
     return {
-      showTutorial:false,
-      tutorialHeight:0,
-      startMeasure:1
+      showTutorial: false,
+      tutorialHeight: 0,
+      startMeasure: 1
     };
   },
   computed: {},
@@ -67,8 +67,14 @@ export default {
       console.log(code);
       try {
         eval(code);
-        if (clock) {clock.stop(); clock.dispose()}
-        clock = new Tone.Clock(()=>{console.log(Tone.Transport.seconds);highlightBlock(Tone.Transport.seconds)},4)
+        if (clock) {
+          clock.stop();
+          clock.dispose()
+        }
+        clock = new Tone.Clock(() => {
+          // console.log(Tone.Transport.seconds);
+          highlightBlock(Tone.Transport.seconds)
+        }, 4)
         clock.start()
         //TODO: auto stop...
         // Tone.Transport.on('stop',()=>{
@@ -84,7 +90,11 @@ export default {
       musixiseParts.forEach(item => {
         item.dispose();
       });
-      if (clock) {clock.stop(); clock.dispose();clock=undefined}
+      if (clock) {
+        clock.stop();
+        clock.dispose();
+        clock = undefined
+      }
       musixiseParts = [];
     },
     handleSave() {
@@ -113,7 +123,7 @@ export default {
         return;
       }
       console.log(MidiTracks)
-      Object.keys(MidiTracks).forEach((timbre,index)=>{
+      Object.keys(MidiTracks).forEach((timbre, index) => {
         let flatten = MidiTracks[timbre].reduce((acc, cur) => acc.concat(cur), []);
         flatten = flatten.reduce((acc, cur) => acc.concat(cur), []); //flatten再一次，以搞定poly音[D3,G3]这种
         flatten.reduce((acc, cur) => {
@@ -199,10 +209,10 @@ export default {
       blocklyDiv.style.top = y + "px";
       blocklyDiv.style.width = blocklyArea.offsetWidth + "px";
       blocklyDiv.style.height = blocklyArea.offsetHeight + "px";
-      console.log(blocklyArea.offsetWidth,blocklyArea.offsetHeight);
+      console.log(blocklyArea.offsetWidth, blocklyArea.offsetHeight);
       Blockly.svgResize(demoWorkspace);
 
-      self.tutorialHeight = blocklyArea.offsetHeight-50
+      self.tutorialHeight = blocklyArea.offsetHeight - 50
       console.log(self.tutorialHeight)
     };
     window.addEventListener("resize", onresize, false);
@@ -214,28 +224,29 @@ export default {
 </script>
 <style lang="scss" scoped>
 .main {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 .tutorial {
-  position: absolute;
-  left:0;
-  width:40%;
-  min-width:460px;
-  top:80px;
-  overflow-y:scroll;
+    position: absolute;
+    left: 0;
+    width: 40%;
+    min-width: 460px;
+    top: 80px;
+    overflow-y: scroll;
 }
 .slide-enter-active {
-  transition: all .6s ease-out;
+    transition: all 0.6s ease-out;
 }
 .slide-leave-active {
-  transition: all .6s ease-out;
+    transition: all 0.6s ease-out;
 }
-.slide-enter, .slide-leave-to
-/* .slide-fade-leave-active below version 2.1.8 */ {
-  opacity: 0;
-  left:-40%;
+/* .slide-fade-leave-active below version 2.1.8 */
+.slide-enter,
+.slide-leave-to {
+    opacity: 0;
+    left: -40%;
 }
 </style>

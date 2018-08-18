@@ -144,7 +144,7 @@ const FXMap = {
   distortion: Tone.Distortion,
   panner: Tone.AutoPanner,
   wahwah: Tone.AutoWah,
-  delay: Tone.FeedbackDelay,
+  delay: Tone.PingPongDelay,
   chorus: Tone.Chorus,
   tremolo: Tone.Tremolo,
   vibrato: Tone.Vibrato,
@@ -152,6 +152,7 @@ const FXMap = {
 };
 let tracks = [];
 let currentTrackId = 0;
+
 function createTrack(timbre, tempo, volumn, metre, mute) {
   metre = metre ? eval(metre) : 1;
   // if (mute) volumn = 0;
@@ -165,6 +166,7 @@ function createTrack(timbre, tempo, volumn, metre, mute) {
   });
   currentTrackId += 1;
 }
+
 function cleanTrack() {
   tracks = [];
   currentTrackId = 0;
@@ -208,7 +210,10 @@ const Util = {
     const octaveDown = noteStr.match(/'+[0-9]+/g)
       ? noteStr.match(/'+[0-9]+/g)[0].length - note.length
       : 0;
-    return { note, octave: octaveUp - octaveDown };
+    return {
+      note,
+      octave: octaveUp - octaveDown
+    };
   },
   getToneNotes: function(sequence, beat, tempo, volumn, metre, measureCount) {
     //都是针对‘对0’
@@ -505,13 +510,55 @@ function prepareTrackNotes(part, track) {
   // for playback //musixiseParts is currently reset in about.vue
   //playback connect effect chain
   console.log("hehehehe FX:", effects);
+
   // let dist = Object.keys(effects).reduce((a, b) => {
   //   new FXMap(a)().connect(new FXMap(b)());
   // });
   // dist.toMaster();
   const effectNodes = Object.keys(effects).map(effectName => {
-    return new FXMap[effectName]();
+    const effect = new FXMap[effectName]();
+    // effect.wet.value = 0.5;
+    // effect.wet.rampTo(0, 2, Tone.now() + 2);
+    // effect.wet.rampTo(1, 2, Tone.now() + 3);
+    // effect.wet.rampTo(0, 2, Tone.now() + 4);
+    //TODO either loop through，either use preset param keys
+    console.log(Object.entries(effects[effectName]));
+    if (
+      Object.entries(effects[effectName]) &&
+      Object.entries(effects[effectName]).length
+    ) {
+      Object.entries(effects[effectName]).forEach(paramOA => {
+        // paramOA ['delay',{value:[0.1,0.5,0.3],timepoint:[1,2,3]}]
+        // effect['wet'] = 0.5, wet default: 1
+        const effectName = paramOA[0];
+        const effectObj = paramOA[1];
+        effectObj.value.forEach((paramvalue, index) => {
+          // 没curve，硬set
+          effect[effectName].setValueAtTime(
+            paramvalue,
+            Tone.now() + (effectObj.timepoint[index] - 1) * metre * 240 / tempo
+          );
+          if (effectObj.timepoint[index + 1]) {
+            effect[effectName].rampTo(
+              effectObj.value[index + 1],
+              (effectObj.timepoint[index + 1] - effectObj.timepoint[index]) *
+                metre *
+                240 /
+                tempo,
+              Tone.now() +
+                (effectObj.timepoint[index] - 1) * metre * 240 / tempo
+            );
+          }
+        });
+      });
+    }
+    return effect;
   });
+  // if (effectNodes[0]) {
+  //   console.log(effectNodes[0]);
+  //   console.log(effectNodes[0].wet);
+  // }
+
   const instrument = instrumentMap[timbre]();
   instrument.chain(...effectNodes, Tone.Master);
   // playback notes
@@ -546,22 +593,24 @@ function createEffect(
   //   reverb: {
   //     roomSize: {
   //       value: [3, 2, 1],
-  //       timePoint: [1, 2, 3]
+  //       timepoint: [1, 2, 3]
   //     }
   //   },
   //   delay: {
   //     delayTime: {
   //         value: [3, 2, 1],
-  //         timePoint: [1, 2, 3]
+  //         timepoint: [1, 2, 3]
   //     },
   //     feedback: {
   //         value: [3, 2, 1],
-  //         timePoint: [1, 2, 3]
+  //         timepoint: [1, 2, 3]
   //     }
   //   }
   // }
-  tracks[currentTrackId - 1].effects[effect] = {};
-  tracks[currentTrackId - 1].effects[effect][parameter] = {};
+  if (!tracks[currentTrackId - 1].effects[effect])
+    tracks[currentTrackId - 1].effects[effect] = {};
+  if (!tracks[currentTrackId - 1].effects[effect][parameter])
+    tracks[currentTrackId - 1].effects[effect][parameter] = {};
   if (!tracks[currentTrackId - 1].effects[effect][parameter].value) {
     tracks[currentTrackId - 1].effects[effect][parameter].value = [
       effectStartValue,
