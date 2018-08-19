@@ -26,7 +26,8 @@ export default {
     system.addStave({
       voices: [
         score.voice([
-          score.notes('(C4 A3)/1,(D4 B3),(E4 C4),(F4 D4),(G4 E4),(A4 F4),(B4 G4),(C5 A4)'),
+          // vexflow asks notes should be in order from low note to high note!
+          score.notes('(A3 C4)/1,(B3 D4),(C4 E4),(D4 F4),(E4 G4),(F4 A4),(G4 B4),(A4 C5)'),
         ].reduce((a,b)=>{return a.concat(b)}))
       ]
     }).addClef('treble');

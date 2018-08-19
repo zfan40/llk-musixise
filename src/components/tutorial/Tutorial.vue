@@ -42,7 +42,18 @@ export default {
     msg: String
   },
   mounted() {
-    
+
+  },
+  data() {
+    return {
+      activeNames: ['1']
+    };
+  },
+  methods: {
+    handleChange(e) {
+      // e is same as this.activeNames
+      // console.log(e)
+    }
   }
 };
 </script>
