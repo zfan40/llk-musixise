@@ -206,7 +206,8 @@ export default {
         maxScale: 3,
         minScale: 0.3,
         scaleSpeed: 1.2
-      }
+      },
+      media:'https://cdn.cnbj1.fds.api.mi-img.com/blockly-media/'
     });
     var onresize = function(e) {
       // Compute the absolute coordinates and dimensions of blocklyArea.

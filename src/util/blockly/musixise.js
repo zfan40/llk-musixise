@@ -199,10 +199,14 @@ Blockly.JavaScript["create_effect"] = function(block) {
   ].map(item =>
     Blockly.JavaScript.valueToCode(block, item, Blockly.JavaScript.ORDER_NONE)
   );
-  if (parameter) {
+  if (effectEndValue) {
     return `createEffect(${effect},${parameter},${effectStartValue},${effectStartMeasure},${effectEndValue},${effectEndMeasure});\n`;
+  } else if (effectStartMeasure) {
+    return `createEffect(${effect},${parameter},${effectStartValue},${effectStartMeasure})\n`;
+  } else if (effectStartValue) {
+    return `createEffect(${effect},${parameter},${effectStartValue});\n`;
   } else {
-    return `createEffect(${effect});`;
+    return `createEffect(${effect});\n`;
   }
 };
 

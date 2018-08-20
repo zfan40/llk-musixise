@@ -387,6 +387,13 @@ function prepareTrackNotes(part, track) {
   // dist.toMaster();
   const effectNodes = Object.keys(effects).map(effectName => {
     const effect = new FXMap[effectName]();
+    if (
+      effectName == "panner" ||
+      effectName == "tremolo" ||
+      effectName == "vibrato"
+    ) {
+      effect.start();
+    }
     // effect.wet.value = 0.5;
     // effect.wet.rampTo(0, 2, Tone.now() + 2);
     // effect.wet.rampTo(1, 2, Tone.now() + 3);
@@ -400,24 +407,28 @@ function prepareTrackNotes(part, track) {
       Object.entries(effects[effectName]).forEach(paramOA => {
         // paramOA ['delay',{value:[0.1,0.5,0.3],timepoint:[1,2,3]}]
         // effect['wet'] = 0.5, wet default: 1
-        const effectName = paramOA[0];
-        const effectObj = paramOA[1];
-        effectObj.value.forEach((paramvalue, index) => {
+        const paramName = paramOA[0];
+        const paramObj = paramOA[1];
+        paramObj.value.forEach((paramvalue, index) => {
           // 没curve，硬set
-          effect[effectName].setValueAtTime(
-            paramvalue,
-            Tone.now() + (effectObj.timepoint[index] - 1) * metre * 240 / tempo
-          );
-          if (effectObj.timepoint[index + 1]) {
-            effect[effectName].rampTo(
-              effectObj.value[index + 1],
-              (effectObj.timepoint[index + 1] - effectObj.timepoint[index]) *
-                metre *
-                240 /
-                tempo,
-              Tone.now() +
-                (effectObj.timepoint[index] - 1) * metre * 240 / tempo
+          if (paramvalue) {
+            effect[paramName].setValueAtTime(
+              paramvalue,
+              Tone.now() + (paramObj.timepoint[index] - 1) * metre * 240 / tempo
             );
+            if (paramObj.timepoint[index + 1]) {
+              effect[paramName].rampTo(
+                paramObj.value[index + 1],
+                (paramObj.timepoint[index + 1] - paramObj.timepoint[index]) *
+                  metre *
+                  240 /
+                  tempo,
+                Tone.now() +
+                  (paramObj.timepoint[index] - 1) * metre * 240 / tempo
+              );
+            }
+          } else {
+            console.log("空的时候");
           }
         });
       });
@@ -432,6 +443,8 @@ function prepareTrackNotes(part, track) {
   console.log(instrumentMap);
   const instrument = instrumentMap[timbre]();
   console.log(instrument);
+  // var autoPanner = new Tone.AutoPanner("4n").start();
+  // instrument.chain(...effectNodes, autoPanner, Tone.Master);
   instrument.chain(...effectNodes, Tone.Master);
   // instrument.toMaster();
   console.log(notes);
@@ -483,18 +496,21 @@ export function createEffect(
   // }
   if (!tracks[currentTrackId - 1].effects[effect])
     tracks[currentTrackId - 1].effects[effect] = {};
-  if (!tracks[currentTrackId - 1].effects[effect][parameter])
+  if (parameter && !tracks[currentTrackId - 1].effects[effect][parameter])
     tracks[currentTrackId - 1].effects[effect][parameter] = {};
-  if (!tracks[currentTrackId - 1].effects[effect][parameter].value) {
+  if (
+    parameter &&
+    !tracks[currentTrackId - 1].effects[effect][parameter].value
+  ) {
     tracks[currentTrackId - 1].effects[effect][parameter].value = [
       effectStartValue,
       effectEndValue
     ];
     tracks[currentTrackId - 1].effects[effect][parameter].timepoint = [
-      effectStartMeasure,
+      effectStartMeasure ? effectStartMeasure : 1,
       effectEndMeasure
     ];
-  } else {
+  } else if (parameter) {
     tracks[currentTrackId - 1].effects[effect][parameter].value.push(
       effectStartValue,
       effectEndValue
