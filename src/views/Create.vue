@@ -1,20 +1,30 @@
 <template>
 <div class="main">
-  <header style="height:80px;">
-    <p style="background-color:white;height:40px;line-height: 40px;margin:0;padding-left:28px;background-color:#ffcc33;">LLK Musixise</p>
+  <header style="height:100px;">
+    <div class="global-header">
+      <p>LLK Musixise</p>
+      <div class="menu-btns" v-show="!userInfo.userId">
+        我的作品
+      </div>
+      <div class="avatar">
+        <avatar />
+      </div>
+    </div>
     <div style="background-color:#00bdd4;height: 40px;line-height:40px;padding-left:20px;padding-right:20px;display: flex;justify-content: space-between;">
-      <div class="">
-        <el-input-number v-model="startMeasure" size="mini" :min="1"></el-input-number>
+      <div style="display:flex;align-items:center;justify-content:center;">
+        <div class="">
+          <el-input-number v-model="startMeasure" size="mini" :min="1"></el-input-number>
+        </div>
         <i id="play" class="iconfont icon-icon--13" style="font-size:26px;cursor: pointer;" @click="handlePlay"></i>
         <i id="stop" class="iconfont icon-icon--17" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleStop"></i>
         <i id="save" class="iconfont icon-icon--1" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleSave"></i>
         <!-- <i id="load" class="iconfont icon-icon--" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleLoad"></i> -->
         <i id="export-midi" class="iconfont icon-geshi_yinpinmidi" style="font-size:24px;cursor: pointer;padding-left:10px;" @click="handleExportMidi"></i>
         <i id="clear" class="iconfont icon-icon--5" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleClear"></i>
-        <i id="clear" class="iconfont icon-icon--34" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleToggleTutorial"></i>
+        <i id="teach" class="iconfont icon-icon--34" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleToggleTutorial"></i>
       </div>
       <div class="">
-        <span>切视图</span>
+        <!-- <span>切视图</span> -->
         <work-loader />
       </div>
     </div>
@@ -25,6 +35,7 @@
       <tutorial />
     </div>
   </transition>
+  <user-forms />
 </div>
 </template>
 
@@ -33,7 +44,9 @@ import Blockly from "node-blockly/browser"; // import Blockly
 import Tutorial from "@/components/tutorial/Tutorial.vue";
 import BlockHelper from "@/components/blockhelper/index.vue";
 import WorkLoader from "@/components/workloader/index.vue";
-import scopeEval from "scope-eval"
+import Avatar from "@/components/avatar.vue";
+import UserForms from "@/components/UserFormView";
+import scopeEval from "scope-eval";
 import {
   createTrack,
   cleanTrack,
@@ -43,7 +56,7 @@ import {
   makeSound,
   prepareProject,
   highlightBlock
-} from "../util/core/audioAPI"
+} from "../util/core/audioAPI";
 require("../util/blockly/musixise"); // import Structure of Musixise Blocks
 const FileSaver = require("file-saver"); // For Midi file export
 
@@ -53,7 +66,9 @@ export default {
   components: {
     Tutorial,
     BlockHelper,
-    WorkLoader
+    WorkLoader,
+    Avatar,
+    UserForms
   },
   data() {
     return {
@@ -62,19 +77,23 @@ export default {
       startMeasure: 1
     };
   },
-  computed: {},
+  computed: {
+    userInfo() {
+      return this.$store.state.user.userInfo;
+    }
+  },
   methods: {
     handlePlay() {
       Blockly.JavaScript.addReservedWords("code");
       Tone.Transport.stop();
-      cleanTrack()
+      cleanTrack();
       var code = Blockly.JavaScript.workspaceToCode(Blockly.getMainWorkspace()); //把workspace转换为代码
       code += `prepareProject();makeSound(${this.startMeasure});`;
       // Eval can be dangerous. For more controlled execution, check
       // https://github.com/NeilFraser/JS-Interpreter.
       console.log(code);
       try {
-        scopeEval(code,{
+        scopeEval(code, {
           createTrack,
           cleanTrack,
           createMeasureNew,
@@ -82,17 +101,17 @@ export default {
           createEffect,
           makeSound,
           prepareProject,
-          highlightBlock,
-        })
+          highlightBlock
+        });
         if (clock) {
           clock.stop();
-          clock.dispose()
+          clock.dispose();
         }
         clock = new Tone.Clock(() => {
           // console.log(Tone.Transport.seconds);
-          highlightBlock(Tone.Transport.seconds)
-        }, 4)
-        clock.start()
+          highlightBlock(Tone.Transport.seconds);
+        }, 4);
+        clock.start();
         //TODO: auto stop...
         // Tone.Transport.on('stop',()=>{
         //   // if (clock) {clock.stop(); clock.dispose()}
@@ -106,15 +125,18 @@ export default {
       if (clock) {
         clock.stop();
         clock.dispose();
-        clock = undefined
+        clock = undefined;
       }
       Tone.Transport.stop();
-      cleanTrack()
+      cleanTrack();
     },
     handleSave() {
       let xml = Blockly.Xml.workspaceToDom(Blockly.getMainWorkspace()); // 当前workspace的block转成xml dom
       let xmlText = Blockly.Xml.domToText(xml);
       console.log(xmlText);
+      this.$store.commit("SHOW_DIALOG", {
+        type: "uploadrecord"
+      });
     },
     handleLoad() {
       let workspace = Blockly.getMainWorkspace();
@@ -136,14 +158,22 @@ export default {
         alert("nothing to export");
         return;
       }
-      console.log(MidiTracks)
+      console.log(MidiTracks);
       Object.keys(MidiTracks).forEach((timbre, index) => {
-        let flatten = MidiTracks[timbre].reduce((acc, cur) => acc.concat(cur), []);
+        let flatten = MidiTracks[timbre].reduce(
+          (acc, cur) => acc.concat(cur),
+          []
+        );
         flatten = flatten.reduce((acc, cur) => acc.concat(cur), []); //flatten再一次，以搞定poly音[D3,G3]这种
         flatten.reduce((acc, cur) => {
-          return acc.note(cur.midiNo, cur.startTime, cur.duration, cur.velocity);
+          return acc.note(
+            cur.midiNo,
+            cur.startTime,
+            cur.duration,
+            cur.velocity
+          );
         }, midi.track(`${index}`).patch(32));
-      })
+      });
 
       // 单音色导出DEMO
       // // flatten MidiTracks
@@ -184,7 +214,7 @@ export default {
       workspace.clear();
     },
     handleToggleTutorial() {
-      this.showTutorial = !this.showTutorial
+      this.showTutorial = !this.showTutorial;
     }
   },
   created() {},
@@ -207,7 +237,7 @@ export default {
         minScale: 0.3,
         scaleSpeed: 1.2
       },
-      media:'https://cdn.cnbj1.fds.api.mi-img.com/blockly-media/'
+      media: "https://cdn.cnbj1.fds.api.mi-img.com/blockly-media/"
     });
     var onresize = function(e) {
       // Compute the absolute coordinates and dimensions of blocklyArea.
@@ -227,8 +257,8 @@ export default {
       console.log(blocklyArea.offsetWidth, blocklyArea.offsetHeight);
       Blockly.svgResize(demoWorkspace);
 
-      self.tutorialHeight = blocklyArea.offsetHeight - 50
-      console.log(self.tutorialHeight)
+      self.tutorialHeight = blocklyArea.offsetHeight - 50;
+      console.log(self.tutorialHeight);
     };
     window.addEventListener("resize", onresize, false);
     onresize();
@@ -239,29 +269,47 @@ export default {
 </script>
 <style lang="scss" scoped>
 .main {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 .tutorial {
-    position: absolute;
-    left: 0;
-    width: 40%;
-    min-width: 460px;
-    top: 80px;
-    overflow-y: scroll;
+  position: absolute;
+  left: 0;
+  width: 40%;
+  min-width: 460px;
+  top: 100px;
+  overflow-y: scroll;
 }
 .slide-enter-active {
-    transition: all 0.6s ease-out;
+  transition: all 0.6s ease-out;
 }
 .slide-leave-active {
-    transition: all 0.6s ease-out;
+  transition: all 0.6s ease-out;
 }
 /* .slide-fade-leave-active below version 2.1.8 */
 .slide-enter,
 .slide-leave-to {
-    opacity: 0;
-    left: -40%;
+  opacity: 0;
+  left: -40%;
+}
+.global-header {
+  display: flex;
+  justify-content: space-between;
+  background-color: white;
+  height: 60px;
+  line-height: 60px;
+  margin: 0;
+  padding-left: 28px;
+  background-color: #ffcc33;
+  .menu-btns {
+    flex: 2;
+    padding-left: 30%;
+  }
+  .avatar {
+    padding-right: 10px;
+    padding-top: 5px;
+  }
 }
 </style>

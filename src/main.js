@@ -1,9 +1,10 @@
 import Vue from "vue";
 import App from "./App.vue";
 import router from "./router";
-import store from "./store";
+import store from "./vuex/store";
 import "./registerServiceWorker";
 
+import FlagIcon from "vue-flag-icon";
 import ElementUI from "element-ui";
 import "element-ui/lib/theme-chalk/index.css";
 
@@ -20,6 +21,7 @@ Vue.config.ignoredElements = [
 ];
 Vue.config.productionTip = false;
 Vue.use(ElementUI);
+Vue.use(FlagIcon);
 
 new Vue({
   router,

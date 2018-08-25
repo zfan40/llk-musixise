@@ -409,24 +409,36 @@ function prepareTrackNotes(part, track) {
         // effect['wet'] = 0.5, wet default: 1
         const paramName = paramOA[0];
         const paramObj = paramOA[1];
+        // 把value的重复时间加0.01
+        paramObj.timepoint.forEach((point, index, self) => {
+          if (index > 0 && point === self[index - 1]) {
+            self[index] = point + 0.01;
+          }
+        });
+        console.log(paramObj);
         paramObj.value.forEach((paramvalue, index) => {
           // 没curve，硬set
           if (paramvalue) {
-            effect[paramName].setValueAtTime(
+            // effect[paramName].setValueAtTime(
+            //   paramvalue,
+            //   Tone.now() + (paramObj.timepoint[index] - 1) * metre * 240 / tempo
+            // );
+            effect[paramName].linearRampToValueAtTime(
               paramvalue,
               Tone.now() + (paramObj.timepoint[index] - 1) * metre * 240 / tempo
             );
-            if (paramObj.timepoint[index + 1]) {
-              effect[paramName].rampTo(
-                paramObj.value[index + 1],
-                (paramObj.timepoint[index + 1] - paramObj.timepoint[index]) *
-                  metre *
-                  240 /
-                  tempo,
-                Tone.now() +
-                  (paramObj.timepoint[index] - 1) * metre * 240 / tempo
-              );
-            }
+
+            // if (paramObj.timepoint[index + 1]) {
+            //   effect[paramName].rampTo(
+            //     paramObj.value[index + 1],
+            //     (paramObj.timepoint[index + 1] - paramObj.timepoint[index]) *
+            //       metre *
+            //       240 /
+            //       tempo,
+            //     Tone.now() +
+            //       (paramObj.timepoint[index] - 1) * metre * 240 / tempo
+            //   );
+            // }
           } else {
             console.log("空的时候");
           }
