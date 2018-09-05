@@ -21,7 +21,7 @@ export default {
           collectNum: null,
           lastModifiedDate: "2017-03-23 16:45:13",
           fileHash: "b730b516a4f34d9344e55288ec3b1245",
-          owner: {
+          userVO: {
             uid: 40,
             nickName: "零零柒",
             smallAvatar: "http://oaeyej2ty.bkt.clouddn.com/CcwtD1PN_dfg.jpg",
@@ -49,7 +49,9 @@ export default {
     this.marqueeStyle = "";
     if (this.workObj)
       this.getImageColorCSS(
-        this.workObj.cover ? this.workObj.cover : this.workObj.owner.smallAvatar
+        this.workObj.cover
+          ? this.workObj.cover
+          : this.workObj.userVO.smallAvatar
       );
     if (
       this.$refs.insider &&
@@ -114,7 +116,7 @@ export default {
 
 <template>
     <div v-if="workObj.id" class="info" @click="onclickcell(workObj)" @mouseover="onhovercell" @mouseleave="onleavecell">
-        <img class="work-cover" :src="workObj.cover?workObj.cover:workObj.owner.smallAvatar"></img>
+        <img class="work-cover" :src="workObj.cover?workObj.cover:workObj.userVO.smallAvatar"></img>
         <transition name="fade">
           <div v-show="maskshow" class="work-mask">
             <!-- <span ref="outsider" class="work-body-desc"><p ref="insider" :style="marqueeStyle">{{workObj.content}}</p></span> -->
@@ -131,6 +133,7 @@ export default {
 
 <style lang="scss" scoped>
 .info {
+  position: relative;
   display: flex;
   cursor: pointer;
   align-items: stretch;
@@ -141,7 +144,6 @@ export default {
   border-radius: 5px;
   justify-content: space-between;
   background-color: #fff;
-  margin-bottom: 20px;
   color: #000;
   /*margin: .4rem 0 .6rem;*/
   .work-cover {

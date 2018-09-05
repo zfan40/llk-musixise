@@ -7,6 +7,19 @@
       <el-form-item label="作品名称" :label-width="formLabelWidth">
         <el-input placeholder="为你的作品起个名..." v-model="uploadRecordForm.title"></el-input>
       </el-form-item>
+      <el-form-item label="作品图片" :label-width="formLabelWidth">
+        <el-upload
+          class="avatar-uploader"
+          action="//blocks.musixise.com/api/v1/picture/uploadPic"
+          name="files"
+          :headers="header"
+          :show-file-list="false"
+          :on-success="handleUploadSuccess"
+          :before-upload="beforeUpload">
+          <img v-if="imageUrl" :src="imageUrl" class="avatar">
+          <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+        </el-upload>
+      </el-form-item>
       <el-form-item label="作品介绍" :label-width="formLabelWidth">
         <el-input placeholder="为你的作品加点介绍..." type="textarea" :autosize="{ minRows: 2, maxRows: 4}" v-model="uploadRecordForm.content"></el-input>
       </el-form-item>
@@ -19,6 +32,9 @@
 </template>
 
 <script>
+import * as Cookies from "js-cookie";
+import Blockly from "node-blockly/browser"; // import Blockly
+
 export default {
   data() {
     return {
@@ -26,10 +42,15 @@ export default {
       //   dataType: 'json',
       //   type: 'POST',
       // },
+      imageUrl: "",
       uploadRecordForm: {
         title: "",
-        content: "",
-        cover: ""
+        content: ""
+      },
+      header: {
+        processData: false,
+        // "Content-Type": "multipart/form-data",
+        Authorization: Cookies.get("serviceToken")
       },
       formLabelWidth: "120px"
     };
@@ -43,17 +64,39 @@ export default {
   methods: {
     handleClose() {
       // cuz registerrFormVisible is bind with state, it cannot close automatically, we need to close in this before-close event
+      this.header = {
+        processData: false,
+        // "Content-Type": "multipart/form-data",
+        Authorization: Cookies.get("serviceToken")
+      };
       this.hideUploadRecordDialog();
     },
     hideUploadRecordDialog() {
       this.$store.commit("HIDE_DIALOG", { type: "uploadrecord" });
     },
+    handleUploadSuccess(res) {
+      this.imageUrl = res.data;
+    },
+    beforeUpload(file) {
+      const isJPG = file.type === "image/jpeg" || file.type === "image/png";
+      const isLt2M = file.size / 1024 / 1024 < 2;
+
+      if (!isJPG) {
+        this.$message.error("上传图片需为jpg或png格式!");
+      }
+      if (!isLt2M) {
+        this.$message.error("上传图片大小需小于2MB");
+      }
+      return isJPG && isLt2M;
+    },
     submitUploadRecordForm() {
       const self = this;
+      const xml = Blockly.Xml.workspaceToDom(Blockly.getMainWorkspace()); // 当前workspace的block转成xml dom
+      const record = Blockly.Xml.domToText(xml);
       this.$store
         .dispatch("uploadRecord", {
-          record: self.$store.state.perform.recorder,
-          info: this.uploadRecordForm
+          record,
+          info: { ...this.uploadRecordForm, cover: this.imageUrl }
         })
         .then(
           () => {

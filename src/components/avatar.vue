@@ -90,6 +90,7 @@ export default {
     },
     redirectTo(url) {
       console.log("redirecting to: ", url);
+      console.log(this.userInfo);
     }
   }
 };

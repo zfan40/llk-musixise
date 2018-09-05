@@ -79,7 +79,7 @@ export function uploadRecord(record, info) {
     const reader = new FileReader();
     reader.onload = async event => {
       const fd = new FormData();
-      fd.append("fname", "test.txt");
+      fd.append("fname", "block.txt");
       fd.append("data", event.target.result);
       // fd.append('access_token', tokenObj.access_token);
       let postFix = "";
@@ -160,75 +160,38 @@ export function getRecommendations() {
 }
 
 // below is PC login
-export function loginUser(loginInfo) {
-  return new Promise((resolve, reject) => {
-    const tokenInCookie = Cookies.get("serviceToken");
-    if (tokenInCookie) {
-      reqConfig.headers.Authorization = `${tokenInCookie}`;
-      return axios.get("//blocks.musixise.com/api/v1/user/getInfo", reqConfig);
-    } else {
-      axios
-        .post(
-          "//blocks.musixise.com/api/v1/user/authenticate",
-          JSON.stringify(loginInfo),
-          reqConfig
-        )
-        .then(
-          response => {
-            console.log("authenticate user:", response.data);
-            reqConfig.headers.Authorization = `${response.data.data.id_token}`;
-            Cookies.set("serviceToken", response.data.data.id_token, {
-              expires: 7
-            });
-            // reqConfig.headers.Authorization = `Bearer ${response.data.id_token}`; // 验证通过
-            return axios.get(
-              "//blocks.musixise.com/api/v1/user/getInfo",
-              reqConfig
-            );
-          },
-          () => {
-            reject("denglu");
-          }
-        )
-        .then(
-          response => {
-            // console.log("action: login result:", response.data);
-            // commit(types.UPDATE_USER, { userInfo: response.data.data });
-            resolve(response);
-          },
-          () => {
-            reject();
-          }
-        );
-    }
-  });
+export async function loginUser(loginInfo) {
+  const tokenInCookie = Cookies.get("serviceToken");
+  if (loginInfo && !tokenInCookie) {
+    const auth = await axios.post(
+      "//blocks.musixise.com/api/v1/user/authenticate",
+      JSON.stringify(loginInfo),
+      reqConfig
+    );
+    reqConfig.headers.Authorization = `${auth.data.data.id_token}`;
+    Cookies.set("serviceToken", auth.data.data.id_token, {
+      expires: 7
+    });
+    return axios.get("//blocks.musixise.com/api/v1/user/getInfo", reqConfig);
+  } else {
+    reqConfig.headers.Authorization = `${tokenInCookie}`;
+    return axios.get("//blocks.musixise.com/api/v1/user/getInfo", reqConfig);
+  }
 }
 
-export const registerUser = registerInfo => {
-  console.log("sdfsdf", registerInfo);
-  return new Promise((resolve, reject) => {
-    axios
-      .post(
-        "//blocks.musixise.com/api/v1/user/register",
-        JSON.stringify(registerInfo),
-        reqConfig
-      )
-      .then(
-        response => {
-          console.log("action: register result:", response.data);
-          if (response.data.errcode !== 0) {
-            reject(response.data.errmsg);
-            return;
-          }
-          resolve(registerInfo);
-          // dispatch("loginUser", { loginInfo: registerInfo });
-        },
-        () => {
-          reject();
-        }
-      );
-  });
-};
+export async function registerUser(registerInfo) {
+  const response = await axios.post(
+    "//blocks.musixise.com/api/v1/user/register",
+    JSON.stringify(registerInfo),
+    reqConfig
+  );
+  console.log("in api", response);
+  if (response.data.errcode !== "0") {
+    console.log("good");
+    return Promise.reject(response.data.errmsg);
+  }
+  return Promise.resolve(registerInfo);
+}
 
 export const updateUser = ({ commit }, { updateInfo }) => {
   console.log("sdfsdf", updateInfo);

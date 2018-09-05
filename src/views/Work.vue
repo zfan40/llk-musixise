@@ -17,15 +17,11 @@
         </div>
         <i id="play" class="iconfont icon-icon--13" style="font-size:26px;cursor: pointer;" @click="handlePlay"></i>
         <i id="stop" class="iconfont icon-icon--17" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleStop"></i>
+        <!-- <i id="save" class="iconfont icon-icon--1" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleSave"></i> -->
         <!-- <i id="load" class="iconfont icon-icon--" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleLoad"></i> -->
         <i id="export-midi" class="iconfont icon-geshi_yinpinmidi" style="font-size:24px;cursor: pointer;padding-left:10px;" @click="handleExportMidi"></i>
-        <i id="clear" class="iconfont icon-icon--5" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleClear"></i>
+        <!-- <i id="clear" class="iconfont icon-icon--5" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleClear"></i> -->
         <i id="teach" class="iconfont icon-icon--34" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleToggleTutorial"></i>
-        <i id="save" class="iconfont icon-icon--1" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleSave"></i>
-      </div>
-      <div class="">
-        <!-- <span>切视图</span> -->
-        <work-loader />
       </div>
     </div>
   </header>
@@ -80,9 +76,34 @@ export default {
   computed: {
     userInfo() {
       return this.$store.state.user.userInfo;
+    },
+    work() {
+      //TODO
+      this.loadWork(this.$store.state.work.content);
+      return this.$store.state.work;
     }
   },
   methods: {
+    fetchData() {
+      let workId =
+        this.$route.params.id || this.$store.state.user.userInfo.userId;
+      if (workId) {
+        this.$store.dispatch("fetchWork", {
+          workId
+        });
+      }
+    },
+    loadWork(blocklyXmlText) {
+      if (!blocklyXmlText) return;
+      let workspace = Blockly.getMainWorkspace();
+      workspace.clear();
+      if (blocklyXmlText) {
+        Blockly.Xml.domToWorkspace(
+          Blockly.Xml.textToDom(blocklyXmlText),
+          workspace
+        ); // 把xml dom放到workspace里头展示出来
+      }
+    },
     handlePlay() {
       Blockly.JavaScript.addReservedWords("code");
       Tone.Transport.stop();
@@ -217,7 +238,10 @@ export default {
       this.showTutorial = !this.showTutorial;
     }
   },
-  created() {},
+  created() {
+    //TODO:
+    this.$store.dispatch("fetchwork", this.$route.id);
+  },
   mounted() {
     const self = this;
     var blocklyArea = window.document.getElementById("blockly-area");

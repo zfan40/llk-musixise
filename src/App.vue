@@ -7,9 +7,18 @@
     <router-view/>
   </div>
 </template>
+<script>
+export default {
+  created() {
+    // alert('jb')
+    this.$store.dispatch("loginUser", {}); // 有cookie时 自动登录 auto login
+  }
+};
+</script>
 
 <style lang="scss">
-body,* {
+body,
+* {
   padding: 0;
   margin: 0;
   box-sizing: border-box;
