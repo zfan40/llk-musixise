@@ -3,7 +3,7 @@
   <div class="blockly-editor" id="blockly-area" style="flex:1">
     <div id="blockly-div" style="position:absolute;"></div>
     <xml id="toolbox" style="display: none">
-      <category name="Loops" colour="120">
+      <category name="Loops" colour="0">
         <block type="controls_repeat_ext">
           <value name="TIMES">
             <shadow type="math_number">
@@ -34,7 +34,7 @@
         <block type="variables_get"></block>
       </category>
 
-      <category name="Boolean" colour="65">
+      <category name="Boolean" colour="30">
         <block type="logic_compare"></block>
         <block type="logic_operation"></block>
         <block type="logic_negate"></block>
@@ -43,7 +43,7 @@
         <block type="logic_ternary"></block>
       </category>
 
-      <category name="Math" colour="125">
+      <category name="Math" colour="60">
         <block type="math_number">
           <field name="NUM">123</field>
         </block>
@@ -82,7 +82,7 @@
         <block type="math_random_float"></block>
       </category>
 
-      <category name="Sounds" colour="355">
+      <category name="Sounds" colour="90">
         <block type="create_track">
           <value name="TIMBRE">
             <block type="text">
@@ -123,7 +123,7 @@
         <block type="create_effect"></block>
       </category>
 
-      <category name="Timbre" colour="210">
+      <category name="Timbre" colour="120">
         <block type="text">
           <field name="TEXT">pulse</field>
         </block>
@@ -137,7 +137,7 @@
           <field name="TEXT">noise</field>
         </block>
       </category>
-      <category name="Sequence" colour="310">
+      <category name="Sequence" colour="170">
         <block type="text">
           <field name="TEXT">C4,D4,E4,F4</field>
         </block>
@@ -155,7 +155,7 @@
           <field name="TEXT">[Db5,F5],Bb4,[D5,F#5],Bb4,[Db5,F5],Bb4,[C5,E5],Bb4,[Db5,F5],Bb4,[C5,E5],Bb4,[Cb5,Eb5],Bb4,[C5,E5],Bb4</field>
         </block>
       </category>
-      <category name="Beats" colour="255">
+      <category name="Beats" colour="210">
         <block type="text">
           <field name="TEXT">0---0---0---0---</field>
         </block>
@@ -172,8 +172,7 @@
 </template>
 
 <script>
-export default {
-}
+export default {};
 </script>
 
 <style lang="css">

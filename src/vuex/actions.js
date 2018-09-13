@@ -87,50 +87,39 @@ export async function loadMusixiserFavWorks(
 
 export async function fetchWork({ dispatch, commit, state }, { id }) {
   // 获取某id的音乐盒音乐内容
-  const project = await fetchMbox(id);
-  console.log("xxi", project.data.data.url);
-  console.log("xxi", project.data.data.userId);
-  const musixiser = await fetchMusixiser(project.data.data.userId);
-  console.log("work musixiser info: ", musixiser.data.data);
+  // console.log("1", id);
+  const project = await API.fetchMbox(id);
+  // console.log(2);
+  // console.log("xxi", project.data.data.url);
+  // console.log("xxi", project.data.data.userId);
+  const musixiser = await API.fetchMusixiser(project.data.data.userId);
+  // console.log("work musixiser info: ", musixiser.data.data);
   project.data.data.userVO = musixiser.data.data; // 拼接口。
-  const request = new XMLHttpRequest();
-  request.open("GET", project.data.data.url, true);
-  request.send(null);
-  request.onreadystatechange = function() {
-    if (request.readyState === 4 && request.status === 200) {
-      const type = request.getResponseHeader("Content-Type");
-      if (type.indexOf("text") !== -1) {
-        commit(types.SET_WORK_DETAIL, {
-          content: JSON.parse(request.responseText),
-          info: project.data.data
-        });
-        resolve();
+  return new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest();
+    request.open("GET", project.data.data.url, true);
+    request.send(null);
+    request.onreadystatechange = function() {
+      if (request.readyState === 4 && request.status === 200) {
+        const type = request.getResponseHeader("Content-Type");
+        if (type.indexOf("text") !== -1) {
+          commit(types.SET_WORK_DETAIL, {
+            content: JSON.parse(request.responseText),
+            info: project.data.data
+          });
+          resolve();
+        }
       }
-    }
-  };
+    };
+  });
 }
-
+export async function updateUser({ commit }, { updateInfo }) {
+  await API.updateUser(updateInfo);
+  const response = await API.loginUser({});
+  commit(types.UPDATE_USER, { userInfo: response.data.data });
+}
 // To Complete
 
-// export const updateUser = ({ commit }, { updateInfo }) => {
-//   return new Promise((resoleve, reject) => {
-//     Vue.axios
-//       .post(
-//         "//blocks.musixise.com/api/user/updateInfo",
-//         JSON.stringify(updateInfo),
-//         req_config
-//       )
-//       .then(
-//         response => {
-//           console.log("update user successful:", response.data);
-//           // commit(types.UPDATE_USER,{userInfo:response.data.data});
-//         },
-//         () => {
-//           reject();
-//         }
-//       );
-//   });
-// };
 // export const loadRecommend = ({ commit }) => {
 //   Vue.axios
 //     .post("//blocks.musixise.com/api/home", "", req_config)

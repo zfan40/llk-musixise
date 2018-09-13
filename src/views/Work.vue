@@ -1,15 +1,7 @@
 <template>
 <div class="main">
   <header style="height:100px;">
-    <div class="global-header">
-      <p>LLK Musixise</p>
-      <div class="menu-btns" v-show="userInfo.userId">
-        我的作品
-      </div>
-      <div class="avatar">
-        <avatar />
-      </div>
-    </div>
+    <global-header />
     <div style="background-color:#00bdd4;height: 40px;line-height:40px;padding-left:20px;padding-right:20px;display: flex;justify-content: space-between;">
       <div style="display:flex;align-items:center;justify-content:center;">
         <div class="">
@@ -42,6 +34,7 @@ import BlockHelper from "@/components/blockhelper/index.vue";
 import WorkLoader from "@/components/workloader/index.vue";
 import Avatar from "@/components/avatar.vue";
 import UserForms from "@/components/UserFormView";
+import GlobalHeader from "@/components/GlobalHeader";
 import scopeEval from "scope-eval";
 import {
   createTrack,
@@ -64,7 +57,8 @@ export default {
     BlockHelper,
     WorkLoader,
     Avatar,
-    UserForms
+    UserForms,
+    GlobalHeader
   },
   data() {
     return {
@@ -79,7 +73,8 @@ export default {
     },
     work() {
       //TODO
-      this.loadWork(this.$store.state.work.content);
+      console.log("----", this.$store.state.work.content);
+      // this.loadWork(this.$store.state.work.content);
       return this.$store.state.work;
     }
   },
@@ -240,7 +235,23 @@ export default {
   },
   created() {
     //TODO:
-    this.$store.dispatch("fetchwork", this.$route.id);
+    this.$store
+      .dispatch("fetchWork", { id: this.$route.params.id })
+      .then(() => {
+        this.loadWork(this.$store.state.work.content);
+      });
+  },
+  beforeRouteUpdate(to, from, next) {
+    // react to route changes...
+    // don't forget to call next()
+    // console.log(to.params.id);
+    if (to.name === "work") {
+      this.$store.dispatch("fetchWork", { id: to.params.id }).then(() => {
+        this.loadWork(this.$store.state.work.content);
+      });
+    } else {
+      next();
+    }
   },
   mounted() {
     const self = this;

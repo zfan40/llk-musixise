@@ -3,13 +3,15 @@ import Vue from "vue";
 
 const state = {
   info: {},
-  content: {}
+  content: ""
 };
 
 const mutations = {
   [types.SET_WORK_DETAIL](state, { info, content }) {
-    state.info = info;
-    state.content = content;
+    // state.info = info;
+    // state.content = content;
+    Vue.set(state, "info", info);
+    Vue.set(state, "content", content);
   }
 };
 

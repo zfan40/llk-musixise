@@ -193,24 +193,10 @@ export async function registerUser(registerInfo) {
   return Promise.resolve(registerInfo);
 }
 
-export const updateUser = ({ commit }, { updateInfo }) => {
-  console.log("sdfsdf", updateInfo);
-  return new Promise((resoleve, reject) => {
-    axios
-      .post(
-        "//blocks.musixise.com/api/user/updateInfo",
-        JSON.stringify(updateInfo),
-        reqConfig
-      )
-      .then(
-        response => {
-          console.log("update user successful:", response.data);
-          resolve(response.data);
-          // commit(types.UPDATE_USER,{userInfo:response.data.data});
-        },
-        () => {
-          reject();
-        }
-      );
-  });
-};
+export function updateUser(updateInfo) {
+  axios.put(
+    "//blocks.musixise.com/api/v1/user/updateInfo",
+    JSON.stringify(updateInfo),
+    reqConfig
+  );
+}

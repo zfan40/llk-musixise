@@ -3,10 +3,17 @@
   <header style="height:60px;">
     <global-header />
   </header>
-  <div id="work-container">
-    <div class="song-item" v-for="item in musixiserOwnWorks" :key="item.id">
-      <song-grid :workObj="item" :onclickcell="onClickCell"/>
-    </div>
+  <div>
+    探索专区还在开发
+  </div>
+  <div>
+    古典歌曲
+  </div>
+  <div>
+    中国戏剧
+  </div>
+  <div>
+    中国风
   </div>
   <user-forms />
 </div>
@@ -58,7 +65,6 @@ export default {
     fetchData() {
       let userId =
         this.$route.params.id || this.$store.state.user.userInfo.userId;
-      console.log("user id is,", userId);
       if (userId) {
         this.$store.dispatch("loadMusixiserDetail", {
           userId
@@ -82,36 +88,9 @@ export default {
     }
   },
   created() {
-    console.log("user created");
     this.fetchData();
   },
-  mounted() {
-    console.log("user mounted");
-  },
-  beforeRouteUpdate(to, from, next) {
-    // react to route changes...
-    // don't forget to call next()
-    // navigate between `/foo/1` and `/foo/2`
-    const userId = to.params.id;
-    if (userId) {
-      this.$store.dispatch("loadMusixiserDetail", {
-        userId
-      });
-      this.$store.dispatch("loadMusixiserWorks", {
-        userId,
-        pagination: { currentPage: 1 }
-      });
-      this.$store.dispatch("loadMusixiserFavWorks", {
-        userId,
-        pagination: { currentPage: 1 }
-      });
-    }
-    next();
-  },
-  beforeRouteLeave(to, from, next) {
-    console.log("router leaving to: ", to);
-    next();
-  },
+  mounted() {},
   updated() {}
 };
 </script>

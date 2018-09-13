@@ -19,7 +19,7 @@
   <div class="" v-else>
     <el-popover ref="user-popover" placement="bottom" title="" width="200" trigger="hover">
       <el-menu>
-        <el-menu-item @click="redirectTo()" index="1-1">
+        <el-menu-item @click="checkMe" index="1-1">
           <i class="el-icon-menu"></i><span>查看个人</span>
         </el-menu-item>
         <el-menu-item @click="update" index="2-1">
@@ -54,9 +54,6 @@ export default {
     hidePopOver() {
       this.popoverVisible = false;
     },
-    perform() {
-      this.$router.push("/perform");
-    },
     register() {
       this.hidePopOver();
       // pop register dialog (this is a sync, no need for dispatch)
@@ -88,9 +85,12 @@ export default {
         });
       });
     },
+    checkMe() {
+      const url = `/user/${this.userInfo.userId}`;
+      this.redirectTo(url);
+    },
     redirectTo(url) {
-      console.log("redirecting to: ", url);
-      console.log(this.userInfo);
+      this.$router.push(url);
     }
   }
 };
