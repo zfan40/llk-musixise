@@ -38,9 +38,7 @@
 </template>
 
 <script>
-import Avatar from "@/components/avatar.vue";
 import UserForms from "@/components/UserFormView";
-import SongGrid from "@/components/common/songGrid";
 import GlobalHeader from "@/components/GlobalHeader";
 // import scopeEval from "scope-eval";
 // import {
@@ -54,60 +52,18 @@ import GlobalHeader from "@/components/GlobalHeader";
 //   highlightBlock
 // } from "../util/core/audioAPI";
 
-let clock;
 export default {
-  name: "workspace",
+  name: "about",
   components: {
-    Avatar,
     UserForms,
-    SongGrid,
     GlobalHeader
   },
   data() {
-    return {
-      showTutorial: false,
-      tutorialHeight: 0,
-      startMeasure: 1
-    };
+    return {};
   },
-  computed: {
-    userInfo() {
-      this.fetchData();
-      return this.$store.state.user.userInfo;
-    },
-    musixiserOwnWorks() {
-      return this.$store.state.musixiserdetail.ownWorks;
-    }
-  },
-  methods: {
-    fetchData() {
-      let userId =
-        this.$route.params.id || this.$store.state.user.userInfo.userId;
-      if (userId) {
-        this.$store.dispatch("loadMusixiserDetail", {
-          userId
-        });
-        this.$store.dispatch("loadMusixiserWorks", {
-          userId,
-          pagination: { currentPage: 1 }
-        });
-        this.$store.dispatch("loadMusixiserFavWorks", {
-          userId,
-          pagination: { currentPage: 1 }
-        });
-      }
-    },
-    handleToggleTutorial() {
-      this.showTutorial = !this.showTutorial;
-    },
-    onClickCell(a) {
-      console.log(a);
-      this.$router.push(`/work/${a.id}`);
-    }
-  },
-  created() {
-    this.fetchData();
-  },
+  computed: {},
+  methods: {},
+  created() {},
   mounted() {},
   updated() {}
 };

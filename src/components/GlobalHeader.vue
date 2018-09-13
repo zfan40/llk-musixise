@@ -1,7 +1,7 @@
 <template>
   <div class="global-header">
     <router-link tag="p" to="/">
-      <a>LLK Musixise</a>
+      <a>音乐练习</a>
     </router-link>
     
     <el-menu :default-active="activeIndex" 
@@ -30,6 +30,16 @@
     <!-- <div class="menu-btns" v-show="userInfo.userId">
       我的作品
     </div> -->
+    <div class="search">
+      <el-autocomplete
+        disabled
+        clearable
+        v-model="searchKey"
+        :fetch-suggestions="querySearchAsync"
+        placeholder="搜索作品/作者/课程"
+        @select="handleSelect"
+      ></el-autocomplete>
+    </div>
     <div class="avatar">  
       <avatar />
     </div>
@@ -45,11 +55,13 @@ export default {
     Avatar
   },
   data() {
-    return {};
+    return {
+      searchKey: ""
+    };
   },
   computed: {
     userInfo() {
-      this.fetchData();
+      // this.fetchData();
       return this.$store.state.user.userInfo;
     },
     activeIndex() {
@@ -63,26 +75,26 @@ export default {
       console.log(a[e - 1]);
       this.$router.push(a[e - 1]);
     },
-    fetchData() {
-      let userId =
-        this.$route.params.id || this.$store.state.user.userInfo.userId;
-      if (userId) {
-        this.$store.dispatch("loadMusixiserDetail", {
-          userId
-        });
-        this.$store.dispatch("loadMusixiserWorks", {
-          userId,
-          pagination: { currentPage: 1 }
-        });
-        this.$store.dispatch("loadMusixiserFavWorks", {
-          userId,
-          pagination: { currentPage: 1 }
-        });
-      }
-    }
+    querySearchAsync() {}
+    // fetchData() {
+    //   let userId = this.$store.state.user.userInfo.userId;
+    //   if (userId) {
+    //     this.$store.dispatch("loadMusixiserDetail", {
+    //       userId
+    //     });
+    //     this.$store.dispatch("loadMusixiserWorks", {
+    //       userId,
+    //       pagination: { currentPage: 1 }
+    //     });
+    //     this.$store.dispatch("loadMusixiserFavWorks", {
+    //       userId,
+    //       pagination: { currentPage: 1 }
+    //     });
+    //   }
+    // }
   },
   created() {
-    this.fetchData();
+    // this.fetchData();
   },
   mounted() {},
   updated() {}

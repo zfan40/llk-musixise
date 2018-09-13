@@ -31,7 +31,7 @@
       </el-menu>
     </el-popover>
     <div class="AvatarMenu">
-      <span class="name">你好,{{userInfo.realname}}</span>
+      <span class="name">Hi, {{userInfo.realname}}</span>
       <img class="avatar" v-popover:user-popover :src="userInfo.smallAvatar" alt="]v[">
     </div>
   </div>
@@ -110,7 +110,7 @@ export default {
     cursor: pointer;
   }
   .name {
-    padding: 5px 0;
+    padding: 0px 16px;
     font-size: 13px;
   }
 }

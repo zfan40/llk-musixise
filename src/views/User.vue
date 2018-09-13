@@ -13,7 +13,6 @@
 </template>
 
 <script>
-import Avatar from "@/components/avatar.vue";
 import UserForms from "@/components/UserFormView";
 import SongGrid from "@/components/common/songGrid";
 import GlobalHeader from "@/components/GlobalHeader";
@@ -29,11 +28,9 @@ import GlobalHeader from "@/components/GlobalHeader";
 //   highlightBlock
 // } from "../util/core/audioAPI";
 
-let clock;
 export default {
   name: "workspace",
   components: {
-    Avatar,
     UserForms,
     SongGrid,
     GlobalHeader
@@ -127,26 +124,6 @@ export default {
   display: flex;
   .song-item {
     margin: 20px;
-  }
-}
-.global-header {
-  display: flex;
-  justify-content: space-between;
-  background-color: white;
-  height: 60px;
-  line-height: 60px;
-  margin: 0;
-  padding-left: 28px;
-  background-color: #ffcc33;
-  .menu-btns {
-    flex: 2;
-    padding-left: 30%;
-  }
-  .avatar {
-    padding-right: 10px;
-    // padding-top: 5px;
-    display: flex;
-    align-items: center;
   }
 }
 </style>

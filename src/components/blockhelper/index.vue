@@ -34,16 +34,16 @@
         <block type="variables_get"></block>
       </category>
 
-      <category name="Boolean" colour="30">
+      <!-- <category name="Boolean" colour="30">
         <block type="logic_compare"></block>
         <block type="logic_operation"></block>
         <block type="logic_negate"></block>
         <block type="logic_boolean"></block>
         <block type="logic_null"></block>
         <block type="logic_ternary"></block>
-      </category>
+      </category> -->
 
-      <category name="Math" colour="60">
+      <!-- <category name="Math" colour="60">
         <block type="math_number">
           <field name="NUM">123</field>
         </block>
@@ -80,7 +80,7 @@
           </value>
         </block>
         <block type="math_random_float"></block>
-      </category>
+      </category> -->
 
       <category name="Sounds" colour="90">
         <block type="create_track">

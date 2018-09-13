@@ -1,10 +1,12 @@
 import * as Cookies from "js-cookie";
-// import Vue from 'vue';
+import Vue from "vue";
+import { Message } from "element-ui";
 const axios = require("axios");
 
 axios.interceptors.response.use(res => {
   if (res.data.errcode !== "0") {
-    alert(res.data.resmsg);
+    Message(res.data.resmsg);
+    // alert(res.data.resmsg);
     return Promise.reject(res);
   }
   return res;

@@ -92,9 +92,11 @@ export async function fetchWork({ dispatch, commit, state }, { id }) {
   // console.log(2);
   // console.log("xxi", project.data.data.url);
   // console.log("xxi", project.data.data.userId);
-  const musixiser = await API.fetchMusixiser(project.data.data.userId);
+
+  // const musixiser = await API.fetchMusixiser(project.data.data.userId);
   // console.log("work musixiser info: ", musixiser.data.data);
-  project.data.data.userVO = musixiser.data.data; // 拼接口。
+
+  // project.data.data.userVO = musixiser.data.data; // 拼接口。
   return new Promise((resolve, reject) => {
     const request = new XMLHttpRequest();
     request.open("GET", project.data.data.url, true);
