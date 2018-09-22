@@ -3,6 +3,7 @@ import Vue from "vue";
 import { Message } from "element-ui";
 const axios = require("axios");
 
+// real api address is 101.200.212.87:8083 <=> blocks.musixise.com
 axios.interceptors.response.use(res => {
   if (res.data.errcode !== "0") {
     Message(res.data.resmsg);

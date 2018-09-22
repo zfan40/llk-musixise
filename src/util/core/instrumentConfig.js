@@ -105,14 +105,14 @@ const harp = () =>
 const guitar = () =>
   new Tone.Sampler(
     {
-      A2: "A2.[mp3|ogg]",
-      A3: "A3.[mp3|ogg]",
-      C3: "C3.[mp3|ogg]",
-      C4: "C4.[mp3|ogg]",
-      D2: "E3.[mp3|ogg]",
-      D4: "E5.[mp3|ogg]",
-      E2: "E2.[mp3|ogg]",
-      E3: "E3.[mp3|ogg]"
+      // A2: "A2.[mp3|ogg]",
+      // A3: "A3.[mp3|ogg]",
+      // C3: "C3.[mp3|ogg]",
+      // C4: "C4.[mp3|ogg]",
+      D1: "D1.[mp3|ogg]",
+      D2: "D2.[mp3|ogg]",
+      D3: "D3.[mp3|ogg]",
+      D4: "D4.[mp3|ogg]"
     },
     {
       release: 1,
