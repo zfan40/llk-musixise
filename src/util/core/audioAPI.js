@@ -212,7 +212,15 @@ export function createMeasureOnScaleNew( // this would finally call createMeasur
       //["1''","1"]
       return sequenceNumber.map(noteStr => {
         const { note, octave } = Util.getNoteAndOctave(noteStr);
-        return Tone.Frequency(basenote)
+        // basenote is 'C4' or 'B4'
+        if (!parseInt(basenote))
+          return Tone.Frequency(basenote)
+            .transpose(
+              12 * octave + scaleInterval[(note - 1) % scaleInterval.length] - 1
+            )
+            .toNote();
+        //base note is 60 or 64
+        return Tone.Midi(basenote)
           .transpose(
             12 * octave + scaleInterval[(note - 1) % scaleInterval.length] - 1
           )
@@ -222,7 +230,14 @@ export function createMeasureOnScaleNew( // this would finally call createMeasur
       // "1''"
       // Tone.transpose receives an integer to transpose
       const { note, octave } = Util.getNoteAndOctave(sequenceNumber);
-      return Tone.Frequency(basenote)
+      if (!parseInt(basenote))
+        return Tone.Frequency(basenote)
+          .transpose(
+            12 * octave + scaleInterval[(note - 1) % scaleInterval.length] - 1
+          )
+          .toNote();
+      //base note is 60 or 64
+      return Tone.Midi(basenote)
         .transpose(
           12 * octave + scaleInterval[(note - 1) % scaleInterval.length] - 1
         )
