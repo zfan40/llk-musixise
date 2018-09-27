@@ -116,10 +116,98 @@
               <field name="TEXT">00</field>
             </block>
           </value>
+          <value name="PART">
+            <block type="math_number">
+              <field name="NUM">1</field>
+            </block>
+          </value>
         </block>
-        <block type="create_measure_on_scale_new"></block>
-        <block type="create_measure_match_zero_new"></block>
-        <block type="create_measure_on_scale_match_zero_new"></block>
+        <block type="create_measure_on_scale_new">
+          <value name="MEASURE">
+            <block type="math_number">
+              <field name="NUM">1</field>
+            </block>
+          </value>
+          <value name="SEQUENCE">
+            <block type="text">
+              <field name="TEXT">1,2</field>
+            </block>
+          </value>
+          <value name="BEAT">
+            <block type="text">
+              <field name="TEXT">00</field>
+            </block>
+          </value>
+          <value name="SCALE">
+            <block type="text">
+              <field name="TEXT"></field>
+            </block>
+          </value>
+          <value name="BASENOTE">
+            <block type="text">
+              <field name="TEXT">G4</field>
+            </block>
+          </value>
+          <value name="PART">
+            <block type="math_number">
+              <field name="NUM">1</field>
+            </block>
+          </value>
+        </block>
+        <block type="create_measure_match_zero_new">
+          <value name="MEASURE">
+            <block type="math_number">
+              <field name="NUM">1</field>
+            </block>
+          </value>
+          <value name="SEQUENCE">
+            <block type="text">
+              <field name="TEXT">C4,C4</field>
+            </block>
+          </value>
+          <value name="BEAT">
+            <block type="text">
+              <field name="TEXT">00</field>
+            </block>
+          </value>
+          <value name="PART">
+            <block type="math_number">
+              <field name="NUM">1</field>
+            </block>
+          </value>
+        </block>
+        <block type="create_measure_on_scale_match_zero_new">
+          <value name="MEASURE">
+            <block type="math_number">
+              <field name="NUM">1</field>
+            </block>
+          </value>
+          <value name="SEQUENCE">
+            <block type="text">
+              <field name="TEXT">1,2</field>
+            </block>
+          </value>
+          <value name="BEAT">
+            <block type="text">
+              <field name="TEXT">00</field>
+            </block>
+          </value>
+          <value name="SCALE">
+            <block type="text">
+              <field name="TEXT"></field>
+            </block>
+          </value>
+          <value name="BASENOTE">
+            <block type="text">
+              <field name="TEXT">G4</field>
+            </block>
+          </value>
+          <value name="PART">
+            <block type="math_number">
+              <field name="NUM">1</field>
+            </block>
+          </value>
+        </block>
         <block type="create_effect"></block>
       </category>
 

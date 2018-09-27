@@ -27,13 +27,13 @@ export function getUserInfo(wxcode) {
     // alert('cookie used');
     reqConfig.headers.Authorization = `${tokenInCookie}`;
     // tokenObj.access_token = tokenInCookie;
-    return axios.get("//blocks.musixise.com/api/v1/user/getInfo", reqConfig);
+    return axios.get("//101.200.212.87:8083/api/v1/user/getInfo", reqConfig);
   } else if (!tokenInCookie && wxcode) {
     // alert('no cookie');
     return new Promise((resolve, reject) => {
       axios
         .post(
-          `//blocks.musixise.com/api/v1/user/oauth/wechat/callback?code=${wxcode}`,
+          `//101.200.212.87:8083/api/v1/user/oauth/wechat/callback?code=${wxcode}`,
           "",
           reqConfig
         )
@@ -49,7 +49,7 @@ export function getUserInfo(wxcode) {
               expires: 7
             });
             return axios.get(
-              "//blocks.musixise.com/api/v1/user/getInfo",
+              "//101.200.212.87:8083/api/v1/user/getInfo",
               reqConfig
             );
           },
@@ -89,7 +89,7 @@ export function uploadRecord(record, info) {
       try {
         // important, othereise dispatch won't be stoped here...
         postFix = await axios.post(
-          "//blocks.musixise.com/api/v1/uploadAudio",
+          "//101.200.212.87:8083/api/v1/uploadAudio",
           fd,
           formReqConfig
         );
@@ -106,7 +106,7 @@ export function uploadRecord(record, info) {
       console.log(workURL);
       return axios
         .post(
-          "//blocks.musixise.com/api/v1/work/create",
+          "//101.200.212.87:8083/api/v1/work/create",
           JSON.stringify(param),
           reqConfig
         )
@@ -123,26 +123,26 @@ export function uploadRecord(record, info) {
 }
 
 export function fetchMbox(id) {
-  return axios.get(`//blocks.musixise.com/api/v1/work/detail/${id}`, reqConfig);
+  return axios.get(`//101.200.212.87:8083/api/v1/work/detail/${id}`, reqConfig);
 }
 export function fetchMusixiser(id) {
-  return axios.get(`//blocks.musixise.com/api/v1/user/detail/${id}`, reqConfig);
+  return axios.get(`//101.200.212.87:8083/api/v1/user/detail/${id}`, reqConfig);
 }
 export function fetchWorksFromMusixiser(id, page) {
   return axios.get(
-    `//blocks.musixise.com/api/v1/work/getListByUid/${id}?page=${page}&size=15`,
+    `//101.200.212.87:8083/api/v1/work/getListByUid/${id}?page=${page}&size=15`,
     reqConfig
   );
 }
 export function fetchFavWorks(id, page) {
   return axios.get(
-    `//blocks.musixise.com/api/v1/favorite/getWorkList/${id}?page=${page}&size=15`,
+    `//101.200.212.87:8083/api/v1/favorite/getWorkList/${id}?page=${page}&size=15`,
     reqConfig
   );
 }
 export function toggleFavSong({ workId, status }) {
   return axios.post(
-    "//blocks.musixise.com/api/v1/favorite/create",
+    "//101.200.212.87:8083/api/v1/favorite/create",
     JSON.stringify({ workId, status }),
     reqConfig
   );
@@ -151,7 +151,7 @@ export function toggleFavSong({ workId, status }) {
 }
 export function updateWorkTitle({ id, title }) {
   return axios.put(
-    `//blocks.musixise.com/api/v1/work/updateWork/${id}`,
+    `//101.200.212.87:8083/api/v1/work/updateWork/${id}`,
     JSON.stringify({ title }),
     reqConfig
   );
@@ -159,7 +159,7 @@ export function updateWorkTitle({ id, title }) {
   // .catch((err) => { console.log(err); });
 }
 export function getRecommendations() {
-  return axios.post("//blocks.musixise.com/api/v1/home", "", reqConfig);
+  return axios.post("//101.200.212.87:8083/api/v1/home", "", reqConfig);
 }
 
 // below is PC login
@@ -167,7 +167,7 @@ export async function loginUser(loginInfo) {
   const tokenInCookie = Cookies.get("serviceToken");
   if (loginInfo && !tokenInCookie) {
     const auth = await axios.post(
-      "//blocks.musixise.com/api/v1/user/authenticate",
+      "//101.200.212.87:8083/api/v1/user/authenticate",
       JSON.stringify(loginInfo),
       reqConfig
     );
@@ -175,16 +175,16 @@ export async function loginUser(loginInfo) {
     Cookies.set("serviceToken", auth.data.data.id_token, {
       expires: 7
     });
-    return axios.get("//blocks.musixise.com/api/v1/user/getInfo", reqConfig);
+    return axios.get("//101.200.212.87:8083/api/v1/user/getInfo", reqConfig);
   } else {
     reqConfig.headers.Authorization = `${tokenInCookie}`;
-    return axios.get("//blocks.musixise.com/api/v1/user/getInfo", reqConfig);
+    return axios.get("//101.200.212.87:8083/api/v1/user/getInfo", reqConfig);
   }
 }
 
 export async function registerUser(registerInfo) {
   const response = await axios.post(
-    "//blocks.musixise.com/api/v1/user/register",
+    "//101.200.212.87:8083/api/v1/user/register",
     JSON.stringify(registerInfo),
     reqConfig
   );
@@ -198,7 +198,7 @@ export async function registerUser(registerInfo) {
 
 export function updateUser(updateInfo) {
   axios.put(
-    "//blocks.musixise.com/api/v1/user/updateInfo",
+    "//101.200.212.87:8083/api/v1/user/updateInfo",
     JSON.stringify(updateInfo),
     reqConfig
   );
