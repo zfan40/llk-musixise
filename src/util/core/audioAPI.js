@@ -65,7 +65,8 @@ const Util = {
     return a;
   },
   getNoteAndOctave: function(noteStr) {
-    //receives a note string, like 1 or 1' or ''1
+    //receives a note string, like 1 or 1' or ''1,even ''1b, 3#''
+    //1,1#,2,2#,3,4,4#,5,5#,6,7b,7,1'
     const note = noteStr.match(/[0-9]+/g)[0]; // string
     const octaveUp = noteStr.match(/[0-9]+'+/g)
       ? noteStr.match(/[0-9]+'+/g)[0].length - note.length
@@ -73,9 +74,14 @@ const Util = {
     const octaveDown = noteStr.match(/'+[0-9]+/g)
       ? noteStr.match(/'+[0-9]+/g)[0].length - note.length
       : 0;
+    const sharp =
+      noteStr.split("").filter(item => item == "#").length -
+      noteStr.split("").filter(item => item == "b").length;
+
     return {
       note,
-      octave: octaveUp - octaveDown
+      octave: octaveUp - octaveDown,
+      sharp
     };
   },
   getToneNotes: function(sequence, beat, tempo, volumn, metre, measureCount) {
@@ -205,46 +211,59 @@ export function createMeasureOnScaleNew( // this would finally call createMeasur
     scaleInterval = scales[scale];
   }
   const sequenceArray = JSON.parse(
-    `[${sequence}]`.replace(/('*[0-9]+'*)/g, '"$1"')
+    `[${sequence}]`.replace(/('*[0-9]+#*b*'*)/g, '"$1"')
   ); // only integer
   const notesFromNumbers = sequenceArray.map(sequenceNumber => {
     if (typeof sequenceNumber === "object") {
       //["1''","1"]
       return sequenceNumber.map(noteStr => {
-        const { note, octave } = Util.getNoteAndOctave(noteStr);
+        const { note, octave, sharp } = Util.getNoteAndOctave(noteStr);
         // basenote is 'C4' or 'B4'
         if (!parseInt(basenote))
           return Tone.Frequency(basenote)
             .transpose(
-              12 * octave + scaleInterval[(note - 1) % scaleInterval.length] - 1
+              12 * (octave + Math.floor((note - 1) / scaleInterval.length)) +
+                scaleInterval[(note - 1) % scaleInterval.length] +
+                sharp -
+                1
             )
             .toNote();
         //base note is 60 or 64
         return Tone.Midi(basenote)
           .transpose(
-            12 * octave + scaleInterval[(note - 1) % scaleInterval.length] - 1
+            12 * (octave + Math.floor((note - 1) / scaleInterval.length)) +
+              scaleInterval[(note - 1) % scaleInterval.length] +
+              sharp -
+              1
           )
           .toNote();
       });
     } else {
       // "1''"
       // Tone.transpose receives an integer to transpose
-      const { note, octave } = Util.getNoteAndOctave(sequenceNumber);
+      const { note, octave, sharp } = Util.getNoteAndOctave(sequenceNumber);
       if (!parseInt(basenote))
         return Tone.Frequency(basenote)
           .transpose(
-            12 * octave + scaleInterval[(note - 1) % scaleInterval.length] - 1
+            12 * (octave + Math.floor((note - 1) / scaleInterval.length)) +
+              scaleInterval[(note - 1) % scaleInterval.length] +
+              sharp -
+              1
           )
           .toNote();
       //base note is 60 or 64
       return Tone.Midi(basenote)
         .transpose(
-          12 * octave + scaleInterval[(note - 1) % scaleInterval.length] - 1
+          12 * (octave + Math.floor((note - 1) / scaleInterval.length)) +
+            scaleInterval[(note - 1) % scaleInterval.length] +
+            sharp -
+            1
         )
         .toNote();
     }
   });
-  // console.log(notesFromNumbers); //["C3","D3",["C3","D4"]]
+  // console.log("notesFromNumbers", notesFromNumbers); //["C3","D3",["C3","D4"]]
+  //[["C3","E3"],"G3"] => "[[C3,E3],G3]"
   const fedNotes = notesFromNumbers.reduce((a, b) => {
     let pre = a;
     let post = b;
@@ -254,9 +273,10 @@ export function createMeasureOnScaleNew( // this would finally call createMeasur
     if (typeof b == "object") {
       post = `[${b}]`;
     }
-    return `${pre},${post}`;
-  });
-  // console.log(fedNotes);
+    if (pre) return `${pre},${post}`;
+    else return `${post}`;
+  }, "");
+  console.log("fedNotes", fedNotes);
   createMeasureNew(measure, fedNotes, beat, matchZero, blockId, part);
 }
 

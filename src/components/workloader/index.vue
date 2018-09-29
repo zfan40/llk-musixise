@@ -7,7 +7,15 @@
 
 <script>
 import Blockly from "node-blockly/browser"; // import Blockly
-import { test1, mario, ff, pianophase, overworldMario } from "@/util/demos";
+import {
+  test1,
+  mario,
+  ff,
+  pianophase,
+  overworldMario,
+  chunjiang,
+  kentJazz
+} from "@/util/demos";
 export default {
   data() {
     return {
@@ -31,6 +39,14 @@ export default {
         {
           value: "overworldMario",
           label: "overworldMario"
+        },
+        {
+          value: "chunjiang",
+          label: "chunjiang"
+        },
+        {
+          value: "kentJazz",
+          label: "kentJazz"
         }
       ],
       value8: ""
@@ -39,7 +55,15 @@ export default {
   methods: {
     change(e) {
       console.log(e);
-      const a = { test1, mario, ff, pianophase, overworldMario };
+      const a = {
+        test1,
+        mario,
+        ff,
+        pianophase,
+        overworldMario,
+        chunjiang,
+        kentJazz
+      };
       this.loadWork(a[e]);
     },
     loadWork(blocklyXmlText) {
