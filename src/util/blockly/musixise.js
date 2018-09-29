@@ -89,13 +89,8 @@ Blockly.defineBlocksWithJsonArray([
   // Block for colour picker.
   {
     type: "create_measure_new",
-    message0: "音符对位 小节 %1 音序 %2 拍子%3 声部 %4",
+    message0: "音符对位 音序 %1 拍子%2 声部 %3",
     args0: [
-      {
-        type: "input_value",
-        name: "MEASURE",
-        check: "Number"
-      },
       {
         type: "input_value",
         name: "SEQUENCE",
@@ -122,17 +117,10 @@ Blockly.defineBlocksWithJsonArray([
 ]);
 
 Blockly.JavaScript["create_measure_new"] = function(block) {
-  const [measure, sequence, beat, part] = [
-    "MEASURE",
-    "SEQUENCE",
-    "BEAT",
-    "PART"
-  ].map(item =>
+  const [sequence, beat, part] = ["SEQUENCE", "BEAT", "PART"].map(item =>
     Blockly.JavaScript.valueToCode(block, item, Blockly.JavaScript.ORDER_NONE)
   );
-  return `createMeasureNew(${measure},${sequence},${beat},false,'${
-    block.id
-  }',${part});\n`;
+  return `createMeasureNew(${sequence},${beat},false,'${block.id}',${part});\n`;
 };
 
 Blockly.defineBlocksWithJsonArray([
@@ -214,13 +202,8 @@ Blockly.defineBlocksWithJsonArray([
   // Block for colour picker.
   {
     type: "create_measure_on_scale_new",
-    message0: "音级对位 小节%1 音序 %2 拍子%3 调式%4 根音%5 声部%6",
+    message0: "音级对位 音序 %1 拍子%2 调式%3 根音%4 声部%5",
     args0: [
-      {
-        type: "input_value",
-        name: "MEASURE",
-        check: "Number"
-      },
       {
         type: "input_value",
         name: "SEQUENCE",
@@ -257,8 +240,7 @@ Blockly.defineBlocksWithJsonArray([
 ]);
 
 Blockly.JavaScript["create_measure_on_scale_new"] = function(block) {
-  const [measure, sequence, beat, scale, basenote, part] = [
-    "MEASURE",
+  const [sequence, beat, scale, basenote, part] = [
     "SEQUENCE",
     "BEAT",
     "SCALE",
@@ -267,7 +249,7 @@ Blockly.JavaScript["create_measure_on_scale_new"] = function(block) {
   ].map(item =>
     Blockly.JavaScript.valueToCode(block, item, Blockly.JavaScript.ORDER_NONE)
   );
-  return `createMeasureOnScaleNew(${measure},${sequence},${beat},${scale},${basenote},false,'${
+  return `createMeasureOnScaleNew(${sequence},${beat},${scale},${basenote},false,'${
     block.id
   }',${part});\n`;
 };
@@ -276,13 +258,8 @@ Blockly.defineBlocksWithJsonArray([
   // Block for colour picker.
   {
     type: "create_measure_match_zero_new",
-    message0: "音符对0 小节 %1 音序 %2 拍子%3 声部%4",
+    message0: "音符对0 音序 %1 拍子%2 声部%3",
     args0: [
-      {
-        type: "input_value",
-        name: "MEASURE",
-        check: "Number"
-      },
       {
         type: "input_value",
         name: "SEQUENCE",
@@ -309,30 +286,18 @@ Blockly.defineBlocksWithJsonArray([
 ]);
 
 Blockly.JavaScript["create_measure_match_zero_new"] = function(block) {
-  const [measure, sequence, beat, part] = [
-    "MEASURE",
-    "SEQUENCE",
-    "BEAT",
-    "PART"
-  ].map(item =>
+  const [sequence, beat, part] = ["SEQUENCE", "BEAT", "PART"].map(item =>
     Blockly.JavaScript.valueToCode(block, item, Blockly.JavaScript.ORDER_NONE)
   );
-  return `createMeasureNew(${measure},${sequence},${beat},true,'${
-    block.id
-  }',${part});\n`;
+  return `createMeasureNew(${sequence},${beat},true,'${block.id}',${part});\n`;
 };
 
 Blockly.defineBlocksWithJsonArray([
   // Block for colour picker.
   {
     type: "create_measure_on_scale_match_zero_new",
-    message0: "音级对0 小节 %1 音序 %2 拍子%3 调式%4 根音%5 声部%6",
+    message0: "音级对0 音序 %1 拍子%2 调式%3 根音%4 声部%5",
     args0: [
-      {
-        type: "input_value",
-        name: "MEASURE",
-        check: "Number"
-      },
       {
         type: "input_value",
         name: "SEQUENCE",
@@ -369,8 +334,7 @@ Blockly.defineBlocksWithJsonArray([
 ]);
 
 Blockly.JavaScript["create_measure_on_scale_match_zero_new"] = function(block) {
-  const [measure, sequence, beat, scale, basenote, part] = [
-    "MEASURE",
+  const [sequence, beat, scale, basenote, part] = [
     "SEQUENCE",
     "BEAT",
     "SCALE",
@@ -379,7 +343,9 @@ Blockly.JavaScript["create_measure_on_scale_match_zero_new"] = function(block) {
   ].map(item =>
     Blockly.JavaScript.valueToCode(block, item, Blockly.JavaScript.ORDER_NONE)
   );
-  return `createMeasureOnScaleNew(${measure},${sequence},${beat},${scale},${basenote},true,'${
+  return `createMeasureOnScaleNew(${sequence},${beat},${scale},${basenote},true,'${
     block.id
   }',${part});\n`;
 };
+
+// from blockly games appengine/js/js-blocks

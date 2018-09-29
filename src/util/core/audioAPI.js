@@ -144,38 +144,28 @@ const Util = {
 
 //when creating new measures, accumulate measure one by one
 // a song has many tracks. one track can have many parts, one part can have many measures
-export function createMeasureNew(
-  measure,
-  sequence,
-  beat,
-  matchZero,
-  blockId,
-  part
-) {
+export function createMeasureNew(sequence, beat, matchZero, blockId, part) {
   if (part == undefined) part = 1;
   if (!tracks[currentTrackId - 1].parts[part - 1]) {
     tracks[currentTrackId - 1].parts[part - 1] = {};
     tracks[currentTrackId - 1].parts[part - 1].measures = [];
-    tracks[currentTrackId - 1].parts[part - 1].measures[measure - 1] = {
-      measure,
+    tracks[currentTrackId - 1].parts[part - 1].measures.push({
       sequence,
       beat,
       matchZero,
       blockId
-    };
+    });
   } else {
-    tracks[currentTrackId - 1].parts[part - 1].measures[measure - 1] = {
-      measure,
+    tracks[currentTrackId - 1].parts[part - 1].measures.push({
       sequence,
       beat,
       matchZero,
       blockId
-    };
+    });
   }
 }
 
 export function createMeasureOnScaleNew( // this would finally call createMeasureNew
-  measure,
   sequence,
   beat,
   scale,
@@ -277,7 +267,7 @@ export function createMeasureOnScaleNew( // this would finally call createMeasur
     else return `${post}`;
   }, "");
   console.log("fedNotes", fedNotes);
-  createMeasureNew(measure, fedNotes, beat, matchZero, blockId, part);
+  createMeasureNew(fedNotes, beat, matchZero, blockId, part);
 }
 
 // by far, we have got a track's all measures, need to process,normalize
