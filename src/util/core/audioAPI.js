@@ -478,7 +478,7 @@ function prepareTrackNotes(part, track) {
   // }
   console.log("==========================");
   console.log(instrumentMap);
-  const instrument = instrumentMap[timbre]();
+  const instrument = instrumentMap[timbre];
   console.log(instrument);
   // var autoPanner = new Tone.AutoPanner("4n").start();
   // instrument.chain(...effectNodes, autoPanner, Tone.Master);
