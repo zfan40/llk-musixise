@@ -88,44 +88,6 @@ Blockly.JavaScript["create_track"] = function(block) {
 Blockly.defineBlocksWithJsonArray([
   // Block for colour picker.
   {
-    type: "create_measure_new",
-    message0: "音符对位 音序 %1 拍子%2 声部 %3",
-    args0: [
-      {
-        type: "input_value",
-        name: "SEQUENCE",
-        check: "String" //should be array
-      },
-      {
-        type: "input_value",
-        name: "BEAT",
-        check: "String"
-      },
-      {
-        type: "input_value",
-        name: "PART",
-        check: "Number"
-      }
-    ],
-    inputsInline: true,
-    previousStatement: null,
-    nextStatement: null,
-    colour: 355,
-    tooltip: "",
-    helpUrl: ""
-  }
-]);
-
-Blockly.JavaScript["create_measure_new"] = function(block) {
-  const [sequence, beat, part] = ["SEQUENCE", "BEAT", "PART"].map(item =>
-    Blockly.JavaScript.valueToCode(block, item, Blockly.JavaScript.ORDER_NONE)
-  );
-  return `createMeasureNew(${sequence},${beat},false,'${block.id}',${part});\n`;
-};
-
-Blockly.defineBlocksWithJsonArray([
-  // Block for colour picker.
-  {
     type: "create_effect",
     message0: "效果 效果 %1 参数 %2 初始值%3 初始小节 %4 结束值%5 结束小节 %6",
     args0: [
@@ -201,6 +163,52 @@ Blockly.JavaScript["create_effect"] = function(block) {
 Blockly.defineBlocksWithJsonArray([
   // Block for colour picker.
   {
+    type: "create_measure_new",
+    message0: "音符对位 音序 %1 拍子%2 声部 %3",
+    args0: [
+      {
+        type: "input_value",
+        name: "SEQUENCE",
+        check: "String" //should be array
+      },
+      {
+        type: "input_value",
+        name: "BEAT",
+        check: "String"
+      },
+      {
+        type: "input_value",
+        name: "PART",
+        check: "Number"
+      }
+    ],
+    inputsInline: true,
+    previousStatement: null,
+    nextStatement: null,
+    colour: 355,
+    tooltip: "",
+    helpUrl: ""
+  }
+]);
+
+Blockly.JavaScript["create_measure_new"] = function(block) {
+  const [sequence, beat, part] = ["SEQUENCE", "BEAT", "PART"].map(item =>
+    Blockly.JavaScript.valueToCode(block, item, Blockly.JavaScript.ORDER_NONE)
+  );
+  console.log(sequence);
+  const norm_sequence = eval(sequence);
+  const sequenceArray = JSON.parse(
+    `[${norm_sequence}]`.replace(/([ABCDEFG]#*b*[1-9])/g, '"$1"')
+  );
+  console.log(sequenceArray);
+  return `createMeasureNew(${JSON.stringify(sequenceArray)},${beat},false,'${
+    block.id
+  }',${part});\n`;
+};
+
+Blockly.defineBlocksWithJsonArray([
+  // Block for colour picker.
+  {
     type: "create_measure_on_scale_new",
     message0: "音级对位 音序 %1 拍子%2 调式%3 根音%4 声部%5",
     args0: [
@@ -249,9 +257,14 @@ Blockly.JavaScript["create_measure_on_scale_new"] = function(block) {
   ].map(item =>
     Blockly.JavaScript.valueToCode(block, item, Blockly.JavaScript.ORDER_NONE)
   );
-  return `createMeasureOnScaleNew(${sequence},${beat},${scale},${basenote},false,'${
-    block.id
-  }',${part});\n`;
+  const norm_sequence = eval(sequence);
+  const sequenceArray = JSON.parse(
+    `[${norm_sequence}]`.replace(/('*[0-9]+#*b*'*)/g, '"$1"')
+  ); // only integer
+  console.log(sequenceArray);
+  return `createMeasureOnScaleNew(${JSON.stringify(
+    sequenceArray
+  )},${beat},${scale},${basenote},false,'${block.id}',${part});\n`;
 };
 
 Blockly.defineBlocksWithJsonArray([
@@ -289,7 +302,13 @@ Blockly.JavaScript["create_measure_match_zero_new"] = function(block) {
   const [sequence, beat, part] = ["SEQUENCE", "BEAT", "PART"].map(item =>
     Blockly.JavaScript.valueToCode(block, item, Blockly.JavaScript.ORDER_NONE)
   );
-  return `createMeasureNew(${sequence},${beat},true,'${block.id}',${part});\n`;
+  const norm_sequence = eval(sequence);
+  const sequenceArray = JSON.parse(
+    `[${norm_sequence}]`.replace(/([ABCDEFG]#*b*[1-9])/g, '"$1"')
+  );
+  return `createMeasureNew(${JSON.stringify(sequenceArray)},${beat},true,'${
+    block.id
+  }',${part});\n`;
 };
 
 Blockly.defineBlocksWithJsonArray([
@@ -343,9 +362,13 @@ Blockly.JavaScript["create_measure_on_scale_match_zero_new"] = function(block) {
   ].map(item =>
     Blockly.JavaScript.valueToCode(block, item, Blockly.JavaScript.ORDER_NONE)
   );
-  return `createMeasureOnScaleNew(${sequence},${beat},${scale},${basenote},true,'${
-    block.id
-  }',${part});\n`;
+  const norm_sequence = eval(sequence);
+  const sequenceArray = JSON.parse(
+    `[${norm_sequence}]`.replace(/('*[0-9]+#*b*'*)/g, '"$1"')
+  ); // only integer
+  return `createMeasureOnScaleNew(${JSON.stringify(
+    sequenceArray
+  )},${beat},${scale},${basenote},true,'${block.id}',${part});\n`;
 };
 
 // from blockly games appengine/js/js-blocks

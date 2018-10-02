@@ -1,6 +1,7 @@
 import Vue from "vue";
 import Router from "vue-router";
 import Create from "./views/Create.vue";
+import EZCreate from "./views/EZCreate.vue";
 import User from "./views/User.vue";
 import Work from "./views/Work.vue";
 import Home from "./views/Home.vue";
@@ -14,6 +15,11 @@ export default new Router({
       path: "/",
       name: "home",
       component: Home
+    },
+    {
+      path: "/ez-create",
+      name: "ez-create",
+      component: EZCreate
     },
     {
       path: "/create",

@@ -233,6 +233,8 @@ export default {
       },
       media: "https://cdn.cnbj1.fds.api.mi-img.com/blockly-media/"
     });
+
+    demoWorkspace.addChangeListener(e => console.log(e));
     var onresize = function(e) {
       // Compute the absolute coordinates and dimensions of blocklyArea.
       var element = blocklyArea;

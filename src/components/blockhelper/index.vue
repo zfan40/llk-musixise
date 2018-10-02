@@ -83,8 +83,6 @@
       </category> -->
       <category name="Functions" colour="290" custom="PROCEDURE"></category>
       <category name="Sounds" colour="90">
-        <block type="procedures_defnoreturn" name="la"/>
-        <!-- <block type="procedures_callnoreturn"/> -->
         <block type="create_track">
           <value name="TIMBRE">
             <block type="text">

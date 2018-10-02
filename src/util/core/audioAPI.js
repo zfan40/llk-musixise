@@ -92,9 +92,9 @@ const Util = {
     }
     console.log(".....", sequence);
     console.log(".....", beat);
-    const sequenceArray = JSON.parse(
-      `[${sequence}]`.replace(/([ABCDEFG]#*b*[1-9])/g, '"$1"')
-    ); //不对就报错
+    // const sequenceArray = JSON.parse(
+    //   `[${sequence}]`.replace(/([ABCDEFG]#*b*[1-9])/g, '"$1"')
+    // ); //不对就报错
     const noteLen = measureCount * (metre * 240 / tempo / beat.length); //should replace 120 with BPM
     const toneNotes = [];
 
@@ -110,7 +110,7 @@ const Util = {
 
         toneNote = {
           time: index * noteLen,
-          note: sequenceArray[zeroCounter],
+          note: sequence[zeroCounter],
           duration: noteLen,
           velocity: digit === "0" ? volumn / 100 : volumn * digit / 1000
         };
@@ -200,10 +200,10 @@ export function createMeasureOnScaleNew( // this would finally call createMeasur
   if (scale) {
     scaleInterval = scales[scale];
   }
-  const sequenceArray = JSON.parse(
-    `[${sequence}]`.replace(/('*[0-9]+#*b*'*)/g, '"$1"')
-  ); // only integer
-  const notesFromNumbers = sequenceArray.map(sequenceNumber => {
+  // const sequenceArray = JSON.parse(
+  //   `[${sequence}]`.replace(/('*[0-9]+#*b*'*)/g, '"$1"')
+  // ); // only integer
+  const notesFromNumbers = sequence.map(sequenceNumber => {
     if (typeof sequenceNumber === "object") {
       //["1''","1"]
       return sequenceNumber.map(noteStr => {
@@ -254,20 +254,20 @@ export function createMeasureOnScaleNew( // this would finally call createMeasur
   });
   // console.log("notesFromNumbers", notesFromNumbers); //["C3","D3",["C3","D4"]]
   //[["C3","E3"],"G3"] => "[[C3,E3],G3]"
-  const fedNotes = notesFromNumbers.reduce((a, b) => {
-    let pre = a;
-    let post = b;
-    if (typeof a == "object") {
-      pre = `[${a}]`;
-    }
-    if (typeof b == "object") {
-      post = `[${b}]`;
-    }
-    if (pre) return `${pre},${post}`;
-    else return `${post}`;
-  }, "");
-  console.log("fedNotes", fedNotes);
-  createMeasureNew(fedNotes, beat, matchZero, blockId, part);
+  // const fedNotes = notesFromNumbers.reduce((a, b) => {
+  //   let pre = a;
+  //   let post = b;
+  //   if (typeof a == "object") {
+  //     pre = `[${a}]`;
+  //   }
+  //   if (typeof b == "object") {
+  //     post = `[${b}]`;
+  //   }
+  //   if (pre) return `${pre},${post}`;
+  //   else return `${post}`;
+  // }, "");
+  // console.log("fedNotes", fedNotes);
+  createMeasureNew(notesFromNumbers, beat, matchZero, blockId, part);
 }
 
 // by far, we have got a track's all measures, need to process,normalize
@@ -297,22 +297,22 @@ function normalizeMeasures(part) {
     } else {
       if (!part.measures[measureIndex].matchZero) {
         // 对位转成对0，抽出对应的音//TODO: bug here, super mario....seemingly solved
-        const sequenceArray = JSON.parse(
-          `[${part.measures[measureIndex].sequence}]`.replace(
-            /([ABCDEFG]#*b*[1-9])/g,
-            '"$1"'
-          )
-        );
+        // const sequenceArray = JSON.parse(
+        //   `[${part.measures[measureIndex].sequence}]`.replace(
+        //     /([ABCDEFG]#*b*[1-9])/g,
+        //     '"$1"'
+        //   )
+        // );
         const newSeqArray = part.measures[measureIndex].beat
           .split("")
           .map((beatDigit, index) => {
             if (beatDigit.match(/\d/g)) {
-              return sequenceArray[index];
+              return part.measures[measureIndex].sequence[index];
             } else {
               return "";
             }
           });
-        // console.log("bbbbbbbbbbb", newSeqArray);
+        console.log("bbbbbbbbbbb", newSeqArray);
 
         // part.measures[measureIndex].sequence = newSeqArray.filter(note => note != "").join(","); //不行，因为内层数组会被打开
         let s = JSON.stringify(newSeqArray.filter(note => note != "")).replace(
@@ -341,11 +341,13 @@ function normalizeMeasures(part) {
 
   //把所有measure合成一大段 应了老话「不要看小节线」
   part.tonepart = part.measures.reduce((a, b) => {
+    console.log("?", a.sequence);
     return {
       // TODO: if a/b is empty string, no comma here, seemingly solved
-      sequence: `${a.sequence}${a.sequence && b.sequence ? "," : ""}${
-        b.sequence
-      }`,
+      // sequence: `${a.sequence}${a.sequence && b.sequence ? "," : ""}${
+      //   b.sequence
+      // }`,
+      sequence: a.sequence.concat(b.sequence),
       beat: `${a.beat}${b.beat}`
     };
   });
@@ -413,6 +415,7 @@ function prepareTrackNotes(part, track) {
   const effectNodes = Object.keys(effects).map(effectName => {
     const effect = new FXMap[effectName]();
     if (
+      //对于这种要特殊操作，已经问过tone作者
       effectName == "panner" ||
       effectName == "tremolo" ||
       effectName == "vibrato"
