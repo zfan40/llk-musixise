@@ -94,7 +94,7 @@ Blockly.defineBlocksWithJsonArray([
               height: 19,
               alt: "half"
             },
-            "half"
+            "2"
           ],
           [
             {
@@ -103,7 +103,7 @@ Blockly.defineBlocksWithJsonArray([
               height: 19,
               alt: "quarter"
             },
-            "quarter"
+            "4"
           ],
           [
             {
@@ -112,7 +112,34 @@ Blockly.defineBlocksWithJsonArray([
               height: 19,
               alt: "eighth"
             },
-            "eighth"
+            "8"
+          ],
+          [
+            {
+              src: "/static/stave/note0.5d.png",
+              width: 9,
+              height: 19,
+              alt: "halfdot"
+            },
+            "2d"
+          ],
+          [
+            {
+              src: "/static/stave/note0.25d.png",
+              width: 9,
+              height: 19,
+              alt: "quarterdot"
+            },
+            "4d"
+          ],
+          [
+            {
+              src: "/static/stave/note0.125d.png",
+              width: 9,
+              height: 19,
+              alt: "eighthdot"
+            },
+            "8d"
           ]
         ]
       },
@@ -132,12 +159,14 @@ Blockly.defineBlocksWithJsonArray([
 ]);
 
 Blockly.JavaScript["create_note"] = function(block) {
-  const [noteLen, notePitch] = ["NOTE_LEN", "NOTE_PITCH"].map(item =>
+  const [notePitch] = ["NOTE_PITCH"].map(item =>
     Blockly.JavaScript.valueToCode(block, item, Blockly.JavaScript.ORDER_NONE)
   );
-  console.log([noteLen, notePitch]);
-
-  return ``;
+  console.log("\\\\");
+  console.log(block.getFieldValue("NOTE_LEN"));
+  console.log(notePitch);
+  const noteLen = block.getFieldValue("NOTE_LEN");
+  return `createNote('${noteLen}',${notePitch});`;
 };
 
 Blockly.defineBlocksWithJsonArray([
@@ -157,7 +186,7 @@ Blockly.defineBlocksWithJsonArray([
               height: 19,
               alt: "half"
             },
-            "half"
+            "2"
           ],
           [
             {
@@ -166,7 +195,7 @@ Blockly.defineBlocksWithJsonArray([
               height: 19,
               alt: "quarter"
             },
-            "quarter"
+            "4"
           ],
           [
             {
@@ -175,7 +204,7 @@ Blockly.defineBlocksWithJsonArray([
               height: 19,
               alt: "eighth"
             },
-            "eighth"
+            "8"
           ]
         ]
       }
@@ -190,10 +219,6 @@ Blockly.defineBlocksWithJsonArray([
 ]);
 
 Blockly.JavaScript["create_rest"] = function(block) {
-  const [restLen] = ["REST_LEN"].map(item =>
-    Blockly.JavaScript.valueToCode(block, item, Blockly.JavaScript.ORDER_NONE)
-  );
-  console.log(restLen);
-
-  return ``;
+  const restLen = block.getFieldValue("REST_LEN");
+  return `createRest(${restLen});`;
 };

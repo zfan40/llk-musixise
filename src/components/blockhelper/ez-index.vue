@@ -35,18 +35,7 @@
       </category>
       <category name="Functions" colour="290" custom="PROCEDURE"></category>
       <category name="Sounds" colour="90">
-        <block type="create_note">
-          <field name="NOTE_LEN">quarter</field>
-          <value name="NOTE_PITCH">
-            <block type="text">
-              <field name="TEXT">C4</field>
-            </block>
-          </value>
-        </block>
-        <block type="create_rest">
-          <field name="NOTE_LEN">quarter</field>
-        </block>
-        <block type="create_track">
+        <block type="ez_create_track">
           <value name="TIMBRE">
             <block type="text">
               <field name="TEXT">piano</field>
@@ -62,13 +51,24 @@
               <field name="NUM">100</field>
             </block>
           </value>
-        </block>
-        <block type="create_measure_new">
-          <value name="MEASURE">
-            <block type="math_number">
-              <field name="NUM">1</field>
+          <value name="METRE">
+            <block type="text">
+              <field name="TEXT">4/4</field>
             </block>
           </value>
+        </block>
+        <block type="create_note">
+          <field name="NOTE_LEN">4</field>
+          <value name="NOTE_PITCH">
+            <block type="text">
+              <field name="TEXT">C4</field>
+            </block>
+          </value>
+        </block>
+        <block type="create_rest">
+          <field name="NOTE_LEN">4</field>
+        </block>
+        <block type="ez_create_measure_match_zero_new">
           <value name="SEQUENCE">
             <block type="text">
               <field name="TEXT">C4,C4</field>
@@ -79,18 +79,8 @@
               <field name="TEXT">00</field>
             </block>
           </value>
-          <value name="PART">
-            <block type="math_number">
-              <field name="NUM">1</field>
-            </block>
-          </value>
         </block>
-        <block type="create_measure_on_scale_new">
-          <value name="MEASURE">
-            <block type="math_number">
-              <field name="NUM">1</field>
-            </block>
-          </value>
+        <block type="ez_create_measure_on_scale_match_zero_new">
           <value name="SEQUENCE">
             <block type="text">
               <field name="TEXT">1,2</field>
@@ -101,77 +91,12 @@
               <field name="TEXT">00</field>
             </block>
           </value>
-          <value name="SCALE">
-            <block type="text">
-              <field name="TEXT"></field>
-            </block>
-          </value>
           <value name="BASENOTE">
             <block type="text">
               <field name="TEXT">G4</field>
             </block>
           </value>
-          <value name="PART">
-            <block type="math_number">
-              <field name="NUM">1</field>
-            </block>
-          </value>
         </block>
-        <block type="create_measure_match_zero_new">
-          <value name="MEASURE">
-            <block type="math_number">
-              <field name="NUM">1</field>
-            </block>
-          </value>
-          <value name="SEQUENCE">
-            <block type="text">
-              <field name="TEXT">C4,C4</field>
-            </block>
-          </value>
-          <value name="BEAT">
-            <block type="text">
-              <field name="TEXT">00</field>
-            </block>
-          </value>
-          <value name="PART">
-            <block type="math_number">
-              <field name="NUM">1</field>
-            </block>
-          </value>
-        </block>
-        <block type="create_measure_on_scale_match_zero_new">
-          <value name="MEASURE">
-            <block type="math_number">
-              <field name="NUM">1</field>
-            </block>
-          </value>
-          <value name="SEQUENCE">
-            <block type="text">
-              <field name="TEXT">1,2</field>
-            </block>
-          </value>
-          <value name="BEAT">
-            <block type="text">
-              <field name="TEXT">00</field>
-            </block>
-          </value>
-          <value name="SCALE">
-            <block type="text">
-              <field name="TEXT"></field>
-            </block>
-          </value>
-          <value name="BASENOTE">
-            <block type="text">
-              <field name="TEXT">G4</field>
-            </block>
-          </value>
-          <value name="PART">
-            <block type="math_number">
-              <field name="NUM">1</field>
-            </block>
-          </value>
-        </block>
-        <block type="create_effect"></block>
       </category>
 
       <category name="Timbre" colour="120">

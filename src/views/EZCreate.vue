@@ -14,6 +14,7 @@
         <i id="clear" class="iconfont icon-icon--5" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleClear"></i>
         <i id="teach" class="iconfont icon-icon--34" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleToggleTutorial"></i>
         <i id="save" class="iconfont icon-icon--1" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleSave"></i>
+        <i id="sheeticon" class="iconfont icon-icon--34" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleToggleSheet"></i>
       </div>
       <div class="">
         <!-- <span>切视图</span> -->
@@ -25,6 +26,11 @@
   <transition name="slide">
     <div class="tutorial" :style="{height:`${tutorialHeight}px`}" v-show="showTutorial">
       <tutorial />
+    </div>
+  </transition>
+  <transition name="slide">
+    <div class="sheet" :style="{height:`${tutorialHeight}px`}" v-show="showSheet">
+      <sheet />
     </div>
   </transition>
   <user-forms />
@@ -39,6 +45,7 @@ import WorkLoader from "@/components/workloader/index.vue";
 import Avatar from "@/components/avatar.vue";
 import UserForms from "@/components/UserFormView";
 import GlobalHeader from "@/components/GlobalHeader";
+import Sheet from "@/components/sheet/index.vue";
 import scopeEval from "scope-eval";
 import {
   createTrack,
@@ -46,6 +53,8 @@ import {
   createMeasureNew,
   createMeasureOnScaleNew,
   createEffect,
+  createNote,
+  createRest,
   makeSound,
   prepareProject,
   highlightBlock
@@ -63,11 +72,13 @@ export default {
     WorkLoader,
     Avatar,
     UserForms,
-    GlobalHeader
+    GlobalHeader,
+    Sheet
   },
   data() {
     return {
       showTutorial: false,
+      showSheet: false,
       tutorialHeight: 0,
       startMeasure: 1
     };
@@ -93,6 +104,8 @@ export default {
           cleanTrack,
           createMeasureNew,
           createMeasureOnScaleNew,
+          createNote,
+          createRest,
           createEffect,
           makeSound,
           prepareProject,
@@ -210,6 +223,9 @@ export default {
     },
     handleToggleTutorial() {
       this.showTutorial = !this.showTutorial;
+    },
+    handleToggleSheet() {
+      this.showSheet = !this.showSheet;
     }
   },
   created() {},
@@ -279,6 +295,14 @@ export default {
   top: 100px;
   overflow-y: scroll;
 }
+.sheet {
+  position: absolute;
+  left: 0;
+  width: 40%;
+  min-width: 980px;
+  top: 100px;
+  overflow-y: scroll;
+}
 .slide-enter-active {
   transition: all 0.6s ease-out;
 }
@@ -310,5 +334,8 @@ export default {
     display: flex;
     align-items: center;
   }
+}
+.sheet {
+  pointer-events: none;
 }
 </style>

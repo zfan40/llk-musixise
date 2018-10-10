@@ -314,13 +314,14 @@ function normalizeMeasures(part) {
           });
         console.log("bbbbbbbbbbb", newSeqArray);
 
-        // part.measures[measureIndex].sequence = newSeqArray.filter(note => note != "").join(","); //不行，因为内层数组会被打开
-        let s = JSON.stringify(newSeqArray.filter(note => note != "")).replace(
-          /"/g,
-          ""
-        );
-        s = s.substring(1, s.length - 1); // 去掉数组的前后方括号
-        part.measures[measureIndex].sequence = s;
+        // TO FIX HERE!!!
+        // let s = JSON.stringify(newSeqArray.filter(note => note != "")).replace(
+        //   /"/g,
+        //   ""
+        // );
+        // s = s.substring(1, s.length - 1); // 去掉数组的前后方括号
+        // part.measures[measureIndex].sequence = s;
+        part.measures[measureIndex].sequence = newSeqArray;
         part.measures[measureIndex].matchZero = true;
       }
       // console.log("jjjjjjjjjjjjjj", part.measures[measureIndex].sequence);
@@ -341,7 +342,7 @@ function normalizeMeasures(part) {
 
   //把所有measure合成一大段 应了老话「不要看小节线」
   part.tonepart = part.measures.reduce((a, b) => {
-    console.log("?", a.sequence);
+    // console.log("?", a.sequence);
     return {
       // TODO: if a/b is empty string, no comma here, seemingly solved
       // sequence: `${a.sequence}${a.sequence && b.sequence ? "," : ""}${
@@ -606,3 +607,64 @@ export function highlightBlock(time) {
   });
   lastActiveBlockIds = currentActiveBlockIds;
 }
+
+// notes related:
+// block call this directly
+
+// TODO：分析每个track的所有note，每到16个长度，也就是到了一个小节，就调用已有的函数一次。
+// const notes = []
+let currentBeat = "";
+let currentSequence = [];
+export function createNote(noteLen, notePitch) {
+  //noteLen:1,2,4,8,16
+  // notePitch: 'E3' or 'E3,C4,D4'
+  const noteToBeatStrMap = {
+    "1": "0---------------",
+    "2": "0-------",
+    "4": "0---",
+    "8": "0-",
+    "16": "0",
+    "2d": "0-----------",
+    "4d": "0-----",
+    "8d": "0--"
+  };
+  // notes.push([noteLen,notePitch])
+  //其实可以不push，直接来
+  currentBeat += noteToBeatStrMap[noteLen];
+  if (notePitch.indexOf(",") >= 0) {
+    notePitch = notePitch.split(",");
+  }
+  currentSequence.push(notePitch);
+  // TODO,可不一定是16哦 43拍就是12，83拍就是6
+  const beatLeninMeasure = 16; //如果是44拍，那么默认一个小节的长度应该是16
+  if (currentBeat.length == 16 * tracks[currentTrackId - 1].metre) {
+    //call original functions
+    createMeasureNew(currentSequence, currentBeat, true, "", 1);
+    // clear data
+    currentBeat = "";
+    currentSequence = [];
+  }
+}
+export function createRest(restLen) {
+  const noteToBeatStrMap = {
+    "1": "________________",
+    "2": "________",
+    "4": "____",
+    "8": "__",
+    "16": "_"
+  };
+  // notes.push([noteLen,notePitch])
+  //其实可以不push，直接来
+  currentBeat += noteToBeatStrMap[restLen];
+  if (currentBeat.length == 16) {
+    //call original functions
+    createMeasureNew(currentSequence, currentBeat, true, "", 1);
+    // clear data
+    currentBeat = "";
+    currentSequence = [];
+  }
+}
+// function generatePartWithNotes() {
+//   // generate 「part」 where function prepareTrackNotes(part, track) could utilize
+//   for (let i = 0; i <= notes.length - 1; i++) {}
+// }

@@ -108,7 +108,7 @@ Blockly.defineBlocksWithJsonArray([
   }
 ]);
 
-Blockly.JavaScript["create_measure_match_zero_new"] = function(block) {
+Blockly.JavaScript["ez_create_measure_match_zero_new"] = function(block) {
   const [sequence, beat] = ["SEQUENCE", "BEAT"].map(item =>
     Blockly.JavaScript.valueToCode(block, item, Blockly.JavaScript.ORDER_NONE)
   );
@@ -152,7 +152,9 @@ Blockly.defineBlocksWithJsonArray([
   }
 ]);
 
-Blockly.JavaScript["create_measure_on_scale_match_zero_new"] = function(block) {
+Blockly.JavaScript["ez_create_measure_on_scale_match_zero_new"] = function(
+  block
+) {
   const [sequence, beat, scale, basenote, part] = [
     "SEQUENCE",
     "BEAT",

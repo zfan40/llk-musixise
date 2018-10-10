@@ -14,7 +14,8 @@ import {
   pianophase,
   overworldMario,
   chunjiang,
-  kentJazz
+  kentJazz,
+  ezNote
 } from "@/util/demos";
 export default {
   data() {
@@ -47,6 +48,10 @@ export default {
         {
           value: "kentJazz",
           label: "kentJazz"
+        },
+        {
+          value: "ezNote",
+          label: "ezNote"
         }
       ],
       value8: ""
@@ -62,7 +67,8 @@ export default {
         pianophase,
         overworldMario,
         chunjiang,
-        kentJazz
+        kentJazz,
+        ezNote
       };
       this.loadWork(a[e]);
     },

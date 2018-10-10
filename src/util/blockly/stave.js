@@ -26,8 +26,6 @@
 import Blockly from "node-blockly/browser";
 goog.require("Blockly.FieldPitch");
 
-goog.require("BlocklyGames");
-
 /**
  * Common HSV hue for all blocks in this category.
  */
