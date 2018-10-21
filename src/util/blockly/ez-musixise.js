@@ -29,9 +29,37 @@ Blockly.defineBlocksWithJsonArray([
     message0: "乐轨 音色 %1 速度 %2 音量 %3 节拍 %4",
     args0: [
       {
-        type: "input_value",
+        type: "field_dropdown",
         name: "TIMBRE",
-        check: "String"
+        options: [
+          [
+            {
+              src: "/static/instruments/piano.png",
+              width: 30,
+              height: 30,
+              alt: "piano"
+            },
+            "piano"
+          ],
+          [
+            {
+              src: "/static/instruments/harp.png",
+              width: 30,
+              height: 30,
+              alt: "harp"
+            },
+            "harp"
+          ],
+          [
+            {
+              src: "/static/instruments/acoustic-guitar.png",
+              width: 30,
+              height: 30,
+              alt: "acoustic-guitar"
+            },
+            "guitar"
+          ]
+        ]
       },
       {
         type: "input_value",
@@ -67,17 +95,13 @@ Blockly.defineBlocksWithJsonArray([
 
 Blockly.JavaScript["ez_create_track"] = function(block) {
   // Do while/until loop.
-  const [timbre, measure, volumn, metre] = [
-    "TIMBRE",
-    "TEMPO",
-    "VOLUMN",
-    "METRE"
-  ].map(item =>
+  const [measure, volumn, metre] = ["TEMPO", "VOLUMN", "METRE"].map(item =>
     Blockly.JavaScript.valueToCode(block, item, Blockly.JavaScript.ORDER_NONE)
   );
+  const timbre = block.getFieldValue("TIMBRE");
   var branch = Blockly.JavaScript.statementToCode(block, "measures");
   return `
-  createTrack(${timbre},${measure},${volumn},${metre});
+  createTrack('${timbre}',${measure},${volumn},${metre});
   ${branch};
   `;
 };

@@ -1,6 +1,7 @@
 // const BPM = 120;
 // const note32 = BPM / 60 / 32;
-let MidiTracks = {}; // will eventually be something like: {sin:[toneNote,toneNote,toneNote,...],piano:[toneNote,toneNote]}
+window.MidiTracks = {}; // will eventually be something like: {sin:[toneNote,toneNote,toneNote,...],piano:[toneNote,toneNote]}
+window.Score = [];
 let lastActiveBlockIds = [];
 let currentActiveBlockIds = [];
 AudioParam.prototype.cancelAndHoldAtTime = false;
@@ -8,6 +9,7 @@ AudioParam.prototype.cancelAndHoldAtTime = false;
 let musixiseParts = [];
 import { instrumentMap } from "./instrumentConfig";
 import { FXMap } from "./FXConfig";
+import { toEzScore } from "./scoreAPI";
 
 let tracks = [];
 let currentTrackId = 0;
@@ -356,6 +358,17 @@ function normalizeMeasures(part) {
   console.log(part.tonepart);
 }
 
+export function generateScore() {
+  tracks.forEach((track, trackIndex) => {
+    //音轨
+    Score[trackIndex] = [];
+    track.parts.forEach((part, partIndex) => {
+      //声部，声部通常就1个
+      normalizeMeasures(part);
+      Score[trackIndex][partIndex] = toEzScore(part.measures);
+    });
+  });
+}
 function prepareTrackNotes(part, track) {
   // measure: int (1)
   // timbre: string ('square')
@@ -369,6 +382,7 @@ function prepareTrackNotes(part, track) {
   } = part; // instead of being param, read from create part
   const { timbre, tempo, volumn, metre, effects } = track;
   console.log("!!!", part);
+
   let notes = Util.getToneNotes(
     sequence,
     beat,
@@ -668,3 +682,9 @@ export function createRest(restLen) {
 //   // generate 「part」 where function prepareTrackNotes(part, track) could utilize
 //   for (let i = 0; i <= notes.length - 1; i++) {}
 // }
+export function fetchMidi() {
+  return MidiTracks;
+}
+export function fetchScore() {
+  return Score;
+}

@@ -32,7 +32,30 @@ Blockly.defineBlocksWithJsonArray([
         type: "input_value",
         name: "TIMBRE",
         check: "String"
+        // type: "field_dropdown",
+        // name: "TIMBRE",
+        // options: [
+        //   [
+        //     {
+        //       src: "/static/stave/note0.5.png",
+        //       width: 9,
+        //       height: 19,
+        //       alt: "half"
+        //     },
+        //     "piano"
+        //   ],
+        //   [
+        //     {
+        //       src: "/static/stave/note0.25.png",
+        //       width: 9,
+        //       height: 19,
+        //       alt: "quarter"
+        //     },
+        //     "guitar"
+        //   ]
+        // ]
       },
+
       {
         type: "input_value",
         name: "TEMPO",

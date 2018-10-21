@@ -9,7 +9,6 @@
         </div>
         <i id="play" class="iconfont icon-icon--13" style="font-size:26px;cursor: pointer;" @click="handlePlay"></i>
         <i id="stop" class="iconfont icon-icon--17" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleStop"></i>
-        <!-- <i id="load" class="iconfont icon-icon--" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleLoad"></i> -->
         <i id="export-midi" class="iconfont icon-geshi_yinpinmidi" style="font-size:24px;cursor: pointer;padding-left:10px;" @click="handleExportMidi"></i>
         <i id="clear" class="iconfont icon-icon--5" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleClear"></i>
         <i id="teach" class="iconfont icon-icon--34" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleToggleTutorial"></i>
@@ -30,7 +29,7 @@
   </transition>
   <transition name="slide">
     <div class="sheet" :style="{height:`${tutorialHeight}px`}" v-show="showSheet">
-      <sheet />
+      <sheet :scoreNotes="scoreNotes" />
     </div>
   </transition>
   <user-forms />
@@ -57,6 +56,7 @@ import {
   createRest,
   makeSound,
   prepareProject,
+  generateScore,
   highlightBlock
 } from "../util/core/audioAPI";
 require("../util/blockly/ez-musixise"); // import Structure of Musixise Blocks
@@ -80,7 +80,8 @@ export default {
       showTutorial: false,
       showSheet: false,
       tutorialHeight: 0,
-      startMeasure: 1
+      startMeasure: 1,
+      scoreNotes: []
     };
   },
   computed: {
@@ -146,22 +147,24 @@ export default {
         type: "uploadrecord"
       });
     },
-    handleLoad() {
-      let workspace = Blockly.getMainWorkspace();
-      workspace.clear();
-      if (blocklyXmlText) {
-        Blockly.Xml.domToWorkspace(
-          Blockly.Xml.textToDom(blocklyXmlText),
-          workspace
-        ); // 把xml dom放到workspace里头展示出来
-      }
-    },
     handleExportMidi() {
       var midi = MidiConvert.create();
-      MidiTracks = {}; //erase MidiTracks in createMeasure, might put into store
+      MidiTracks = {}; //erase MidiTracks in createMeasure, might put into store, now is global variable
       var code = Blockly.JavaScript.workspaceToCode(Blockly.getMainWorkspace()); //把workspace转换为代码
       code += "prepareProject();cleanTrack()";
-      eval(code);
+      // eval(code);
+      scopeEval(code, {
+        createTrack,
+        cleanTrack,
+        createMeasureNew,
+        createMeasureOnScaleNew,
+        createNote,
+        createRest,
+        createEffect,
+        makeSound,
+        prepareProject,
+        highlightBlock
+      });
       if (Object.entries(MidiTracks).length === 0) {
         alert("nothing to export");
         return;
@@ -183,29 +186,6 @@ export default {
         }, midi.track(`${index}`).patch(32));
       });
 
-      // 单音色导出DEMO
-      // // flatten MidiTracks
-      // let flatten = MidiTracks.square.reduce((acc, cur) => acc.concat(cur), []);
-      // flatten = flatten.reduce((acc, cur) => acc.concat(cur), []); //flatten再一次，以搞定poly音[D3,G3]这种
-      // // flatten.sort((a, b) => (a.startTime - b.startTime));
-      // console.log(flatten);
-      // // chain problem!
-      // flatten.reduce((acc, cur) => {
-      //   return acc.note(cur.midiNo, cur.startTime, cur.duration, cur.velocity);
-      // }, midi.track("2").patch(32));
-
-      // OFFICIAL DEMO
-      // midi
-      //   .track()
-      //   // select an instrument by its MIDI patch number
-      //   .patch(32)
-      //   // chain note events: note, time, duration
-      //   .note(76, 0, 0.66666)
-      //   .note(46, 0, 0.66666)
-      //   .note(50, 0, 2)
-      //   .note(76, 0.66666, 0.66666)
-      //   .note(76, 1.33333, 0.66666);
-
       const binaryString = midi.encode();
       // write the output
       const bytes = new Uint8Array(binaryString.length);
@@ -225,6 +205,20 @@ export default {
       this.showTutorial = !this.showTutorial;
     },
     handleToggleSheet() {
+      Score = []; //global variable for now
+      var code = Blockly.JavaScript.workspaceToCode(Blockly.getMainWorkspace()); //把workspace转换为代码
+      code += "generateScore();cleanTrack()";
+      scopeEval(code, {
+        createTrack,
+        cleanTrack,
+        createMeasureNew,
+        createMeasureOnScaleNew,
+        createNote,
+        createRest,
+        createEffect,
+        generateScore
+      });
+      this.scoreNotes = Score;
       this.showSheet = !this.showSheet;
     }
   },
@@ -298,10 +292,12 @@ export default {
 .sheet {
   position: absolute;
   left: 0;
-  width: 40%;
+  background-color: rgba(0, 0, 0, 0.7);
+  width: 100%;
   min-width: 980px;
   top: 100px;
   overflow-y: scroll;
+  // pointer-events: none;
 }
 .slide-enter-active {
   transition: all 0.6s ease-out;
@@ -334,8 +330,5 @@ export default {
     display: flex;
     align-items: center;
   }
-}
-.sheet {
-  pointer-events: none;
 }
 </style>
