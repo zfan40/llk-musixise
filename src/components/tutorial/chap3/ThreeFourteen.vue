@@ -56,7 +56,7 @@ export default {
     system.addConnector("singleRight");
     system.addConnector("singleLeft");
 
-    var system = vf1.System({ x: 230, width: 180, spaceBetweenStaves: 10 });
+    system = vf1.System({ x: 230, width: 180, spaceBetweenStaves: 10 });
     system.addStave({
       voices: [
         score.voice(

@@ -71,8 +71,8 @@ const toEzScore = measures => {
   return measures.map(measure => {
     const noteKeys = toEZVexFlowNoteKey(measure.sequence); //'d3,d#3,a3,(d3,d5)'
     const noteLens = toEZVexFlowNoteLen(measure.beat); //["q","q","q/r","q.",'8']
-    // console.log(noteKeys);
-    // console.log(noteLens);
+    console.log(noteKeys);
+    console.log(noteLens);
     let counter = 0;
     return noteLens.map(noteLen => {
       if (noteLen.indexOf("/r") === -1) {
@@ -92,7 +92,7 @@ const toEZVexFlowNoteKey = notes => {
     if (typeof note === "string") {
       return note.toLowerCase();
     } else {
-      return `(${note.join(",").toLowerCase()})`;
+      return `(${note.join(" ").toLowerCase()})`;
     }
   });
 };
@@ -151,8 +151,9 @@ const toVexFlowNoteLen = (beatStr, noteLenMap, restSymbol) => {
 };
 
 // '0--0--_--0--' => ["q","q","q/r","q."]
-const toEZVexFlowNoteLen = beatStr =>
-  toVexFlowNoteLen(
+const toEZVexFlowNoteLen = beatStr => {
+  console.log("jb", beatStr);
+  return toVexFlowNoteLen(
     beatStr,
     {
       1: "w",
@@ -170,5 +171,22 @@ const toEZVexFlowNoteLen = beatStr =>
     },
     "/r"
   );
+};
+//["c3/8", "e3/q", "g3/q", "b3/q", "b3/8"]=>true
+const isMeasureBeamable = noteArray =>
+  noteArray.filter(a => _isShorterThanQuarterNote(a)).length >= 2; //目前仅要求为：至少有两个小于四分音符的音符
 
-export { toEzScore };
+// "c3/8" => true; "c3/q"=> false
+const _isShorterThanQuarterNote = noteStr => {
+  console.log("ss");
+  return (
+    noteStr.indexOf("/8") >= 0 ||
+    noteStr.indexOf("/16") >= 0 ||
+    noteStr.indexOf("/32") >= 0 ||
+    // noteStr.indexOf("/8.") >= 0 ||
+    noteStr.indexOf("/16.") >= 0 ||
+    noteStr.indexOf("/32.") >= 0
+  );
+};
+
+export { toEzScore, isMeasureBeamable };
