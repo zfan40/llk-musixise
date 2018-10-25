@@ -15,7 +15,8 @@ import {
   overworldMario,
   chunjiang,
   kentJazz,
-  ezNote
+  ezNote,
+  honghegu
 } from "@/util/demos";
 export default {
   data() {
@@ -52,6 +53,10 @@ export default {
         {
           value: "ezNote",
           label: "ezNote"
+        },
+        {
+          value: "honghegu",
+          label: "honghegu"
         }
       ],
       value8: ""
@@ -68,7 +73,8 @@ export default {
         overworldMario,
         chunjiang,
         kentJazz,
-        ezNote
+        ezNote,
+        honghegu
       };
       this.loadWork(a[e]);
     },
