@@ -85,8 +85,8 @@ Blockly.defineBlocksWithJsonArray([
     message1: "小节/音符 %1",
     args1: [{ type: "input_statement", name: "measures" }],
     inputsInline: false,
-    previousStatement: null,
-    nextStatement: null,
+    // previousStatement: null,
+    // nextStatement: null,
     colour: 155,
     tooltip: "",
     helpUrl: ""

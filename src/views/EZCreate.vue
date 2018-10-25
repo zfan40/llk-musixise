@@ -27,11 +27,11 @@
       <tutorial />
     </div>
   </transition>
-  <transition name="slide">
+  <!-- <transition name="slide"> -->
     <div class="sheet" :style="{height:`${tutorialHeight}px`}" v-show="showSheet">
       <sheet :scoreNotes="scoreNotes" />
     </div>
-  </transition>
+  <!-- </transition> -->
   <user-forms />
 </div>
 </template>
@@ -205,21 +205,25 @@ export default {
       this.showTutorial = !this.showTutorial;
     },
     handleToggleSheet() {
-      Score = []; //global variable for now
-      var code = Blockly.JavaScript.workspaceToCode(Blockly.getMainWorkspace()); //把workspace转换为代码
-      code += "generateScore();cleanTrack()";
-      scopeEval(code, {
-        createTrack,
-        cleanTrack,
-        createMeasureNew,
-        createMeasureOnScaleNew,
-        createNote,
-        createRest,
-        createEffect,
-        generateScore
-      });
-      this.scoreNotes = Score;
       this.showSheet = !this.showSheet;
+      if (this.showSheet) {
+        Score = []; //global variable for now
+        var code = Blockly.JavaScript.workspaceToCode(
+          Blockly.getMainWorkspace()
+        ); //把workspace转换为代码
+        code += "generateScore();cleanTrack()";
+        scopeEval(code, {
+          createTrack,
+          cleanTrack,
+          createMeasureNew,
+          createMeasureOnScaleNew,
+          createNote,
+          createRest,
+          createEffect,
+          generateScore
+        });
+        this.scoreNotes = Score;
+      }
     }
   },
   created() {},
@@ -245,7 +249,10 @@ export default {
       media: "https://cdn.cnbj1.fds.api.mi-img.com/blockly-media/"
     });
 
-    demoWorkspace.addChangeListener(e => console.log(e));
+    demoWorkspace.addChangeListener(e => {
+      console.log(e);
+      Blockly.Events.disableOrphans(e);
+    });
     var onresize = function(e) {
       // Compute the absolute coordinates and dimensions of blocklyArea.
       var element = blocklyArea;
@@ -291,10 +298,11 @@ export default {
 }
 .sheet {
   position: absolute;
+  display: flex;
+  justify-content: center;
   left: 0;
   background-color: rgba(0, 0, 0, 0.7);
   width: 100%;
-  min-width: 980px;
   top: 100px;
   overflow-y: scroll;
   // pointer-events: none;
