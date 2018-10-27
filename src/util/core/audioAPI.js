@@ -13,8 +13,10 @@ import { toEzScore } from "./scoreAPI";
 
 let tracks = [];
 let currentTrackId = 0;
+let lastTrackId = 1;
 
 export function createTrack(timbre, tempo, volumn, metre, mute) {
+  _playRestMeasureWhenUsingNote();
   metre = metre ? eval(metre) : 1;
   // if (mute) volumn = 0;
   tracks.push({
@@ -289,7 +291,7 @@ function normalizeMeasures(part) {
     // console.log("measure::::::::::", part.measures[measureIndex]);
     if (!part.measures[measureIndex]) {
       //建一个空小节
-      //TODO: bug here
+      //potential bug here
       part.measures[measureIndex] = {
         measure: measureIndex + 1,
         sequence: "",
@@ -298,7 +300,7 @@ function normalizeMeasures(part) {
       };
     } else {
       if (!part.measures[measureIndex].matchZero) {
-        // 对位转成对0，抽出对应的音//TODO: bug here, super mario....seemingly solved
+        // 对位转成对0，抽出对应的音//potential bug here, super mario....seemingly solved
         // const sequenceArray = JSON.parse(
         //   `[${part.measures[measureIndex].sequence}]`.replace(
         //     /([ABCDEFG]#*b*[1-9])/g,
@@ -346,7 +348,7 @@ function normalizeMeasures(part) {
   part.tonepart = part.measures.reduce((a, b) => {
     // console.log("?", a.sequence);
     return {
-      // TODO: if a/b is empty string, no comma here, seemingly solved
+      // potential bug: if a/b is empty string, no comma here, seemingly solved
       // sequence: `${a.sequence}${a.sequence && b.sequence ? "," : ""}${
       //   b.sequence
       // }`,
@@ -441,7 +443,7 @@ function prepareTrackNotes(part, track) {
     // effect.wet.rampTo(0, 2, Tone.now() + 2);
     // effect.wet.rampTo(1, 2, Tone.now() + 3);
     // effect.wet.rampTo(0, 2, Tone.now() + 4);
-    //TODO either loop through，either use preset param keys
+    // either loop through，either use preset param keys
     console.log(Object.entries(effects[effectName]));
     if (
       Object.entries(effects[effectName]) &&
@@ -586,6 +588,7 @@ export function makeSound(startMeasure) {
 }
 
 export function prepareProject() {
+  _playRestMeasureWhenUsingNote();
   tracks.forEach(track => {
     track.parts.forEach(part => {
       normalizeMeasures(part);
@@ -649,12 +652,42 @@ export function createNote(noteLen, notePitch) {
     notePitch = notePitch.split(",");
   }
   currentSequence.push(notePitch);
-  // TODO,可不一定是16哦 43拍就是12，83拍就是6
-  const beatLeninMeasure = 16; //如果是44拍，那么默认一个小节的长度应该是16
-  if (currentBeat.length == 16 * tracks[currentTrackId - 1].metre) {
+  const measureBeatLength = 16 * tracks[currentTrackId - 1].metre; //如果是44拍，那么默认一个小节的长度应该是16
+
+  if (currentBeat.length > measureBeatLength) {
+    createMeasureNew(
+      currentSequence.slice(0, measureBeatLength),
+      currentBeat.slice(0, measureBeatLength), //前面的
+      true,
+      "",
+      1
+    );
+    currentBeat = currentBeat.slice(measureBeatLength); //后面的
+    currentSequence = currentSequence.slice(measureBeatLength);
+  } else if (currentBeat.length == measureBeatLength) {
     //call original functions
     createMeasureNew(currentSequence, currentBeat, true, "", 1);
     // clear data
+    currentBeat = "";
+    currentSequence = [];
+  }
+}
+function _playRestMeasureWhenUsingNote() {
+  if (currentBeat) {
+    alert(JSON.stringify(currentBeat));
+    //这条createMeasureNew完全是给createNote模块准备的，在换track前，把遗留的currentBeat处理了
+    const measureBeatLength = 16 * tracks[currentTrackId - 1].metre;
+    const currentLeftBeatLength = currentBeat.length;
+    const restPaddingBeat = "_".repeat(
+      measureBeatLength - currentLeftBeatLength
+    );
+    createMeasureNew(
+      currentSequence,
+      currentBeat + restPaddingBeat, //前面的和补充的后面的=>攒全小节长度
+      true,
+      "",
+      1
+    );
     currentBeat = "";
     currentSequence = [];
   }
@@ -682,6 +715,17 @@ export function createRest(restLen) {
 //   // generate 「part」 where function prepareTrackNotes(part, track) could utilize
 //   for (let i = 0; i <= notes.length - 1; i++) {}
 // }
+const _eraseEZ = () => {
+  currentBeat = "";
+  currentSequence = [];
+  window.MidiTracks = {}; // will eventually be something like: {sin:[toneNote,toneNote,toneNote,...],piano:[toneNote,toneNote]}
+  window.Score = [];
+  lastActiveBlockIds = [];
+  currentActiveBlockIds = [];
+  musixiseParts = [];
+  tracks = [];
+  currentTrackId = 0;
+};
 export function fetchMidi() {
   return MidiTracks;
 }

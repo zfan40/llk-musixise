@@ -173,8 +173,8 @@ const toEZVexFlowNoteLen = beatStr => {
   );
 };
 //["c3/8", "e3/q", "g3/q", "b3/q", "b3/8"]=>true
-const isMeasureBeamable = noteArray =>
-  noteArray.filter(a => _isShorterThanQuarterNote(a)).length >= 2; //目前仅要求为：至少有两个小于四分音符的音符
+const isMeasureBeamable = noteArray => _isShorterThanQuarterNote(noteArray[0]); //真tm服气了vexflow的判断方法
+// noteArray.filter(a => _isShorterThanQuarterNote(a)).length >= 2; //目前仅要求为：至少有两个小于四分音符的音符
 
 // "c3/8" => true; "c3/q"=> false
 const _isShorterThanQuarterNote = noteStr => {
