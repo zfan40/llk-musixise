@@ -1,3 +1,9 @@
 module.exports = {
-  lintOnSave: false
+  lintOnSave: false,
+  baseUrl:
+    process.env.NODE_ENV === "production"
+      ? "//s.musixise.com/musixise-www"
+      : "/",
+  outputDir: "dist",
+  assetsDir: "static"
 };
