@@ -68,13 +68,38 @@ const example = [
 ];
 // =>score.notes("C#5/q, g5/8, (e4 g4 b4)/16, e5/16/r, d5/8, e5/8, g5/8, a2/32, a6, a6, g4/64, g4")
 const toEzScore = measures => {
-  return measures.map(measure => {
-    const noteKeys = toEZVexFlowNoteKey(measure.sequence); //'d3,d#3,a3,(d3,d5)'
+  const curves = []; //[['m1a','m2a']] to store all the curve pairs
+  /* 先读这个。。。每小节的最后一个音加个标记位，用来和之后的小节联系
+  音是这些['d3','d#3','a3','(d3,d5)']
+  节奏是这些["q/sustain","q","q/r","q.",'8'] /sustain是自己加的，需要和他前面的音相连
+  （前面的音可能在上一个小节，也可能同小节），绘制的时候要删掉
+  */
+
+  // vf.Curve({
+  //   from: id('m1a'),
+  //   to: id('m2a'),
+  //   options: { cps: [{ x: 0, y: 40 }, { x: 0, y: 40 }] },
+  // });
+  let lastNoteInLastMeasure = "";
+  const score = measures.map((measure, index) => {
+    const noteKeys = toEZVexFlowNoteKey(measure.sequence); //['d3','d#3','a3','(d3,d5)']
     const noteLens = toEZVexFlowNoteLen(measure.beat); //["q","q","q/r","q.",'8']
+
+    // 小节首音为延长位，该音继承上个小节的最后一个音
+    if (noteLens[0].indexOf("/sustain") >= 0) {
+      noteKeys[0] = lastNoteInLastMeasure;
+      noteLens[0] = noteLens[0].replace("/sustain", `[id="m${index}0"]`);
+      /** 连音线的作用：1.跨小节 2.浮点解决不了 3.表达大致乐句意图 */
+      if (index > 0) {
+        curves.push([`m${index}0`, `m${index - 1}end`]); // 跨小节
+      }
+      // noteLens[0] = noteLens[0].slice(0, noteLens[0].indexOf("/sustain")); //just to test without 延长线
+    }
+    lastNoteInLastMeasure = noteKeys[noteKeys.length - 1];
     console.log(noteKeys);
     console.log(noteLens);
     let counter = 0;
-    return noteLens.map(noteLen => {
+    const result = noteLens.map(noteLen => {
       if (noteLen.indexOf("/r") === -1) {
         // a note
         counter += 1;
@@ -84,7 +109,13 @@ const toEzScore = measures => {
         return `e4/${noteLen}`;
       }
     });
+    // 每小节最后一个音标记一下，以备延长线
+    result[result.length - 1] = `${
+      result[result.length - 1]
+    }[id="m${index}end"]`;
+    return result;
   });
+  return score;
 };
 // ["D3", "D#3","A3",["D3","D5"]] => ['d3','d#3','a3','(d3,d5)']
 const toEZVexFlowNoteKey = notes => {
@@ -146,6 +177,9 @@ const toVexFlowNoteLen = (beatStr, noteLenMap, restSymbol) => {
     }
     cursor1 = cursor2;
     cursor2 += 1;
+  }
+  if (beatStr[0] == "-") {
+    noteLen[0] = `${noteLen[0]}/sustain`;
   }
   return noteLen;
 };

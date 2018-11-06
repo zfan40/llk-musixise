@@ -13,7 +13,9 @@ export default {
   name: "sheetscore",
   props: {
     xmlArrayObj: Object,
-    scoreNotes: Array
+    scoreNotes: Array,
+    scoreWidth: Number,
+    scoreHeight: Number
   },
   watch: {
     scoreNotes: function(newVal, oldVal) {
@@ -23,11 +25,17 @@ export default {
   },
   methods: {
     generateScore() {
+      if (!this.scoreNotes || !this.scoreNotes.length) {
+        return;
+      }
       if (document.querySelector("#sheetcanvas").lastChild)
         document
           .querySelector("#sheetcanvas")
           .removeChild(document.querySelector("#sheetcanvas").lastChild);
       const VF = Vex.Flow;
+      const registry = new VF.Registry();
+      VF.Registry.enableDefaultRegistry(registry);
+      const id = id => registry.getElementById(id);
       const vf = new VF.Factory({
         renderer: {
           elementId: "sheetcanvas",
@@ -36,11 +44,13 @@ export default {
         }
       });
       const score = vf.EasyScore();
+      console.log("========= score notes =========");
       console.log(this.scoreNotes);
       /* 
        * this.scoreNotes[0] is first instrument
        * this.scoreNotes[0][0] is first part(声部) of the first instrument 
        */
+
       const instrumentNumber = this.scoreNotes.length;
       const maxMeasureNumber = this.scoreNotes
         .flat()
@@ -109,7 +119,21 @@ export default {
           system.addConnector("singleLeft");
         }
       }
+      vf.Curve({
+        from: id("m0end"),
+        to: id("m10")
+      });
+      vf.Curve({
+        from: id("m1end"),
+        to: id("m2end")
+      });
+      // vf.Curve({
+      //   from: id("m1end"),
+      //   to: id("m20"),
+      //   options: { cps: [{ x: 0, y: 40 }, { x: 0, y: 40 }] }
+      // });
       vf.draw();
+      VF.Registry.disableDefaultRegistry();
     }
   },
   mounted() {

@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "//s.musixise.com/musixise-www/static/precache-manifest.f4c2d17d615a14132d599d69b5adcc02.js"
+  "//s.musixise.com/musixise-www/precache-manifest.bc1d8c04b86af2e6bec30d7fb70befc9.js"
 );
 
 workbox.core.setCacheNameDetails({prefix: "llk-musixise"});

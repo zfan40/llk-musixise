@@ -208,6 +208,7 @@ export default {
       this.showSheet = !this.showSheet;
       if (this.showSheet) {
         Score = []; //global variable for now
+        console.log(Blockly.getMainWorkspace());
         var code = Blockly.JavaScript.workspaceToCode(
           Blockly.getMainWorkspace()
         ); //把workspace转换为代码

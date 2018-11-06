@@ -16,7 +16,7 @@ let currentTrackId = 0;
 let lastTrackId = 1;
 
 export function createTrack(timbre, tempo, volumn, metre, mute) {
-  _playRestMeasureWhenUsingNote();
+  _playLeftNotesInMeasureWhenUsingNote();
   metre = metre ? eval(metre) : 1;
   // if (mute) volumn = 0;
   tracks.push({
@@ -51,7 +51,7 @@ const Util = {
     return Array.prototype.slice.apply(arguments).reduce(function(a, b) {
       if (!a) a = 1;
       if (!b) b = 1;
-      return a * b / gcd(a, b);
+      return (a * b) / gcd(a, b);
     }, 1);
   },
   createUnderScores: function(n) {
@@ -99,7 +99,7 @@ const Util = {
     // const sequenceArray = JSON.parse(
     //   `[${sequence}]`.replace(/([ABCDEFG]#*b*[1-9])/g, '"$1"')
     // ); //不对就报错
-    const noteLen = measureCount * (metre * 240 / tempo / beat.length); //should replace 120 with BPM
+    const noteLen = measureCount * ((metre * 240) / tempo / beat.length); //should replace 120 with BPM
     const toneNotes = [];
 
     let toneNote = {};
@@ -116,7 +116,7 @@ const Util = {
           time: index * noteLen,
           note: sequence[zeroCounter],
           duration: noteLen,
-          velocity: digit === "0" ? volumn / 100 : volumn * digit / 1000
+          velocity: digit === "0" ? volumn / 100 : (volumn * digit) / 1000
         };
         zeroCounter += 1;
 
@@ -470,7 +470,8 @@ function prepareTrackNotes(part, track) {
             // );
             effect[paramName].linearRampToValueAtTime(
               paramvalue,
-              Tone.now() + (paramObj.timepoint[index] - 1) * metre * 240 / tempo
+              Tone.now() +
+                ((paramObj.timepoint[index] - 1) * metre * 240) / tempo
             );
 
             // if (paramObj.timepoint[index + 1]) {
@@ -583,12 +584,12 @@ export function makeSound(startMeasure) {
   if (!startMeasure) startMeasure = 1;
   Tone.Transport.start(
     "+0.1",
-    (startMeasure - 1) * tracks[0].metre * 240 / tracks[0].tempo
+    ((startMeasure - 1) * tracks[0].metre * 240) / tracks[0].tempo
   );
 }
 
 export function prepareProject() {
-  _playRestMeasureWhenUsingNote();
+  _playLeftNotesInMeasureWhenUsingNote();
   tracks.forEach(track => {
     track.parts.forEach(part => {
       normalizeMeasures(part);
@@ -606,7 +607,9 @@ export function highlightBlock(time) {
   currentActiveBlockIds = [];
   tracks.forEach(track => {
     track.parts.forEach(part => {
-      const activeMeasure = parseInt(time / (track.metre * 240 / track.tempo));
+      const activeMeasure = parseInt(
+        time / ((track.metre * 240) / track.tempo)
+      );
       if (
         part.measures[activeMeasure] &&
         part.measures[activeMeasure].blockId
@@ -672,7 +675,7 @@ export function createNote(noteLen, notePitch) {
     currentSequence = [];
   }
 }
-function _playRestMeasureWhenUsingNote() {
+function _playLeftNotesInMeasureWhenUsingNote() {
   if (currentBeat) {
     alert(JSON.stringify(currentBeat));
     //这条createMeasureNew完全是给createNote模块准备的，在换track前，把遗留的currentBeat处理了
