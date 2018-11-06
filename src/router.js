@@ -7,6 +7,8 @@ import Work from "./views/Work.vue";
 import Home from "./views/Home.vue";
 import About from "./views/About.vue";
 import Explore from "./views/Explore.vue";
+import Quiz from "./views/Quiz.vue";
+
 Vue.use(Router);
 
 export default new Router({
@@ -50,6 +52,11 @@ export default new Router({
       path: "/explore",
       name: "explore",
       component: Explore
+    },
+    {
+      path: "/quiz",
+      name: "quiz",
+      component: Quiz
     }
   ]
 });
