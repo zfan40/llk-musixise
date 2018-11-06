@@ -1,7 +1,7 @@
 // const BPM = 120;
 // const note32 = BPM / 60 / 32;
 window.MidiTracks = {}; // will eventually be something like: {sin:[toneNote,toneNote,toneNote,...],piano:[toneNote,toneNote]}
-window.Score = [];
+window.Score = { score: [], curves: [] };
 let lastActiveBlockIds = [];
 let currentActiveBlockIds = [];
 AudioParam.prototype.cancelAndHoldAtTime = false;
@@ -361,13 +361,19 @@ function normalizeMeasures(part) {
 }
 
 export function generateScore() {
+  Score.score = [];
+  Score.curves = [];
   tracks.forEach((track, trackIndex) => {
     //音轨
-    Score[trackIndex] = [];
+    Score.score[trackIndex] = [];
+    Score.curves[trackIndex] = [];
     track.parts.forEach((part, partIndex) => {
       //声部，声部通常就1个
       normalizeMeasures(part);
-      Score[trackIndex][partIndex] = toEzScore(part.measures);
+      const EzScore = toEzScore(part.measures, trackIndex, partIndex);
+      console.log("wefwefwe", EzScore);
+      Score.score[trackIndex][partIndex] = EzScore.score;
+      Score.curves[trackIndex][partIndex] = EzScore.curves;
     });
   });
 }
@@ -722,7 +728,7 @@ const _eraseEZ = () => {
   currentBeat = "";
   currentSequence = [];
   window.MidiTracks = {}; // will eventually be something like: {sin:[toneNote,toneNote,toneNote,...],piano:[toneNote,toneNote]}
-  window.Score = [];
+  window.Score = { score: [], curves: [] };
   lastActiveBlockIds = [];
   currentActiveBlockIds = [];
   musixiseParts = [];

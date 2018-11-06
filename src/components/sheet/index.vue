@@ -12,8 +12,8 @@ import { isMeasureBeamable } from "@/util/core/scoreAPI";
 export default {
   name: "sheetscore",
   props: {
-    xmlArrayObj: Object,
     scoreNotes: Array,
+    scoreCurves: Array,
     scoreWidth: Number,
     scoreHeight: Number
   },
@@ -57,10 +57,7 @@ export default {
         .reduce((a, b) => (a.length > b.length ? a : b), []).length;
 
       //TODO 目前只能44拍
-      // var system;
       for (let i = 0; i <= maxMeasureNumber - 1; i++) {
-        //TODO:得找出最长的measureindex
-        // i => measure index
         let system = vf.System({
           x: (i % 4) * 200 + 50, //TODO: should be based on how many notes
           y: Math.floor(i / 4) * 120 * instrumentNumber,
@@ -71,6 +68,7 @@ export default {
           // j => instrument index
           console.log("@@@@@@@@");
           console.log("measure is", this.scoreNotes[j][0][i]);
+          console.log("curve is", this.scoreCurves[j][0][i]);
           if (!this.scoreNotes[j][0][i]) this.scoreNotes[j][0][i] = ["b4/w/r"]; //补上个
           let feedinNotes = [];
 
@@ -88,7 +86,7 @@ export default {
               )
             ];
           } else {
-            //   // if cannot auto beam, just use plain notes
+            // if cannot auto beam, just use plain notes
             feedinNotes = [
               score.notes(this.scoreNotes[j][0][i].join(","), {
                 clef: "treble" // can be bass
@@ -107,6 +105,7 @@ export default {
           });
           if (i === 0) {
             // 首个小节加谱号
+            // TODO 自动给高音或低音谱号
             stave.addClef("treble").addKeySignature("C"); //bass
           }
         }
@@ -119,18 +118,22 @@ export default {
           system.addConnector("singleLeft");
         }
       }
-      vf.Curve({
-        from: id("m0end"),
-        to: id("m10")
-      });
-      vf.Curve({
-        from: id("m1end"),
-        to: id("m2end")
-      });
+      // 处理连音
+      // id format 't${trackIndex}p${partIndex}m${index}n0' or 't${trackIndex}p${partIndex}m${index}end'
+      // 重新走一遍循环
+      for (let i = 0; i <= maxMeasureNumber - 1; i++) {
+        for (let j = 0; j <= instrumentNumber - 1; j++) {
+          if (this.scoreCurves[j][0][i]) {
+            vf.Curve({
+              from: id(this.scoreCurves[j][0][i][1]),
+              to: id(this.scoreCurves[j][0][i][2])
+            });
+          }
+        }
+      }
       // vf.Curve({
-      //   from: id("m1end"),
-      //   to: id("m20"),
-      //   options: { cps: [{ x: 0, y: 40 }, { x: 0, y: 40 }] }
+      //   from: id("t0p0m1end"),
+      //   to: id("t0p0m2end")
       // });
       vf.draw();
       VF.Registry.disableDefaultRegistry();

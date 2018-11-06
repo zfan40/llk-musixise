@@ -67,7 +67,7 @@ const example = [
   }
 ];
 // =>score.notes("C#5/q, g5/8, (e4 g4 b4)/16, e5/16/r, d5/8, e5/8, g5/8, a2/32, a6, a6, g4/64, g4")
-const toEzScore = measures => {
+const toEzScore = (measures, trackIndex, partIndex) => {
   const curves = []; //[['m1a','m2a']] to store all the curve pairs
   /* 先读这个。。。每小节的最后一个音加个标记位，用来和之后的小节联系
   音是这些['d3','d#3','a3','(d3,d5)']
@@ -88,10 +88,16 @@ const toEzScore = measures => {
     // 小节首音为延长位，该音继承上个小节的最后一个音
     if (noteLens[0].indexOf("/sustain") >= 0) {
       noteKeys[0] = lastNoteInLastMeasure;
-      noteLens[0] = noteLens[0].replace("/sustain", `[id="m${index}0"]`);
+      noteLens[0] = noteLens[0].replace(
+        "/sustain",
+        `[id="t${trackIndex}p${partIndex}m${index}n0"]`
+      );
       /** 连音线的作用：1.跨小节 2.浮点解决不了 3.表达大致乐句意图 */
       if (index > 0) {
-        curves.push([`m${index}0`, `m${index - 1}end`]); // 跨小节
+        curves.push([
+          `t${trackIndex}p${partIndex}m${index}n0`,
+          `t${trackIndex}p${partIndex}m${index - 1}end`
+        ]); // 跨小节
       }
       // noteLens[0] = noteLens[0].slice(0, noteLens[0].indexOf("/sustain")); //just to test without 延长线
     }
@@ -112,10 +118,10 @@ const toEzScore = measures => {
     // 每小节最后一个音标记一下，以备延长线
     result[result.length - 1] = `${
       result[result.length - 1]
-    }[id="m${index}end"]`;
+    }[id="t${trackIndex}p${partIndex}m${index}end"]`;
     return result;
   });
-  return score;
+  return { score, curves };
 };
 // ["D3", "D#3","A3",["D3","D5"]] => ['d3','d#3','a3','(d3,d5)']
 const toEZVexFlowNoteKey = notes => {

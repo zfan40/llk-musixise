@@ -5,8 +5,7 @@
     
     <div v-if="quiz.questionRepresentation=='score'">
       题目五线谱
-      <sheet :scoreWidth="1000" :scoreHeight="100" :scoreNotes="scoreNotes" />
-      <sheet :scoreWidth="1000" :scoreHeight="100" :scoreNotes="scoreNotes" />
+      <sheet :scoreWidth="1000" :scoreHeight="100" :scoreNotes="scoreNotes" :scoreCurves="scoreCurves" />
     </div>
     <div @click="playBlocklyAnswer">作答播放</div>
     <div @click="_reloadBlocklyContext">初始化作答</div>
@@ -79,7 +78,8 @@ export default {
   },
   data() {
     return {
-      scoreNotes: []
+      scoreNotes: [],
+      scoreCurves: []
     };
   },
   computed: {},
@@ -157,7 +157,7 @@ export default {
       this.checkAnswer(1); // enable handle error
     },
     scorelizeBlockly(code) {
-      Score = []; //global variable for now
+      Score = { score: [], curves: [] }; //global variable for now
       code += "generateScore();cleanTrack()";
       scopeEval(code, {
         createTrack,
@@ -169,8 +169,9 @@ export default {
         createEffect,
         generateScore
       });
-      console.log("final score,", Score);
-      this.scoreNotes = Score;
+      console.log("final score,", Score.score);
+      this.scoreNotes = Score.score;
+      this.scoreCurves = Score.curves;
     },
     _scorelizeBlocklyQuestion() {
       // Create a headless workspace.
