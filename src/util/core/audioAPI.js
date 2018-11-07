@@ -299,6 +299,7 @@ function normalizeMeasures(part) {
         matchZero: true
       };
     } else {
+      // 对位处理成对0
       if (!part.measures[measureIndex].matchZero) {
         // 对位转成对0，抽出对应的音//potential bug here, super mario....seemingly solved
         // const sequenceArray = JSON.parse(
@@ -307,7 +308,7 @@ function normalizeMeasures(part) {
         //     '"$1"'
         //   )
         // );
-        const newSeqArray = part.measures[measureIndex].beat
+        let newSeqArray = part.measures[measureIndex].beat
           .split("")
           .map((beatDigit, index) => {
             if (beatDigit.match(/\d/g)) {
@@ -316,6 +317,7 @@ function normalizeMeasures(part) {
               return "";
             }
           });
+        newSeqArray = newSeqArray.filter(seq => !!seq); // 排掉空的
         console.log("bbbbbbbbbbb", newSeqArray);
 
         // TO FIX HERE!!!
@@ -361,6 +363,7 @@ function normalizeMeasures(part) {
 }
 
 export function generateScore() {
+  _playLeftNotesInMeasureWhenUsingNote();
   Score.score = [];
   Score.curves = [];
   tracks.forEach((track, trackIndex) => {
@@ -683,7 +686,7 @@ export function createNote(noteLen, notePitch) {
 }
 function _playLeftNotesInMeasureWhenUsingNote() {
   if (currentBeat) {
-    alert(JSON.stringify(currentBeat));
+    console.log("playLeftNotesInMeasure", JSON.stringify(currentBeat));
     //这条createMeasureNew完全是给createNote模块准备的，在换track前，把遗留的currentBeat处理了
     const measureBeatLength = 16 * tracks[currentTrackId - 1].metre;
     const currentLeftBeatLength = currentBeat.length;

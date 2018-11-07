@@ -74,7 +74,7 @@ export default {
 
           // try auto beam first, might give vue warn error
           if (isMeasureBeamable(this.scoreNotes[j][0][i])) {
-            console.log("beamable", this.scoreNotes[j][0][i]);
+            // console.log("beamable", this.scoreNotes[j][0][i]);
             feedinNotes = [
               score.beam(
                 score.notes(this.scoreNotes[j][0][i].join(","), {

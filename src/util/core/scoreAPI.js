@@ -87,7 +87,7 @@ const toEzScore = (measures, trackIndex, partIndex) => {
 
     // 小节首音为延长位，该音继承上个小节的最后一个音
     if (noteLens[0].indexOf("/sustain") >= 0) {
-      noteKeys[0] = lastNoteInLastMeasure;
+      noteKeys.unshift(lastNoteInLastMeasure);
       noteLens[0] = noteLens[0].replace(
         "/sustain",
         `[id="t${trackIndex}p${partIndex}m${index}n0"]`
@@ -102,8 +102,8 @@ const toEzScore = (measures, trackIndex, partIndex) => {
       // noteLens[0] = noteLens[0].slice(0, noteLens[0].indexOf("/sustain")); //just to test without 延长线
     }
     lastNoteInLastMeasure = noteKeys[noteKeys.length - 1];
-    console.log(noteKeys);
-    console.log(noteLens);
+    console.log("in score API, note keys:", noteKeys);
+    console.log("in score API, note lens:", noteLens);
     let counter = 0;
     const result = noteLens.map(noteLen => {
       if (noteLen.indexOf("/r") === -1) {
