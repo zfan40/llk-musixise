@@ -29,7 +29,7 @@
   </transition>
   <!-- <transition name="slide"> -->
     <div class="sheet" :style="{height:`${tutorialHeight}px`}" v-show="showSheet">
-      <sheet :scoreNotes="scoreNotes" :scoreCurves="scoreCurves" />
+      <sheet :scoreNotes="scoreNotes" :scoreCurves="scoreCurves" :metres="metres" />
     </div>
   <!-- </transition> -->
   <user-forms />
@@ -82,7 +82,8 @@ export default {
       tutorialHeight: 0,
       startMeasure: 1,
       scoreNotes: [],
-      scoreCurves: []
+      scoreCurves: [],
+      metres: []
     };
   },
   computed: {
@@ -208,7 +209,7 @@ export default {
     handleToggleSheet() {
       this.showSheet = !this.showSheet;
       if (this.showSheet) {
-        Score = {score:[],curves:[]}; //global variable for now
+        Score = { score: [], curves: [], metres: [] }; //global variable for now
         console.log(Blockly.getMainWorkspace());
         var code = Blockly.JavaScript.workspaceToCode(
           Blockly.getMainWorkspace()
@@ -226,6 +227,7 @@ export default {
         });
         this.scoreNotes = Score.score;
         this.scoreCurves = Score.curves;
+        this.metres = Score.metres;
       }
     }
   },

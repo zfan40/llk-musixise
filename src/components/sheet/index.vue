@@ -12,8 +12,9 @@ import { isMeasureBeamable } from "@/util/core/scoreAPI";
 export default {
   name: "sheetscore",
   props: {
-    scoreNotes: Array,
-    scoreCurves: Array,
+    scoreNotes: Array, // this.scoreNotes[A][B][C] Ath track, Bth part, Cth measure
+    scoreCurves: Array, // 格式和上同
+    metres: Array, // ['3/4','4/4','4/4'] 针对每个track。TODO:其实也可以考虑弄成跟上面一样，因为metre可以变？
     scoreWidth: Number,
     scoreHeight: Number
   },
@@ -59,7 +60,7 @@ export default {
       //TODO 目前只能44拍
       for (let i = 0; i <= maxMeasureNumber - 1; i++) {
         let system = vf.System({
-          x: (i % 4) * 200 + 50, //TODO: should be based on how many notes
+          x: (i % 4) * 200 + 50, //TODO: WIDTH should be based on how many notes
           y: Math.floor(i / 4) * 120 * instrumentNumber,
           width: 200,
           spaceBetweenStaves: 10
@@ -69,7 +70,7 @@ export default {
           console.log("@@@@@@@@");
           console.log("measure is", this.scoreNotes[j][0][i]);
           console.log("curve is", this.scoreCurves[j][0][i]);
-          if (!this.scoreNotes[j][0][i]) this.scoreNotes[j][0][i] = ["b4/w/r"]; //补上个
+          if (!this.scoreNotes[j][0][i]) this.scoreNotes[j][0][i] = ["b4/w/r"]; //补上个 todo:根据节拍来
           let feedinNotes = [];
 
           // try auto beam first, might give vue warn error
@@ -94,6 +95,9 @@ export default {
             ];
           }
 
+          if(i===0) {
+            score.set({ time: '4/4' }); //todo: use real metre
+          }
           const stave = system.addStave({
             voices: [
               score.voice(
@@ -106,7 +110,11 @@ export default {
           if (i === 0) {
             // 首个小节加谱号
             // TODO 自动给高音或低音谱号
-            stave.addClef("treble").addKeySignature("C"); //bass
+            stave
+              .addClef("treble") //bass
+              .addKeySignature("C")
+              // .addTimeSignature(this.metres[j]);
+            .addTimeSignature("4/4"); // todo: use real metre
           }
         }
         if (instrumentNumber >= 2) {

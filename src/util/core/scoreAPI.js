@@ -67,7 +67,7 @@ const example = [
   }
 ];
 // =>score.notes("C#5/q, g5/8, (e4 g4 b4)/16, e5/16/r, d5/8, e5/8, g5/8, a2/32, a6, a6, g4/64, g4")
-const toEzScore = (measures, trackIndex, partIndex) => {
+const toEzScore = (measures, trackIndex, partIndex, trackMetre) => {
   const curves = []; //[['m1a','m2a']] to store all the curve pairs
   /* 先读这个。。。每小节的最后一个音加个标记位，用来和之后的小节联系
   音是这些['d3','d#3','a3','(d3,d5)']
@@ -83,8 +83,7 @@ const toEzScore = (measures, trackIndex, partIndex) => {
   let lastNoteInLastMeasure = "";
   const score = measures.map((measure, index) => {
     const noteKeys = toEZVexFlowNoteKey(measure.sequence); //['d3','d#3','a3','(d3,d5)']
-    const noteLens = toEZVexFlowNoteLen(measure.beat); //["q","q","q/r","q.",'8']
-
+    const noteLens = toEZVexFlowNoteLen(measure.beat, trackMetre); //["q","q","q/r","q.",'8']
     // 小节首音为延长位，该音继承上个小节的最后一个音
     if (noteLens[0].indexOf("/sustain") >= 0) {
       noteKeys.unshift(lastNoteInLastMeasure);
@@ -147,8 +146,10 @@ const toVexFlowNoteKey = notes => {
 };
 
 // '0--0--_--0--' => ["q","q","qr","qd"]
-const toVexFlowNoteLen = (beatStr, noteLenMap, restSymbol) => {
+const toVexFlowNoteLen = (beatStr, noteLenMap, restSymbol, beat) => {
+  // TODO: 这里面会有不能识别的长度
   //0--0--_--0--
+  console.log("little bitch");
   if (noteLenMap == undefined)
     noteLenMap = {
       1: "w",
@@ -165,6 +166,7 @@ const toVexFlowNoteLen = (beatStr, noteLenMap, restSymbol) => {
       0.046875: "32d"
     };
   if (restSymbol == undefined) restSymbol = "r";
+  if (beat == undefined) beat = 1;
   const noteLen = [];
   const beatStrLen = beatStr.length;
   let cursor1 = 0;
@@ -176,10 +178,10 @@ const toVexFlowNoteLen = (beatStr, noteLenMap, restSymbol) => {
     // noteLen.push((cursor2 - cursor1) / beatStrLen);
     if (beatStr[cursor1] === "_") {
       noteLen.push(
-        `${noteLenMap[(cursor2 - cursor1) / beatStrLen]}${restSymbol}`
+        `${noteLenMap[(beat * (cursor2 - cursor1)) / beatStrLen]}${restSymbol}`
       );
     } else {
-      noteLen.push(noteLenMap[(cursor2 - cursor1) / beatStrLen]);
+      noteLen.push(noteLenMap[(beat * (cursor2 - cursor1)) / beatStrLen]);
     }
     cursor1 = cursor2;
     cursor2 += 1;
@@ -191,7 +193,7 @@ const toVexFlowNoteLen = (beatStr, noteLenMap, restSymbol) => {
 };
 
 // '0--0--_--0--' => ["q","q","q/r","q."]
-const toEZVexFlowNoteLen = beatStr => {
+const toEZVexFlowNoteLen = (beatStr, beat) => {
   console.log("jb", beatStr);
   return toVexFlowNoteLen(
     beatStr,
@@ -209,7 +211,8 @@ const toEZVexFlowNoteLen = beatStr => {
       0.09375: "16.",
       0.046875: "32."
     },
-    "/r"
+    "/r",
+    beat
   );
 };
 //["c3/8", "e3/q", "g3/q", "b3/q", "b3/8"]=>true

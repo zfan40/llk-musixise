@@ -1,7 +1,7 @@
 // const BPM = 120;
 // const note32 = BPM / 60 / 32;
 window.MidiTracks = {}; // will eventually be something like: {sin:[toneNote,toneNote,toneNote,...],piano:[toneNote,toneNote]}
-window.Score = { score: [], curves: [] };
+window.Score = { score: [], curves: [], metres: [] };
 let lastActiveBlockIds = [];
 let currentActiveBlockIds = [];
 AudioParam.prototype.cancelAndHoldAtTime = false;
@@ -18,6 +18,8 @@ let lastTrackId = 1;
 export function createTrack(timbre, tempo, volumn, metre, mute) {
   _playLeftNotesInMeasureWhenUsingNote();
   metre = metre ? eval(metre) : 1;
+
+  // metre = metre || "4/4";
   // if (mute) volumn = 0;
   tracks.push({
     timbre,
@@ -366,14 +368,21 @@ export function generateScore() {
   _playLeftNotesInMeasureWhenUsingNote();
   Score.score = [];
   Score.curves = [];
+  Score.metres = [];
   tracks.forEach((track, trackIndex) => {
     //音轨
     Score.score[trackIndex] = [];
     Score.curves[trackIndex] = [];
+    Score.metres.push(track.metre);
     track.parts.forEach((part, partIndex) => {
       //声部，声部通常就1个
       normalizeMeasures(part);
-      const EzScore = toEzScore(part.measures, trackIndex, partIndex);
+      const EzScore = toEzScore(
+        part.measures,
+        trackIndex,
+        partIndex,
+        track.metre
+      );
       console.log("wefwefwe", EzScore);
       Score.score[trackIndex][partIndex] = EzScore.score;
       Score.curves[trackIndex][partIndex] = EzScore.curves;
@@ -714,8 +723,9 @@ export function createRest(restLen) {
   };
   // notes.push([noteLen,notePitch])
   //其实可以不push，直接来
+  const measureBeatLength = 16 * tracks[currentTrackId - 1].metre;
   currentBeat += noteToBeatStrMap[restLen];
-  if (currentBeat.length == 16) {
+  if (currentBeat.length == measureBeatLength) {
     //call original functions
     createMeasureNew(currentSequence, currentBeat, true, "", 1);
     // clear data
@@ -731,7 +741,7 @@ const _eraseEZ = () => {
   currentBeat = "";
   currentSequence = [];
   window.MidiTracks = {}; // will eventually be something like: {sin:[toneNote,toneNote,toneNote,...],piano:[toneNote,toneNote]}
-  window.Score = { score: [], curves: [] };
+  window.Score = { score: [], curves: [], metres: [] };
   lastActiveBlockIds = [];
   currentActiveBlockIds = [];
   musixiseParts = [];
