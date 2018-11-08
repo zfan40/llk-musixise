@@ -126,7 +126,7 @@ export default {
           if (this.scoreCurves[j][0][i]) {
             vf.Curve({
               from: id(this.scoreCurves[j][0][i][1]),
-              to: id(this.scoreCurves[j][0][i][2])
+              to: id(this.scoreCurves[j][0][i][0])
             });
           }
         }
