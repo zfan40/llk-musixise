@@ -96,7 +96,8 @@ export default {
           }
 
           if(i===0) {
-            score.set({ time: '4/4' }); //todo: use real metre
+            // score.set({ time: '4/4' }); //todo: use real metre
+            score.set({ time: this.metres[j] }); //todo: use real metre
           }
           const stave = system.addStave({
             voices: [
@@ -113,8 +114,8 @@ export default {
             stave
               .addClef("treble") //bass
               .addKeySignature("C")
-              // .addTimeSignature(this.metres[j]);
-            .addTimeSignature("4/4"); // todo: use real metre
+              .addTimeSignature(this.metres[j]);
+            // .addTimeSignature("4/4"); // todo: use real metre
           }
         }
         if (instrumentNumber >= 2) {

@@ -17,15 +17,15 @@ let lastTrackId = 1;
 
 export function createTrack(timbre, tempo, volumn, metre, mute) {
   _playLeftNotesInMeasureWhenUsingNote();
+  const metreString = metre || "4/4";
   metre = metre ? eval(metre) : 1;
-
-  // metre = metre || "4/4";
   // if (mute) volumn = 0;
   tracks.push({
     timbre,
     tempo,
     volumn,
     metre,
+    metreString,
     parts: [],
     effects: {}
   });
@@ -373,7 +373,7 @@ export function generateScore() {
     //音轨
     Score.score[trackIndex] = [];
     Score.curves[trackIndex] = [];
-    Score.metres.push(track.metre);
+    Score.metres.push(track.metreString);
     track.parts.forEach((part, partIndex) => {
       //声部，声部通常就1个
       normalizeMeasures(part);
