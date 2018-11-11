@@ -16,7 +16,8 @@ import {
   chunjiang,
   kentJazz,
   ezNote,
-  honghegu
+  honghegu,
+  edelweiss
 } from "@/util/demos";
 export default {
   data() {
@@ -57,6 +58,10 @@ export default {
         {
           value: "honghegu",
           label: "honghegu"
+        },
+        {
+          value: "edelweiss",
+          label: "edelweiss"
         }
       ],
       value8: ""
@@ -74,7 +79,8 @@ export default {
         chunjiang,
         kentJazz,
         ezNote,
-        honghegu
+        honghegu,
+        edelweiss
       };
       this.loadWork(a[e]);
     },

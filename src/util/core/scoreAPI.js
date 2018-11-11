@@ -101,6 +101,10 @@ const toEzScore = (measures, trackIndex, partIndex, trackMetre) => {
       // noteLens[0] = noteLens[0].slice(0, noteLens[0].indexOf("/sustain")); //just to test without 延长线
     }
     lastNoteInLastMeasure = noteKeys[noteKeys.length - 1];
+    // lastNoteInLastMeasure =
+    //   noteLens[noteLens.length - 1].indexOf("/r") >= 0
+    //     ? "e4/q" // 最后一个音是空
+    //     : noteKeys[noteKeys.length - 1]; // 正常的最后一个音
     console.log("in score API, note keys:", noteKeys);
     console.log("in score API, note lens:", noteLens);
     let counter = 0;

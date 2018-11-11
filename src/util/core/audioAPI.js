@@ -24,8 +24,8 @@ export function createTrack(timbre, tempo, volumn, metre, mute) {
     timbre,
     tempo,
     volumn,
-    metre,
-    metreString,
+    metre, // math num, like 1, 0.75, 0.5 etc
+    metreString, // this is the real metre string, need this to render score
     parts: [],
     effects: {}
   });

@@ -37,11 +37,18 @@ export default {
       const registry = new VF.Registry();
       VF.Registry.enableDefaultRegistry(registry);
       const id = id => registry.getElementById(id);
+      const instrumentNumber = this.scoreNotes.length;
+      const maxMeasureNumber = this.scoreNotes
+        .flat()
+        .reduce((a, b) => (a.length > b.length ? a : b), []).length;
+
+      const canvasHeight =
+        Math.ceil(maxMeasureNumber / 4) * instrumentNumber * 120;
       const vf = new VF.Factory({
         renderer: {
           elementId: "sheetcanvas",
           width: 980,
-          height: 640
+          height: canvasHeight
         }
       });
       const score = vf.EasyScore();
@@ -51,11 +58,6 @@ export default {
        * this.scoreNotes[0] is first instrument
        * this.scoreNotes[0][0] is first part(声部) of the first instrument 
        */
-
-      const instrumentNumber = this.scoreNotes.length;
-      const maxMeasureNumber = this.scoreNotes
-        .flat()
-        .reduce((a, b) => (a.length > b.length ? a : b), []).length;
 
       //TODO 目前只能44拍
       for (let i = 0; i <= maxMeasureNumber - 1; i++) {
@@ -95,7 +97,7 @@ export default {
             ];
           }
 
-          if(i===0) {
+          if (i === 0) {
             // score.set({ time: '4/4' }); //todo: use real metre
             score.set({ time: this.metres[j] }); //todo: use real metre
           }
@@ -157,7 +159,8 @@ export default {
 <style scoped lang="scss">
 #sheet-container {
   margin-top: 40px;
-  height: 640px;
+  // height: 640px;
+  overflow: scroll;
   background-color: white;
 }
 </style>
