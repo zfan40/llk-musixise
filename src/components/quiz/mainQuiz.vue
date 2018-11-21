@@ -1,11 +1,11 @@
 <template>
 <div class="main">
   <div class="question-head">
-    <h3>{{quiz.question}}<span v-if="quiz.questionRepresentation=='audio'" @click="playBlocklyQuestion">题目播放</span></h3>
+    <h3>{{quiz.question}}<span v-if="quiz.questionRepresentation=='audio'" @click="playBlocklyQuestion" style="color:gray">题目播放</span></h3>
     
     <div v-if="quiz.questionRepresentation=='score'">
       题目五线谱
-      <sheet :scoreWidth="1000" :scoreHeight="100" :scoreNotes="scoreNotes" :scoreCurves="scoreCurves" />
+      <sheet :scoreWidth="1000" :scoreHeight="100" :scoreNotes="scoreNotes" :scoreCurves="scoreCurves" :metres="metres"/>
     </div>
     <div @click="playBlocklyAnswer">作答播放</div>
     <div @click="_reloadBlocklyContext">初始化作答</div>
@@ -79,12 +79,16 @@ export default {
   data() {
     return {
       scoreNotes: [],
-      scoreCurves: []
+      scoreCurves: [],
+      metres: []
     };
   },
   computed: {},
   methods: {
     _clearWorkSpace() {
+      this.scoreNotes = [];
+      this.scoreCurves = [];
+      this.metres = [];
       let workspace = Blockly.getMainWorkspace();
       workspace.clear();
     },
@@ -157,7 +161,7 @@ export default {
       this.checkAnswer(1); // enable handle error
     },
     scorelizeBlockly(code) {
-      Score = { score: [], curves: [] }; //global variable for now
+      Score = { score: [], curves: [], metres:[] }; //global variable for now
       code += "generateScore();cleanTrack()";
       scopeEval(code, {
         createTrack,
@@ -172,6 +176,7 @@ export default {
       console.log("final score,", Score.score);
       this.scoreNotes = Score.score;
       this.scoreCurves = Score.curves;
+      this.metres = Score.metres;
     },
     _scorelizeBlocklyQuestion() {
       // Create a headless workspace.

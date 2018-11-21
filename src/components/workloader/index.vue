@@ -17,7 +17,8 @@ import {
   kentJazz,
   ezNote,
   honghegu,
-  edelweiss
+  edelweiss,
+  edelweiss2
 } from "@/util/demos";
 export default {
   data() {
@@ -62,6 +63,10 @@ export default {
         {
           value: "edelweiss",
           label: "edelweiss"
+        },
+        {
+          value: "edelweiss2",
+          label: "edelweiss2"
         }
       ],
       value8: ""
@@ -80,7 +85,8 @@ export default {
         kentJazz,
         ezNote,
         honghegu,
-        edelweiss
+        edelweiss,
+        edelweiss2
       };
       this.loadWork(a[e]);
     },

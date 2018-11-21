@@ -22,7 +22,7 @@ import Quiz from "@/components/quiz/mainQuiz";
 import QuizProgress from "@/components/quiz/quizProgress";
 import QuizNavigator from "@/components/quiz/quizNavigator";
 
-import { quiz } from "@/util/quizes";
+import { quiz1 } from "@/util/quizes";
 export default {
   name: "quiz-page",
   components: {
@@ -35,7 +35,7 @@ export default {
     quizObj: {
       type: Object,
       default() {
-        return quiz;
+        return quiz1;
       }
     }, // all the tests
     quizAnswerHistoryXmlText: {

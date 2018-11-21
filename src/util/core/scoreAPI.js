@@ -86,12 +86,12 @@ const toEzScore = (measures, trackIndex, partIndex, trackMetre) => {
     const noteLens = toEZVexFlowNoteLen(measure.beat, trackMetre); //["q","q","q/r","q.",'8']
     // 小节首音为延长位，该音继承上个小节的最后一个音
     if (noteLens[0].indexOf("/sustain") >= 0) {
-      noteKeys.unshift(lastNoteInLastMeasure);
+      noteKeys.unshift(lastNoteInLastMeasure); //连音线得补上得补上上一个小节的内容
       noteLens[0] = noteLens[0].replace(
         "/sustain",
         `[id="t${trackIndex}p${partIndex}m${index}n0"]`
       );
-      /** 连音线的作用：1.跨小节 2.浮点解决不了 3.表达大致乐句意图 */
+      /* 连音线的作用：1.跨小节 2.浮点解决不了 3.表达大致乐句意图 */
       if (index > 0) {
         curves.push([
           `t${trackIndex}p${partIndex}m${index}n0`,
@@ -100,19 +100,21 @@ const toEzScore = (measures, trackIndex, partIndex, trackMetre) => {
       }
       // noteLens[0] = noteLens[0].slice(0, noteLens[0].indexOf("/sustain")); //just to test without 延长线
     }
-    lastNoteInLastMeasure = noteKeys[noteKeys.length - 1];
-    // lastNoteInLastMeasure =
-    //   noteLens[noteLens.length - 1].indexOf("/r") >= 0
-    //     ? "e4/q" // 最后一个音是空
-    //     : noteKeys[noteKeys.length - 1]; // 正常的最后一个音
+    // lastNoteInLastMeasure = noteKeys[noteKeys.length - 1];
+    lastNoteInLastMeasure =
+      noteLens[noteLens.length - 1].indexOf("/r") >= 0
+        ? "" // 最后一个音是休止,先特么这么处理吧，在渲染那边做特别处理
+        : noteKeys[noteKeys.length - 1]; // 正常的最后一个音
     console.log("in score API, note keys:", noteKeys);
     console.log("in score API, note lens:", noteLens);
     let counter = 0;
     const result = noteLens.map(noteLen => {
       if (noteLen.indexOf("/r") === -1) {
-        // a note
+        // a note, 但如果连音线开始接着休止符也可能是休止符
         counter += 1;
-        return `${noteKeys[counter - 1]}/${noteLen}`;
+        return noteKeys[counter - 1]
+          ? `${noteKeys[counter - 1]}/${noteLen}`
+          : `e4/${noteLen.split("[").join("/r[")}`;
       } else {
         // a rest
         return `e4/${noteLen}`;
@@ -150,8 +152,9 @@ const toVexFlowNoteKey = notes => {
 };
 
 // '0--0--_--0--' => ["q","q","qr","qd"]
+//TODO: ____ should be automatically replaced to _---, why not
 const toVexFlowNoteLen = (beatStr, noteLenMap, restSymbol, beat) => {
-  // TODO: 这里面会有不能识别的长度
+  // TODO: 这里面会有不能识别的长度, 比如三连音等
   //0--0--_--0--
   console.log("little bitch");
   if (noteLenMap == undefined)

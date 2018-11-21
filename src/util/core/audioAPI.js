@@ -152,6 +152,11 @@ const Util = {
 // a song has many tracks. one track can have many parts, one part can have many measures
 export function createMeasureNew(sequence, beat, matchZero, blockId, part) {
   if (part == undefined) part = 1;
+  if (!beat || sequence.length == 0) {
+    beat = "_";
+    sequence = [];
+  }
+  console.log(sequence);
   if (!tracks[currentTrackId - 1].parts[part - 1]) {
     tracks[currentTrackId - 1].parts[part - 1] = {};
     tracks[currentTrackId - 1].parts[part - 1].measures = [];
@@ -336,6 +341,9 @@ function normalizeMeasures(part) {
       //对0的，beat延展就行了，原来000的可能变成0--0--0-- (根据最小公倍数)
       if (part.measures[measureIndex].beat.length < lcmOfBeatLength) {
         const ratio = lcmOfBeatLength / part.measures[measureIndex].beat.length;
+        // console.log("[][][]");
+        // console.log(lcmOfBeatLength);
+        // console.log(part.measures[measureIndex].beat.length);
         const append = Util.createScores(ratio - 1);
         part.measures[measureIndex].beat = part.measures[measureIndex].beat
           .split("")
