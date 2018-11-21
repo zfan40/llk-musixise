@@ -152,9 +152,11 @@ const Util = {
 // a song has many tracks. one track can have many parts, one part can have many measures
 export function createMeasureNew(sequence, beat, matchZero, blockId, part) {
   if (part == undefined) part = 1;
-  if (!beat || sequence.length == 0) {
+  if (!beat && sequence.length == 0) {
     beat = "_";
     sequence = [];
+  } else if (!beat && sequence.length != 0) {
+    beat = "0".repeat(sequence.length); //平均节拍的0000
   }
   console.log(sequence);
   if (!tracks[currentTrackId - 1].parts[part - 1]) {
