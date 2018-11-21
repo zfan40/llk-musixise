@@ -18,7 +18,8 @@ import {
   ezNote,
   honghegu,
   edelweiss,
-  edelweiss2
+  edelweiss2,
+  bach
 } from "@/util/demos";
 export default {
   data() {
@@ -31,6 +32,10 @@ export default {
         {
           value: "mario",
           label: "mario"
+        },
+        {
+          value: "bach",
+          label: "bach"
         },
         {
           value: "ff",
@@ -78,6 +83,7 @@ export default {
       const a = {
         test1,
         mario,
+        bach,
         ff,
         pianophase,
         overworldMario,

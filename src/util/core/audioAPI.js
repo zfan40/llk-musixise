@@ -73,13 +73,17 @@ const Util = {
   getNoteAndOctave: function(noteStr) {
     //receives a note string, like 1 or 1' or ''1,even ''1b, 3#''
     //1,1#,2,2#,3,4,4#,5,5#,6,7b,7,1'
-    const note = noteStr.match(/[0-9]+/g)[0]; // string
-    const octaveUp = noteStr.match(/[0-9]+'+/g)
-      ? noteStr.match(/[0-9]+'+/g)[0].length - note.length
-      : 0;
-    const octaveDown = noteStr.match(/'+[0-9]+/g)
-      ? noteStr.match(/'+[0-9]+/g)[0].length - note.length
-      : 0;
+    // const note = noteStr.match(/[0-9]+/g)[0]; // string
+    // const octaveUp = noteStr.match(/[0-9]+'+/g)
+    //   ? noteStr.match(/[0-9]+'+/g)[0].length - note.length
+    //   : 0;
+    // const octaveDown = noteStr.match(/'+[0-9]+/g)
+    //   ? noteStr.match(/'+[0-9]+/g)[0].length - note.length
+    //   : 0;
+    const note = noteStr.match(/[0-9]+/g)[0];
+    const octaveArray = noteStr.split(/\d+/).map(item => item.split(`'`).length - 1);
+    const octaveUp = octaveArray[1];
+    const octaveDown = octaveArray[0];
     const sharp =
       noteStr.split("").filter(item => item == "#").length -
       noteStr.split("").filter(item => item == "b").length;
@@ -212,6 +216,9 @@ export function createMeasureOnScaleNew( // this would finally call createMeasur
   };
   if (scale) {
     scaleInterval = scales[scale];
+  }
+  if (!basenote) {
+    basenote = 60;
   }
   // const sequenceArray = JSON.parse(
   //   `[${sequence}]`.replace(/('*[0-9]+#*b*'*)/g, '"$1"')
