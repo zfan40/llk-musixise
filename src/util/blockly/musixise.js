@@ -280,11 +280,30 @@ Blockly.JavaScript["create_measure_on_scale_new"] = function(block) {
   ].map(item =>
     Blockly.JavaScript.valueToCode(block, item, Blockly.JavaScript.ORDER_NONE)
   );
+
+  // 取的就有问题
+  console.log("in musixise, check raw sequence", sequence);
+  // if (sequence.length == 1) {
+  //   console.log(
+  //     Blockly.JavaScript.valueToCode(
+  //       block,
+  //       "SEQUENCE",
+  //       Blockly.JavaScript.ORDER_MODULUS
+  //     )
+  //   );
+  //   console.log(
+  //     Blockly.JavaScript.valueToCode(
+  //       block,
+  //       "SEQUENCE",
+  //       Blockly.JavaScript.ORDER_FUNCTION_CALL
+  //     )
+  //   );
+  // }
   const norm_sequence = eval(sequence);
   const sequenceArray = JSON.parse(
     `[${norm_sequence}]`.replace(/('*[0-9]+#*b*'*)/g, '"$1"')
   ); // only integer
-  console.log(sequenceArray);
+  console.log("in musixise, check processed sequence", sequenceArray);
   return `createMeasureOnScaleNew(${JSON.stringify(
     sequenceArray
   )},${beat},${scale},${basenote},false,'${block.id}',${part});\n`;
@@ -343,7 +362,7 @@ Blockly.defineBlocksWithJsonArray([
       {
         type: "input_value",
         name: "SEQUENCE",
-        check: "String" //should be array
+        check: "String"
       },
       {
         type: "input_value",
@@ -385,6 +404,7 @@ Blockly.JavaScript["create_measure_on_scale_match_zero_new"] = function(block) {
   ].map(item =>
     Blockly.JavaScript.valueToCode(block, item, Blockly.JavaScript.ORDER_NONE)
   );
+
   const norm_sequence = eval(sequence);
   const sequenceArray = JSON.parse(
     `[${norm_sequence}]`.replace(/('*[0-9]+#*b*'*)/g, '"$1"')

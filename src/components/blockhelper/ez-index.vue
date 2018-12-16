@@ -68,6 +68,9 @@
         <block type="create_rest">
           <field name="NOTE_LEN">4</field>
         </block>
+        <block type="operate_musixise_string">
+          <field name="NOTE_LEN">4</field>
+        </block>
         <block type="ez_create_measure_match_zero_new">
           <value name="SEQUENCE">
             <block type="text">

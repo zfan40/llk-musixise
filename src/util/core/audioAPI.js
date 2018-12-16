@@ -81,7 +81,9 @@ const Util = {
     //   ? noteStr.match(/'+[0-9]+/g)[0].length - note.length
     //   : 0;
     const note = noteStr.match(/[0-9]+/g)[0];
-    const octaveArray = noteStr.split(/\d+/).map(item => item.split(`'`).length - 1);
+    const octaveArray = noteStr
+      .split(/\d+/)
+      .map(item => item.split(`'`).length - 1);
     const octaveUp = octaveArray[1];
     const octaveDown = octaveArray[0];
     const sharp =
@@ -212,7 +214,8 @@ export function createMeasureOnScaleNew( // this would finally call createMeasur
     Aeolian: [1, 3, 4, 6, 8, 9, 11],
     Locrian: [1, 2, 4, 6, 7, 9, 11],
     Chinese: [1, 3, 5, 8, 10],
-    Japanese: [1, 5, 6, 10, 12]
+    Japanese: [1, 5, 6, 10, 12],
+    Equal: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
   };
   if (scale) {
     scaleInterval = scales[scale];

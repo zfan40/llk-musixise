@@ -1,45 +1,90 @@
 <template>
-<div class="main">
-  <header style="height:100px;">
-    <global-header />
-    <div style="background-color:#00bdd4;height: 40px;line-height:40px;padding-left:20px;padding-right:20px;display: flex;justify-content: space-between;">
-      <div style="display:flex;align-items:center;justify-content:center;">
-        <div class="">
-          <el-input-number v-model="startMeasure" size="mini" :min="1"></el-input-number>
+  <div class="main">
+    <header style="height:100px;">
+      <global-header/>
+      <div
+        style="background-color:#00bdd4;height: 40px;line-height:40px;padding-left:20px;padding-right:20px;display: flex;justify-content: space-between;"
+      >
+        <div style="display:flex;align-items:center;justify-content:center;">
+          <div class>
+            <el-input-number v-model="startMeasure" size="mini" :min="1"></el-input-number>
+          </div>
+          <i
+            id="play"
+            class="iconfont icon-icon--13"
+            style="font-size:26px;cursor: pointer;"
+            @click="handlePlay"
+          ></i>
+          <i
+            id="stop"
+            class="iconfont icon-icon--17"
+            style="font-size:26px;cursor: pointer;padding-left:10px;"
+            @click="handleStop"
+          ></i>
+          <i
+            id="export-midi"
+            class="iconfont icon-geshi_yinpinmidi"
+            style="font-size:24px;cursor: pointer;padding-left:10px;"
+            @click="handleExportMidi"
+          ></i>
+          <i
+            id="clear"
+            class="iconfont icon-icon--5"
+            style="font-size:26px;cursor: pointer;padding-left:10px;"
+            @click="handleClear"
+          ></i>
+          <i
+            id="teach"
+            class="iconfont icon-icon--34"
+            style="font-size:26px;cursor: pointer;padding-left:10px;"
+            @click="handleToggleTutorial"
+          ></i>
+          <i
+            id="save"
+            class="iconfont icon-icon--1"
+            style="font-size:26px;cursor: pointer;padding-left:10px;"
+            @click="handleSave"
+          ></i>
+          <i
+            id="sheeticon"
+            class="iconfont icon-icon--34"
+            style="font-size:26px;cursor: pointer;padding-left:10px;"
+            @click="handleToggleSheet"
+          ></i>
+          <i
+            id="sheeticon"
+            class="iconfont icon-icon--27"
+            style="font-size:26px;cursor: pointer;padding-left:10px;"
+            @click="handleToggleCodeMode"
+          ></i>
         </div>
-        <i id="play" class="iconfont icon-icon--13" style="font-size:26px;cursor: pointer;" @click="handlePlay"></i>
-        <i id="stop" class="iconfont icon-icon--17" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleStop"></i>
-        <i id="export-midi" class="iconfont icon-geshi_yinpinmidi" style="font-size:24px;cursor: pointer;padding-left:10px;" @click="handleExportMidi"></i>
-        <i id="clear" class="iconfont icon-icon--5" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleClear"></i>
-        <i id="teach" class="iconfont icon-icon--34" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleToggleTutorial"></i>
-        <i id="save" class="iconfont icon-icon--1" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleSave"></i>
-        <i id="sheeticon" class="iconfont icon-icon--34" style="font-size:26px;cursor: pointer;padding-left:10px;" @click="handleToggleSheet"></i>
+        <div class>
+          <!-- <span>切视图</span> -->
+          <work-loader/>
+        </div>
       </div>
-      <div class="">
-        <!-- <span>切视图</span> -->
-        <work-loader />
+    </header>
+    <block-helper v-show="codemode==1"/>
+    <code-editor :onCodeChange="onCodeEditorChange" v-show="codemode==2"/>
+    <transition name="slide">
+      <div class="tutorial" :style="{height:`${tutorialHeight}px`}" v-show="showTutorial">
+        <tutorial/>
       </div>
-    </div>
-  </header>
-  <block-helper />
-  <transition name="slide">
-    <div class="tutorial" :style="{height:`${tutorialHeight}px`}" v-show="showTutorial">
-      <tutorial />
-    </div>
-  </transition>
-  <!-- <transition name="slide"> -->
+    </transition>
+    <!-- <transition name="slide"> -->
     <div class="sheet" :style="{height:`${tutorialHeight}px`}" v-show="showSheet">
-      <sheet :scoreNotes="scoreNotes" :scoreCurves="scoreCurves" :metres="metres" />
+      <sheet :scoreNotes="scoreNotes" :scoreCurves="scoreCurves" :metres="metres"/>
     </div>
-  <!-- </transition> -->
-  <user-forms />
-</div>
+    <!-- </transition> -->
+    <user-forms/>
+  </div>
 </template>
 
 <script>
 import Blockly from "node-blockly/browser"; // import Blockly
 import Tutorial from "@/components/tutorial/Tutorial.vue";
 import BlockHelper from "@/components/blockhelper/ez-index.vue";
+import CodeEditor from "@/components/CodeEditor/index.vue";
 import WorkLoader from "@/components/workloader/index.vue";
 import Avatar from "@/components/avatar.vue";
 import UserForms from "@/components/UserFormView";
@@ -59,8 +104,10 @@ import {
   generateScore,
   highlightBlock
 } from "../util/core/audioAPI";
+import { reverseSequence, shuffleSequence } from "../util/core/musicUtilAPI";
 require("../util/blockly/ez-musixise"); // import Structure of Musixise Blocks
 require("../util/blockly/mystave"); // import Structure of Musixise Blocks
+require("../util/blockly/myutil"); // import Structire of Musixise Blocks
 const FileSaver = require("file-saver"); // For Midi file export
 
 let clock;
@@ -69,6 +116,7 @@ export default {
   components: {
     Tutorial,
     BlockHelper,
+    CodeEditor,
     WorkLoader,
     Avatar,
     UserForms,
@@ -83,7 +131,9 @@ export default {
       startMeasure: 1,
       scoreNotes: [],
       scoreCurves: [],
-      metres: []
+      metres: [],
+      codemode: 1,
+      codeEditorCode: ""
     };
   },
   computed: {
@@ -92,44 +142,78 @@ export default {
     }
   },
   methods: {
+    evalRunCode(code) {
+      scopeEval(code, {
+        createTrack,
+        cleanTrack,
+        createMeasureNew,
+        createMeasureOnScaleNew,
+        createNote,
+        createRest,
+        createEffect,
+        makeSound,
+        prepareProject,
+        highlightBlock,
+        generateScore,
+        // below is util
+        reverseSequence,
+        shuffleSequence
+      });
+    },
     handlePlay() {
-      Blockly.JavaScript.addReservedWords("code");
-      Tone.Transport.stop();
-      cleanTrack();
-      var code = Blockly.JavaScript.workspaceToCode(Blockly.getMainWorkspace()); //把workspace转换为代码
-      code += `prepareProject();makeSound(${this.startMeasure});`;
-      // Eval can be dangerous. For more controlled execution, check
-      // https://github.com/NeilFraser/JS-Interpreter.
-      console.log(code);
-      try {
-        scopeEval(code, {
-          createTrack,
-          cleanTrack,
-          createMeasureNew,
-          createMeasureOnScaleNew,
-          createNote,
-          createRest,
-          createEffect,
-          makeSound,
-          prepareProject,
-          highlightBlock
-        });
-        if (clock) {
-          clock.stop();
-          clock.dispose();
+      if (this.codemode == 1) {
+        Blockly.JavaScript.addReservedWords("code");
+        Tone.Transport.stop();
+        cleanTrack();
+        console.log("here");
+        var code = Blockly.JavaScript.workspaceToCode(
+          Blockly.getMainWorkspace()
+        ); //把workspace转换为代码
+        code += `prepareProject();makeSound(${this.startMeasure});`;
+        // Eval can be dangerous. For more controlled execution, check
+        // https://github.com/NeilFraser/JS-Interpreter.
+        console.log(code);
+        try {
+          this.evalRunCode(code);
+          if (clock) {
+            clock.stop();
+            clock.dispose();
+          }
+          clock = new Tone.Clock(() => {
+            // console.log(Tone.Transport.seconds);
+            highlightBlock(Tone.Transport.seconds);
+          }, 4);
+          clock.start();
+          //TODO: auto stop...
+          // Tone.Transport.on('stop',()=>{
+          //   // if (clock) {clock.stop(); clock.dispose()}
+          //   console.log('jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj')
+          // })
+        } catch (error) {
+          console.log(error);
         }
-        clock = new Tone.Clock(() => {
-          // console.log(Tone.Transport.seconds);
-          highlightBlock(Tone.Transport.seconds);
-        }, 4);
-        clock.start();
-        //TODO: auto stop...
-        // Tone.Transport.on('stop',()=>{
-        //   // if (clock) {clock.stop(); clock.dispose()}
-        //   console.log('jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj')
-        // })
-      } catch (error) {
-        console.log(error);
+      } else {
+        Tone.Transport.stop();
+        cleanTrack();
+        let code = this.codeEditorCode;
+        code += `prepareProject();makeSound(${this.startMeasure});`;
+        // Eval can be dangerous. For more controlled execution, check
+        // https://github.com/NeilFraser/JS-Interpreter.
+        console.log(code);
+        try {
+          this.evalRunCode(code);
+          if (clock) {
+            clock.stop();
+            clock.dispose();
+          }
+          clock = new Tone.Clock(() => {
+            // console.log(Tone.Transport.seconds);
+            highlightBlock(Tone.Transport.seconds);
+          }, 4);
+          clock.start();
+        } catch (error) {
+          console.log(error);
+        }
       }
     },
     handleStop() {
@@ -155,18 +239,7 @@ export default {
       var code = Blockly.JavaScript.workspaceToCode(Blockly.getMainWorkspace()); //把workspace转换为代码
       code += "prepareProject();cleanTrack()";
       // eval(code);
-      scopeEval(code, {
-        createTrack,
-        cleanTrack,
-        createMeasureNew,
-        createMeasureOnScaleNew,
-        createNote,
-        createRest,
-        createEffect,
-        makeSound,
-        prepareProject,
-        highlightBlock
-      });
+      this.evalRunCode(code);
       if (Object.entries(MidiTracks).length === 0) {
         alert("nothing to export");
         return;
@@ -206,6 +279,9 @@ export default {
     handleToggleTutorial() {
       this.showTutorial = !this.showTutorial;
     },
+    handleToggleCodeMode() {
+      this.codemode == 1 ? (this.codemode = 2) : (this.codemode = 1);
+    },
     handleToggleSheet() {
       this.showSheet = !this.showSheet;
       if (this.showSheet) {
@@ -215,20 +291,14 @@ export default {
           Blockly.getMainWorkspace()
         ); //把workspace转换为代码
         code += "generateScore();cleanTrack()";
-        scopeEval(code, {
-          createTrack,
-          cleanTrack,
-          createMeasureNew,
-          createMeasureOnScaleNew,
-          createNote,
-          createRest,
-          createEffect,
-          generateScore
-        });
+        this.evalRunCode(code);
         this.scoreNotes = Score.score;
         this.scoreCurves = Score.curves;
         this.metres = Score.metres;
       }
+    },
+    onCodeEditorChange(code) {
+      this.codeEditorCode = code;
     }
   },
   created() {},
